@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace QA402_REST_TEST.Properties {
+namespace QA40x_AUDIO_ANALYSER.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

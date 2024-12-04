@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace QA402_REST_TEST
+namespace QA40x_AUDIO_ANALYSER
 {
     static class Program
     {

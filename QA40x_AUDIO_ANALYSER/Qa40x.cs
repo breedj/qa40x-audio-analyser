@@ -21,40 +21,40 @@ namespace QA402_AUDIO_ANALYSER
 
     public enum Weighting { None, AWeighting, User }
 
-    class LeftRightPair
+    public class LeftRightPair
     {
-        public double Left;
-        public double Right;
+        public double Left { get; set; }
+        public double Right { get; set; }
     }
 
-    class LeftRightTimeSeries
+    public class LeftRightTimeSeries
     {
         /// <summary>
         /// dt is the time between samples. 1/dt is the sample rate
         /// </summary>
-        public double dt;
-        public double[] Left;
-        public double[] Right;
+        public double dt { get; set; }
+        public double[] Left { get; set; }
+        public double[] Right { get; set; }
     }
 
-    class LeftRightFrequencySeries
+    public class LeftRightFrequencySeries
     {
         /// <summary>
         /// df is the frequency spacing of FFT bins
         /// </summary>
-        public double Df;
-        public double[] Left;
-        public double[] Right;
+        public double Df { get; set; }
+        public double[] Left { get; set; }
+        public double[] Right { get; set; }
     }
 
-    class LeftRightSeries
+    public class LeftRightSeries
     {
   
         public LeftRightFrequencySeries FreqInput;
         public LeftRightTimeSeries TimeInput;
     }
 
-    class Qa40x
+    public class Qa40x
     {
         static HttpClient Client = new HttpClient();
         static string RootUrl;

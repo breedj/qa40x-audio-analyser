@@ -9,8 +9,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{52796B45-3D49-41E5-8BBD-B4E2A7C447E8}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>QA402_REST_TEST</RootNamespace>
-    <AssemblyName>QA402_REST_TEST</AssemblyName>
+    <RootNamespace>QA40x_AUDIO_ANALYSER</RootNamespace>
+    <AssemblyName>QA40x_AUDIO_ANALYSER</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -39,7 +39,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>QA402_REST_TEST.Program</StartupObject>
+    <StartupObject>QA40x_AUDIO_ANALYSER.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -117,16 +117,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\FrequencyThdStep.cs" />
+    <Compile Include="Data\ThdFrequencyMeasurementSettings.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\HarmonicData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Qa40x.cs" />
     <Compile Include="QaLibrary.cs" />
+    <Compile Include="Data\StartEndFrequencyPair.cs" />
+    <Compile Include="Data\ThdFrequencyMeasurement.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>

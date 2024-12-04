@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,79 +7,8 @@ using QA402_AUDIO_ANALYSER;
 
 namespace QaControl
 {
-    class StartEndFrequencyPair
-    {
-        public double StartFrequency;
-        public double EndFrequency;
-    }
 
-    class ThdFrequencyMeasurement
-    {
-        public uint SampleRate;
-        public uint FftSize;
-        public int InputRange;
-        public Windowing Window;
-        public double StartFrequency;
-        public double EndFrequency;
-        public uint StepsPerOctave;
-        public double GenAmplitudeDbV;
-        public double GenAmplitudeV;
-        public int Averages = 1;
-        public int SettleTimeMs = 200;      // 200 ms
-        public double Load = 8;               // 8 Ohm
-        public double AmpOutputPower = 1;      // 1 Watt
-        public double AmpOutputAmplitudeV;      // V
-        public double AmpOutputAmplitudeDbV;
-        public List<FrequencyThdStep> StepData;
-        public LeftRightSeries NoiseFloor;
-        
-
-        public ThdFrequencyMeasurement()
-        {
-            StepData = new List<FrequencyThdStep>();
-        }
-    }
-
-    class FrequencyThdStep
-    {
-        public double FundamentalFrequency;
-        public double AmplitudeVolts;
-        public double AmplitudeDbV;
-        public double MagnitudeDb;
-        public List<HarmonicData> Harmonics;
-        public double ThdPercent;
-        public double ThdDb;
-        public double ThdDbN;
-        public LeftRightFrequencySeries fftData;
-        public LeftRightTimeSeries timeData;
-        public double DcComponent;
-        public double D6PlusDbV;
-        public double ThdPercentD6plus;
-        public double ThdDbD6plus;
-        public double PowerWatt;
-        public double NoiseFloorV;
-        public double NoiseFloorDbV;
-
-        public FrequencyThdStep() {
-            Harmonics = new List<HarmonicData>();
-        }
-    }
-
-    class HarmonicData
-    {
-        public int H;
-        public double Frequency;
-        public double AmplitudeVolts;
-        public double AmplitudeDbV;
-        //public double MagnitudeDbVV;
-        public double ThdPercent;
-        public double ThdDb;
-        public double NoiseAmplitudeVolt;
-    }
-
-
-
-    class QaLibrary
+    public class QaLibrary
     {
         
 

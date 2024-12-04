@@ -1,4 +1,4 @@
-﻿namespace QA402_REST_TEST
+﻿namespace QA40x_AUDIO_ANALYSER
 {
     partial class frmMain
     {
@@ -107,6 +107,7 @@
             this.lblThdFreq_THD = new System.Windows.Forms.Label();
             this.lblThdFreq_Magnitude = new System.Windows.Forms.Label();
             this.lblThdFreq_Frequency = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.scTopBottom)).BeginInit();
             this.scTopBottom.Panel1.SuspendLayout();
             this.scTopBottom.Panel2.SuspendLayout();
@@ -145,6 +146,7 @@
             // 
             // scTopBottom.Panel1
             // 
+            this.scTopBottom.Panel1.Controls.Add(this.button1);
             this.scTopBottom.Panel1.Controls.Add(this.progressBar1);
             this.scTopBottom.Panel1.Controls.Add(this.lblThdFreq_Message);
             this.scTopBottom.Panel1.Controls.Add(this.btnMeasurement_ThdFreq);
@@ -1231,6 +1233,16 @@
             this.lblThdFreq_Frequency.TabIndex = 10;
             this.lblThdFreq_Frequency.Text = "Frequency: 00.00 Hz";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(264, 18);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1358,5 +1370,6 @@
         private System.Windows.Forms.CheckBox chkThdFreq_ThickLines;
         private System.Windows.Forms.CheckBox chkThdFreq_ShowMarkers;
         private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Button button1;
     }
 }

@@ -107,7 +107,6 @@
             this.lblThdFreq_THD = new System.Windows.Forms.Label();
             this.lblThdFreq_Magnitude = new System.Windows.Forms.Label();
             this.lblThdFreq_Frequency = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.scTopBottom)).BeginInit();
             this.scTopBottom.Panel1.SuspendLayout();
             this.scTopBottom.Panel2.SuspendLayout();
@@ -146,7 +145,6 @@
             // 
             // scTopBottom.Panel1
             // 
-            this.scTopBottom.Panel1.Controls.Add(this.button1);
             this.scTopBottom.Panel1.Controls.Add(this.progressBar1);
             this.scTopBottom.Panel1.Controls.Add(this.lblThdFreq_Message);
             this.scTopBottom.Panel1.Controls.Add(this.btnMeasurement_ThdFreq);
@@ -191,7 +189,6 @@
             this.btnMeasurement_ThdFreq.TabIndex = 7;
             this.btnMeasurement_ThdFreq.Text = "THD vs Frequency";
             this.btnMeasurement_ThdFreq.UseVisualStyleBackColor = false;
-            this.btnMeasurement_ThdFreq.Click += new System.EventHandler(this.button1_Click);
             // 
             // scThdVsFreq
             // 
@@ -471,7 +468,6 @@
             this.lblThdFreq_OutputLoad.Size = new System.Drawing.Size(73, 13);
             this.lblThdFreq_OutputLoad.TabIndex = 14;
             this.lblThdFreq_OutputLoad.Text = "Amplifier Load";
-            this.lblThdFreq_OutputLoad.Click += new System.EventHandler(this.label2_Click);
             // 
             // txtThdFreq_OutputLoad
             // 
@@ -1233,16 +1229,6 @@
             this.lblThdFreq_Frequency.TabIndex = 10;
             this.lblThdFreq_Frequency.Text = "Frequency: 00.00 Hz";
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(264, 18);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 10;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1252,7 +1238,7 @@
             this.MinimumSize = new System.Drawing.Size(1000, 828);
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "QA40x Audio Analyser";
+            this.Text = "QA40x Audio Analyser - V0.1";
             this.scTopBottom.Panel1.ResumeLayout(false);
             this.scTopBottom.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.scTopBottom)).EndInit();
@@ -1370,6 +1356,5 @@
         private System.Windows.Forms.CheckBox chkThdFreq_ThickLines;
         private System.Windows.Forms.CheckBox chkThdFreq_ShowMarkers;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.Button button1;
     }
 }

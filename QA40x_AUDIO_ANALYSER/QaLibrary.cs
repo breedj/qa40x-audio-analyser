@@ -208,6 +208,36 @@ namespace QaControl
             return leftRightSeries;
         }
 
+        /// <summary>
+        /// Determine the attenuation needed for the input signal to be in the range of the hardware
+        /// </summary>
+        /// <param name="dBV">The maximum level in dBV</param>
+        /// <returns>The attenuation in dB</returns>
+        public static int DetermineAttenuation(double dBV)
+        {
+            int attenuation = 42;
+
+            // Determine attenuation needed
+            if (dBV <= 0)
+                attenuation = 0;
+            else if (dBV <= 6)
+                attenuation = 6;
+            else if (dBV <= 12)
+                attenuation = 12;
+            else if (dBV <= 18)
+                attenuation = 18;
+            else if (dBV <= 24)
+                attenuation = 24;
+            else if (dBV <= 30)
+                attenuation = 30;
+            else if (dBV <= 36)
+                attenuation = 36;
+            else
+                attenuation = 42;
+
+            return attenuation;
+        }
+
     }
 }           
     

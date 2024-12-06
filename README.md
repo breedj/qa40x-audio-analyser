@@ -7,6 +7,12 @@ First version. Currently only left channel is supported. Right channel and more 
 
 **DONE:**
 - [x] THD vs frequency measurement
+- [x] Automatic determination of input attenuation
+- [x] Automatic determination of input amplitude based on output voltage or power setpoint
+- [x] Cursors with data
+- [x] Mini plots with frequency and time domain data
+- [x] Autofitting if graph data
+- [x] Plotting of noise floor in graphs  
       
 **TODO:**
 - [ ] THD vs Output amplitude measurement

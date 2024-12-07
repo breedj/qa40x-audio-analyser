@@ -3,6 +3,9 @@ An audio analyser program for the Quant Asylum QA40x series
 
 First version. Currently only left channel is supported. Right channel and more features will be added.
 
+To install download the msi here: https://github.com/breedj/qa40x-audio-analyser/releases/download/V0.1/QA40xAudioAnalyserSetup.msi
+The applicaton requires .net framework 4.8
+
 ![Github screenshot 1](https://github.com/user-attachments/assets/d5b7a46a-cb92-4634-a7d5-8b6794b2b76d)
 
 **DONE:**

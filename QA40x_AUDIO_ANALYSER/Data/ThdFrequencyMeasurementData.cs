@@ -6,7 +6,7 @@ using QA402_AUDIO_ANALYSER;
 namespace QaControl
 {
 
-    public class ThdFrequencyMeasurement
+    public class ThdFrequencyMeasurementData
     {
         public ThdFrequencyMeasurementSettings Settings { get; set; }
         public List<FrequencyThdStep> StepData { get; set; }
@@ -14,7 +14,7 @@ namespace QaControl
         public LeftRightSeries NoiseFloor { get; set; }
 
 
-        public ThdFrequencyMeasurement()
+        public ThdFrequencyMeasurementData()
         {
             StepData = new List<FrequencyThdStep>();
             Settings = new ThdFrequencyMeasurementSettings();

@@ -8,6 +8,7 @@ namespace QA40x_AUDIO_ANALYSER
 {
     static class Program
     {
+        public static frmMain MainForm;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -16,7 +17,9 @@ namespace QA40x_AUDIO_ANALYSER
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMain());
+            MainForm = new frmMain();
+            MainForm.Init();
+            Application.Run(MainForm);
         }
     }
 }

@@ -155,6 +155,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\FrequencyThdStep.cs" />
+    <Compile Include="Data\ThdAmplitudeMeasurementData.cs" />
+    <Compile Include="Data\ThdAmplitudeMeasurementSettings.cs" />
     <Compile Include="Data\ThdFrequencyMeasurementSettings.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
@@ -162,15 +164,33 @@
     <Compile Include="frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmThdAmplitude.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmThdAmplitude.Designer.cs">
+      <DependentUpon>frmThdAmplitude.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmThdFreq.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmThdFreq.Designer.cs">
+      <DependentUpon>frmThdFreq.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\HarmonicData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Qa40x.cs" />
     <Compile Include="QaLibrary.cs" />
     <Compile Include="Data\StartEndFrequencyPair.cs" />
-    <Compile Include="Data\ThdFrequencyMeasurement.cs" />
+    <Compile Include="Data\ThdFrequencyMeasurementData.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmThdAmplitude.resx">
+      <DependentUpon>frmThdAmplitude.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmThdFreq.resx">
+      <DependentUpon>frmThdFreq.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

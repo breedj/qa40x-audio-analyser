@@ -322,6 +322,12 @@ namespace QA40x_AUDIO_ANALYSER
                 return false;
             }
 
+            bool busy = await Qa40x.IsBusy();
+            if (busy)
+            {
+                MessageBox.Show($"The QA40x seems to be already runnng. Stop the aqcuisition and generator in the QuantAsylum software manually.", "QA40X busy", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
 
             // ********************************************************************
             // Check connection
@@ -564,7 +570,10 @@ namespace QA40x_AUDIO_ANALYSER
                 }
 
                 if (ct.IsCancellationRequested)
+                {
+                    await Qa40x.SetOutputSource(OutputSources.Off);                                             // Be sure to switch gen off
                     return false;
+                }
             }
 
             // Turn the generator off

@@ -17,13 +17,14 @@ First version. Currently only left channel is supported. Right channel and more 
 **TODO:**
 - [ ] THD vs Output amplitude measurement
 - [ ] FFT with automatic peak search
-- [ ] Saving of data to json
-- [ ] Importing data from json
-- [ ] Saving result to image
-- [ ] Generating pdf report of measurments
-- [ ] Project management
+- [ ] Amplifier impedance vs frequency measurement
+- [ ] Saving of data to json file
+- [ ] Importing data from json file
+- [ ] Saving measurment results to image
+- [ ] Generating pdf report of measurements
+- [ ] Measurment project management
 - [ ] Multiple measurements and results per project
-- [ ] Overlay of multiple of the same measurements
+- [ ] Overlay of multiple of the same measurements for comparison
 
 ## INSTALLATION NOTES
 

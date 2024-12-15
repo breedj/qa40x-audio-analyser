@@ -8,9 +8,11 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 
 namespace QA40x_AUDIO_ANALYSER
@@ -18,464 +20,221 @@ namespace QA40x_AUDIO_ANALYSER
 
     public partial class frmThdAmplitude : Form
     {
-        ThdAmplitudeMeasurementData data;
+        public ThdAmplitudeMeasurementData Data { get; set; }       // Data used in this form instance
+        public bool MeasurementBusy { get; set; }                   // Measurement busy state
 
-        CancellationTokenSource ct;
+        CancellationTokenSource ct;                                 // Measurement cancelation token
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public frmThdAmplitude()
         {
             ct = new CancellationTokenSource();
             InitializeComponent();
-            ClearMessage();
-            InitThdFrequencySettings();
+            Program.MainForm.ClearMessage();
+            InitSettings();
             SetThdvsFrequencyControls();
             InitializeMagnitudePlot();
             AttachThdFreqMouseEvent();
-            InitFftPlot(data.Settings.StartFrequency, data.Settings.EndFrequency, -150, 20);
-            InitTimePlot(0, 4, -1, 1);
+            QaLibrary.InitMiniFftPlot(graphFft, 10, 100000, -150, 20);
+            InitMiniTimePlot(0, 4, -1, 1);
         }
 
-
-        void InitThdFrequencySettings()
+        /// <summary>
+        /// Initialise Settings with default settings
+        /// </summary>
+        void InitSettings()
         {
-            data = new();
-            data.Settings.StartFrequency = 20;
-            data.Settings.EndFrequency = 20000;
-            data.Settings.SampleRate = 192000;
-            data.Settings.FftSize = 65536 * 2;
-            data.Settings.Window = Windowing.Hann;
-            data.Settings.StepsPerOctave = 2;
-            data.Settings.InputRange = 18;
-            data.Settings.GenAmplitudeDbV = -5.5;
-            data.Settings.GenAmplitudeV = Math.Pow(10, data.Settings.GenAmplitudeDbV / 20);
-            data.Settings.Averages = 1;
-            data.Settings.Load = 8;
-            data.Settings.AmpOutputPower = 1;
+            Data = new();
+            Data.Settings.Frequency = 1000;
+            Data.Settings.SampleRate = 192000;
+            Data.Settings.FftSize = 65536 * 2;
+            Data.Settings.WindowingFunction = Windowing.Hann;
+            Data.Settings.StepsPerOctave = 5;
+            Data.Settings.StartAmplitude = 0.01;
+            Data.Settings.StartAmplitudeUnit = E_VoltageUnit.Volt;
+            Data.Settings.EndAmplitude = 1;
+            Data.Settings.EndAmplitudeUnit = E_VoltageUnit.Volt;
+            Data.Settings.Averages = 1;
+            Data.Settings.Load = 8;
         }
 
+        /// <summary>
+        /// Set initial control values
+        /// </summary>
         void SetThdvsFrequencyControls()
         {
-            gbThdFreq_dBV_Range.Left = gbThdFreq_D_Range.Left;
-            gbThdFreq_dBV_Range.Top = gbThdFreq_D_Range.Top;
-            gbThdFreq_dBV_Range.Visible = true;
-            gbThdFreq_D_Range.Visible = false;
+            gbDbv_Range.Left = gbD_Range.Left;
+            gbDbv_Range.Top = gbD_Range.Top;
+            gbDbv_Range.Visible = true;
+            gbD_Range.Visible = false;  
 
-            cmbThdFreq_GenType.SelectedIndex = 2;       // Output power
-            txtThdFreq_GenVoltage.ReadOnly = true;
+            txtStartVoltage.Text = Data.Settings.StartAmplitude.ToString("#0.0##");
+            cmbStartVoltageUnit.SelectedIndex = 1;
+            txtEndVoltage.Text = Data.Settings.EndAmplitude.ToString("#0.0##");
+            cmbEndVoltageUnit.SelectedIndex = 1;
 
+            txtOutputLoad.Text = Data.Settings.Load.ToString();                 
+            txtFrequency.Text = Data.Settings.Frequency.ToString();
+            udStepsOctave.Value = Data.Settings.StepsPerOctave;
+            udAverages.Value = Data.Settings.Averages;
 
-            txtThdFreq_GenVoltage.Text = data.Settings.GenAmplitudeDbV.ToString("#0.0##");
-            cmbThdFreq_GenVoltageUnit.SelectedIndex = 2;   // dBV
-            txtThdFreq_OutputVoltage.Text = data.Settings.AmpOutputAmplitudeV.ToString("#0.0##");
-            cmbThdFreq_OutputVoltageUnit.SelectedIndex = 2;   // dBV
-            txtThdFreq_OutputLoad.Text = data.Settings.Load.ToString();           // 8 Ohm
-            txtThdFreq_OutputPower.Text = data.Settings.AmpOutputPower.ToString();          // 1 Watt
-            txtThdFreq_StartFreq.Text = data.Settings.StartFrequency.ToString();
-            txtThdFreq_EndFreq.Text = data.Settings.EndFrequency.ToString();
-            udThdFreq_StepsOctave.Value = data.Settings.StepsPerOctave;
-            udThdFreq_Averages.Value = data.Settings.Averages;
-
-            cmbThdFreq_D_Graph_Top.SelectedIndex = 2;
-            cmbThdFreq_D_Graph_Bottom.SelectedIndex = 3;
-            cmbThdFreq_dBV_Graph_Top.Value = 40;
-            cmbThdFreq_dBV_Graph_Bottom.Value = -140;
-            cmbThdFreq_Graph_From.SelectedIndex = 2;
-            cmbThdFreq_Graph_To.SelectedIndex = 4;
+            cmbD_Graph_Top.SelectedIndex = 2;
+            cmbD_Graph_Bottom.SelectedIndex = 3;
+            cmbDbV_Graph_Top.Value = 40;
+            cmbDbV_Graph_Bottom.Value = -140;
+            cmbVoltageGraph_From.SelectedIndex = 6;
+            cmbVoltageGraph_To.SelectedIndex = 3;
             
             Program.MainForm.HideProgressBar();
         }
 
-        void ChangeGenVoltage()
-        {
-            try
-            {
-                // input voltage
-                switch (cmbThdFreq_GenVoltageUnit.SelectedIndex)
-                {
-                    case 0: // mV
-                        data.Settings.GenAmplitudeV = ParseTextToDouble(txtThdFreq_GenVoltage.Text, data.Settings.GenAmplitudeV) / 1000;
-                        data.Settings.GenAmplitudeDbV = 20 * Math.Log10(data.Settings.GenAmplitudeV);
-                        break;
-                    case 1: // V
-                        data.Settings.GenAmplitudeV = ParseTextToDouble(txtThdFreq_GenVoltage.Text, data.Settings.GenAmplitudeV);
-                        data.Settings.GenAmplitudeDbV = 20 * Math.Log10(data.Settings.GenAmplitudeV);
-                        break;
-                    case 2: // dB
-                        data.Settings.GenAmplitudeDbV = ParseTextToDouble(txtThdFreq_GenVoltage.Text, data.Settings.GenAmplitudeDbV);
-                        data.Settings.GenAmplitudeV = Math.Pow(10, (data.Settings.GenAmplitudeDbV / 20));
-                        break;
-                }
-            }
-            catch { }
-        }
 
-        void ChangeGenVoltageUnit()
-        {
-            switch (cmbThdFreq_GenVoltageUnit.SelectedIndex)
-            {
-                case 0: // mV
-                    txtThdFreq_GenVoltage.Text = (data.Settings.GenAmplitudeV * 1000).ToString("###0");
-                    break;
-                case 1: // V
-                    txtThdFreq_GenVoltage.Text = data.Settings.GenAmplitudeV.ToString("#0.0##");
-                    break;
-                case 2: // dB
-                    txtThdFreq_GenVoltage.Text = data.Settings.GenAmplitudeDbV.ToString("#0.0##");
-                    break;
-            }
-        }
-
-        void ChangeAmpOutputVoltage()
-        {
-            try
-            {
-                // Output voltage
-                switch (cmbThdFreq_OutputVoltageUnit.SelectedIndex)
-                {
-                    case 0: // mV
-                        data.Settings.AmpOutputAmplitudeV = ParseTextToDouble(txtThdFreq_OutputVoltage.Text, data.Settings.AmpOutputAmplitudeV) / 1000;
-                        data.Settings.AmpOutputAmplitudeDbV = 20 * Math.Log10(data.Settings.AmpOutputAmplitudeV);
-                        break;
-                    case 1: // V
-                        data.Settings.AmpOutputAmplitudeV = ParseTextToDouble(txtThdFreq_OutputVoltage.Text, data.Settings.AmpOutputAmplitudeV);
-                        data.Settings.AmpOutputAmplitudeDbV = 20 * Math.Log10(data.Settings.AmpOutputAmplitudeV);
-                        break;
-                    case 2: // dB
-                        data.Settings.AmpOutputAmplitudeDbV = ParseTextToDouble(txtThdFreq_OutputVoltage.Text, data.Settings.AmpOutputAmplitudeDbV);
-                        data.Settings.AmpOutputAmplitudeV = Math.Pow(10, (data.Settings.AmpOutputAmplitudeDbV / 20));
-                        break;
-                }
-            }
-            catch { }
-
-        }
-
-        void ChangeAmpOutputVoltageUnit()
-        {
-            switch (cmbThdFreq_OutputVoltageUnit.SelectedIndex)
-            {
-                case 0: // mV
-                    txtThdFreq_OutputVoltage.Text = (data.Settings.AmpOutputAmplitudeV * 1000).ToString("###0");
-                    break;
-                case 1: // V
-                    txtThdFreq_OutputVoltage.Text = data.Settings.AmpOutputAmplitudeV.ToString("#0.0##");
-                    break;
-                case 2: // dB
-                    txtThdFreq_OutputVoltage.Text = data.Settings.AmpOutputAmplitudeDbV.ToString("#0.0##");
-                    break;
-            }
-        }
-
-        void ChangeThdFrqGenType()
-        {
-            switch (cmbThdFreq_GenType.SelectedIndex)
-            {
-                case 0: // Input voltage
-                    txtThdFreq_GenVoltage.ReadOnly = false;
-                    txtThdFreq_OutputPower.ReadOnly = true;
-                    txtThdFreq_OutputVoltage.ReadOnly = true;
-                    switch (cmbThdFreq_GenVoltageUnit.SelectedIndex)
-                    {
-                        case 0: // mV
-                            txtThdFreq_GenVoltage.Text = ((int)(data.Settings.GenAmplitudeV * 1000)).ToString("###0");
-                            break;
-                        case 1: // V
-                            txtThdFreq_GenVoltage.Text = data.Settings.GenAmplitudeV.ToString("#0.0##");
-                            break;
-                        case 2: // dB
-                            txtThdFreq_GenVoltage.Text = data.Settings.GenAmplitudeDbV.ToString("#0.0#");
-                            break;
-                    }
-                    break;
-                case 1: // Output voltage
-                    txtThdFreq_GenVoltage.ReadOnly = true;
-                    txtThdFreq_OutputPower.ReadOnly = true;
-                    txtThdFreq_OutputVoltage.ReadOnly = false;
-                    switch (cmbThdFreq_GenVoltageUnit.SelectedIndex)
-                    {
-                        case 0: // mV
-                            txtThdFreq_OutputVoltage.Text = ((int)(data.Settings.AmpOutputAmplitudeV * 1000)).ToString("###0");
-                            break;
-                        case 1: // V
-                            txtThdFreq_OutputVoltage.Text = data.Settings.AmpOutputAmplitudeV.ToString("#0.0##");
-                            break;
-                        case 2: // dB
-                            txtThdFreq_OutputVoltage.Text = data.Settings.AmpOutputAmplitudeDbV.ToString("#0.0#");
-                            break;
-                    }
-                    break;
-                case 2: // Output power
-                    txtThdFreq_GenVoltage.ReadOnly = true;
-                    txtThdFreq_OutputPower.ReadOnly = false;
-                    txtThdFreq_OutputVoltage.ReadOnly = true;
-
-                    data.Settings.AmpOutputPower = ParseTextToDouble(txtThdFreq_OutputPower.Text, data.Settings.AmpOutputPower);
-                    data.Settings.Load = ParseTextToDouble(txtThdFreq_OutputLoad.Text, data.Settings.Load);
-                    data.Settings.AmpOutputAmplitudeV = Math.Sqrt(data.Settings.AmpOutputPower * data.Settings.Load);      // Expected output DUT amplitude in Volts
-                    data.Settings.AmpOutputAmplitudeDbV = 20 * Math.Log10(data.Settings.AmpOutputAmplitudeV);     // Expected output DUT amplitude in dBV
-                    switch (cmbThdFreq_GenVoltageUnit.SelectedIndex)
-                    {
-                        case 0: // mV
-                            txtThdFreq_OutputVoltage.Text = ((int)(data.Settings.AmpOutputAmplitudeV * 1000)).ToString();
-                            break;
-                        case 1: // V
-                            txtThdFreq_OutputVoltage.Text = data.Settings.AmpOutputAmplitudeV.ToString("#0.0##");
-                            break;
-                        case 2: // dB
-                            txtThdFreq_OutputVoltage.Text = data.Settings.AmpOutputAmplitudeDbV.ToString("#0.0#");
-                            break;
-                    }
-                    break;
-            }
-        }
-
+        
         /// <summary>
-        /// Show a message
+        /// Perform the measurement
         /// </summary>
-        /// <param name="message"></param>
-        void ShowMessage(string message)
-        {
-           Program.MainForm.ShowMessage(message);
-        }
-
-        /// <summary>
-        /// Clear the message
-        /// </summary>
-        void ClearMessage()
-        {
-            Program.MainForm.ClearMessage();
-        }
-
-        /// <summary>
-        /// Determine the generator voltage for the desired output voltage
-        /// </summary>
-        /// <param name="startGeneratorAmplitude">The amplitude to start with. Should be small but the output should be detectable</param>
-        /// <param name="desiredOutputAmplitude">The desired output amplitude</param>
-        /// <returns></returns>
-        async Task<double> DetermineGenAmplitudeByOutputAmplitude(double startGeneratorAmplitude, double desiredOutputAmplitude)
-        {
-            await Qa40x.SetGen1(1000, startGeneratorAmplitude, true);           // Enable generator with start amplitude at 1 kHz
-            await Qa40x.SetOutputSource(OutputSources.Sine);                    // Set sine wave
-            LeftRightSeries as1 = await QaLibrary.DoAcquisitions(1);            // Do a single aqcuisition
-            LeftRightPair plrp = await Qa40x.GetPeakDbv(995, 1005);             // Get peak amplitude around 1 kHz
-            double leftPeakDbV = plrp.Left;                                     
-            //double rightPeak = plrp.Right;
-            PlotMiniFftGraph(as1.FreqInput);                                             // Plot fft data in mini graph
-            PlotMiniTimeGraph(as1.TimeInput, 1000);                                      // Plot time data in mini graph
-            double amplitude = startGeneratorAmplitude + (desiredOutputAmplitude - leftPeakDbV);    // Determine amplitude for desired output amplitude based on measurement
-            // Check if amplitude not too high or too low.
-            if (amplitude >= 18)
-            {
-                // Display a message box with OK and Cancel buttons
-                DialogResult result = MessageBox.Show(
-                    "The generator will be set to its maximum amplitude.\nDo you want to proceed?",          // Message
-                    "Maximum generator amplitude",                    // Title
-                    MessageBoxButtons.OKCancel,        // Buttons
-                    MessageBoxIcon.Question            // Icon
-                );
-
-                // Check which button was clicked
-                if (result == DialogResult.OK)
-                {
-                    return 18;
-                }
-                else if (result == DialogResult.Cancel)
-                {
-                    return -150;
-                }
-            }
-            else if (amplitude <= -40)
-            {
-                MessageBox.Show("Check if the amplifier is connected and switched on.", "Could not determine amplitude", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return -150;
-            }
-
-            return amplitude;       // Return the new generator amplitude
-        }
-
-
-
-        private bool MeasurementBusy;
-
+        /// <param name="ct">Cancellation token</param>
+        /// <returns>result. false if cancelled</returns>
         async Task<bool> PerformMeasurementSteps(CancellationToken ct)
         {
-            clearThdPlot();
+            
+            clearPlot();
 
-            data.StepData = [];
+            Data.StepData = [];
 
             markerIndex = -1;       // Reset marker
 
             // Init mini plots
-            InitFftPlot(data.Settings.StartFrequency, data.Settings.EndFrequency, -150, 20);
-            InitTimePlot(0, 4, -1, 1);
+            QaLibrary.InitMiniFftPlot(graphFft, 10, 100000, -150, 20);
+            InitMiniTimePlot(0, 4, -1, 1);
 
-            // Check if webserver available
-            if (!IsServerRunning())
-            {
-                MessageBox.Show($"QA40X application is not running.\nPlease start the application first.", "Could not reach webserver", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Check if webserver available and device connected
+            if (await QaLibrary.CheckDeviceConnected() == false)
                 return false;
-            }
-
-            // Check if device connected
-            if (!await Qa40x.IsConnected())
-            {
-                MessageBox.Show($"QA40X analyser is not connected via USB.\nPlease connect the device first.", "QA40X not connected", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return false;
-            }
-
-            bool busy = await Qa40x.IsBusy();
-            if (busy)
-            {
-                MessageBox.Show($"The QA40x seems to be already runnng. Stop the aqcuisition and generator in the QuantAsylum software manually.", "QA40X busy", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return false;
-            }
 
             // ********************************************************************
             // Check connection
             // Load a settings file with the particulars we want
             await Qa40x.SetDefaults();
-
-            await Qa40x.SetGraphXAxis((uint)data.Settings.StartFrequency, (uint)data.Settings.EndFrequency);
-            // Turn the generator off
             await Qa40x.SetOutputSource(OutputSources.Off);            // We need to call this to make it turn on or off
-
-            await Qa40x.SetSampleRate(data.Settings.SampleRate);
-            await Qa40x.SetBufferSize(data.Settings.FftSize);
-
-            await Qa40x.SetWindowing(data.Settings.Window);
+            await Qa40x.SetSampleRate(Data.Settings.SampleRate);
+            await Qa40x.SetBufferSize(Data.Settings.FftSize);
+            await Qa40x.SetWindowing(Data.Settings.WindowingFunction);
             await Qa40x.SetRoundFrequencies(true);
-            // Muting of right channel
-
+           
 
             // ********************************************************************
-            // Determine input level
+            // Determine attenuation level
             // ********************************************************************
-            if (cmbThdFreq_GenType.SelectedIndex == 1 || cmbThdFreq_GenType.SelectedIndex == 2)     // Based on output
-            {
-                if (cmbThdFreq_GenType.SelectedIndex == 1)
-                    ShowMessage($"Determining generator amplitude to get an output amplitude of {data.Settings.AmpOutputAmplitudeDbV:0.00#} dBV.");
-                else
-                    ShowMessage($"Determining generator amplitude to get an output power of {data.Settings.AmpOutputPower:0.00#} W.");
+            double generatorAmplitudedBV = QaLibrary.ConvertVoltage(Data.Settings.StartAmplitude, Data.Settings.StartAmplitudeUnit, E_VoltageUnit.dBV);
+            await Program.MainForm.ShowMessage($"Determining the best input attenuation for a generator voltage of {generatorAmplitudedBV:0.00#} dBV.");
 
-                // Get input voltage based on desired output voltage
-                data.Settings.InputRange = QaLibrary.DetermineAttenuation(data.Settings.AmpOutputAmplitudeDbV);
-                double startAmplitude = -40;  // 10 mV
-                data.Settings.GenAmplitudeDbV = await DetermineGenAmplitudeByOutputAmplitude(startAmplitude, data.Settings.AmpOutputAmplitudeDbV);
-                if (data.Settings.GenAmplitudeDbV == -150)
-                {
-                    ShowMessage($"Could not determine a valid generator amplitude. The amplitude would be {data.Settings.AmpOutputAmplitudeDbV:0.00#} dBV.");
-                    return false;
-                }
+            double testFrequency = QaLibrary.GetNearestBinFrequency(Data.Settings.Frequency, Data.Settings.SampleRate, Data.Settings.FftSize);
+            // Determine correct input attenuation
+            var result = await QaLibrary.DetermineAttenuationForGeneratorVoltage(generatorAmplitudedBV, testFrequency, 42);
+            QaLibrary.PlotMiniFftGraph(graphFft, result.Item3.FreqInput);
+            PlotMiniTimeGraph(result.Item3.TimeInput, testFrequency);
+            //var startAttenuationdBV = data.Settings.InputRange;
+            var startInputAmplitudedBV = result.Item2;
 
-                if (ct.IsCancellationRequested)
-                    return false;
+            // Set attenuation
+            await Qa40x.SetInputRange(result.Item1);
 
-                if (data.Settings.GenAmplitudeDbV < 18)
-                {
-                    ShowMessage($"Found an input amplitude of {data.Settings.GenAmplitudeDbV:0.00#} dBV. Doing second pass.");
-
-                    // 2nd time for extra accuracy
-                    data.Settings.GenAmplitudeDbV = await DetermineGenAmplitudeByOutputAmplitude(data.Settings.GenAmplitudeDbV, data.Settings.AmpOutputAmplitudeDbV);
-                    if (data.Settings.GenAmplitudeDbV == -150)
-                    {
-                        ShowMessage($"Could not determine a valid generator amplitude. The amplitude would be {data.Settings.AmpOutputAmplitudeDbV:0.00#} dBV.");
-                        return false;
-                    }
-                }
-            
-                ChangeGenVoltageUnit();
-
-                ShowMessage($"Found an input amplitude of {data.Settings.GenAmplitudeDbV:0.00#} dBV.");
-            }
-            else if (cmbThdFreq_GenType.SelectedIndex == 0)                         // Based on input voltage
-            {
-                ShowMessage($"Determining the best input attenuation for a generator voltage of {data.Settings.GenAmplitudeDbV:0.00#} dBV.");
-
-                // Determine correct input attenuation
-                await DetermineAttenuation();
-
-                ShowMessage($"Found correct input attenuation of {data.Settings.InputRange:0} dBV for an amplfier amplitude of {data.Settings.AmpOutputAmplitudeDbV:0.00#} dBV.");
-                await Task.Delay(500);
-            }
-            await Qa40x.SetInputRange(data.Settings.InputRange);
+            await Program.MainForm.ShowMessage($"Found correct input attenuation of {result.Item1:0} dBV for an amplifier amplitude of {result.Item2:0.00#} dBV.");
+            await Task.Delay(500);
 
             if (ct.IsCancellationRequested)
                 return false;
 
             // ********************************************************************
-            var binSize = QaLibrary.CalcBinSize(data.Settings.SampleRate, data.Settings.FftSize);
-            // Generate a list of frequencies
-            var stepFrequencies = QaLibrary.GetLineairSpacedLogarithmicFrequenciesPerOctave(data.Settings.StartFrequency, data.Settings.EndFrequency, data.Settings.StepsPerOctave);
-            // Translate the generated list to bin center frequncies
-            var stepBins = QaLibrary.TranslateToBinFrequencies(stepFrequencies, data.Settings.SampleRate, data.Settings.FftSize);
+            // Generate a list of voltages evenly spaced in log scale
+            // ********************************************************************
+            var startAmplitudeV = QaLibrary.ConvertVoltage(Data.Settings.StartAmplitude, Data.Settings.StartAmplitudeUnit, E_VoltageUnit.Volt);
+            var startAmplitudedBV = QaLibrary.ConvertVoltage(Data.Settings.StartAmplitude, Data.Settings.StartAmplitudeUnit, E_VoltageUnit.dBV);
+            var endAmplitudeV = QaLibrary.ConvertVoltage(Data.Settings.EndAmplitude, Data.Settings.EndAmplitudeUnit, E_VoltageUnit.Volt);
+            var stepVoltages = QaLibrary.GetLineairSpacedLogarithmicValuesPerOctave(startAmplitudeV, endAmplitudeV, Data.Settings.StepsPerOctave);
 
             // ********************************************************************
             // Do noise floor measurement
             // ********************************************************************
-            ShowMessage($"Determining noise floor.");
+            await Program.MainForm.ShowMessage($"Determining noise floor.");
             await Qa40x.SetOutputSource(OutputSources.Off);
             await Qa40x.DoAcquisition();
-            LeftRightSeries noiseFloor = await QaLibrary.DoAcquisitions(data.Settings.Averages);
-            data.NoiseFloor = noiseFloor;
+            LeftRightSeries noiseFloor = await QaLibrary.DoAcquisitions(Data.Settings.Averages);
+            Data.NoiseFloor = noiseFloor;
 
-            Program.MainForm.SetupProgressBar(0, stepBins.Length);
+            Program.MainForm.SetupProgressBar(0, stepVoltages.Length);
 
-            //await Qa40x.SetGraphXAxis((uint)data.Settings.StartFrequency, (uint)data.Settings.EndFrequency);  // Does not seem to work
-            
+            var binSize = QaLibrary.CalcBinSize(Data.Settings.SampleRate, Data.Settings.FftSize);
+            uint fundamentalBin = QaLibrary.GetBinOfFrequency(testFrequency, binSize);
 
             // ********************************************************************
-            // Step through the list of frequencies
+            // Step through the list of voltages
             // ********************************************************************
-            for (int f = 0; f < stepBins.Length; f++)
+            for (int i = 0; i < stepVoltages.Length; i++)
             {
-                ShowMessage($"Measuring step {f + 1} of {stepBins.Length}.");
-                Program.MainForm.UpdateProgressBar(f+1);
+                await Program.MainForm.ShowMessage($"Measuring step {i + 1} of {stepVoltages.Length}.");
+                Program.MainForm.UpdateProgressBar(i+1);
 
-                // Set the generator
-                await Qa40x.SetGen1(stepBins[f], data.Settings.GenAmplitudeDbV, true);
-                if (f == 0)
-                    await Qa40x.SetOutputSource(OutputSources.Sine);            // We need to call this to make the averages reset
-                                                                                //await Task.Delay(data.SettleTimeMs);                        // Wait for DUT to settle
+                // Convert generator voltage from V to dBV
+                var generatorVoltageV = stepVoltages[i];
+                var generatorVoltagedBV = QaLibrary.ConvertVoltage(generatorVoltageV, E_VoltageUnit.Volt, E_VoltageUnit.dBV);   // Convert to dBV
 
-                LeftRightSeries lrfs = await QaLibrary.DoAcquisitions(data.Settings.Averages);
+                // Determine attanuation needed
+                var voltageDiffdBV = generatorVoltagedBV - startAmplitudedBV;
+                var newAttenuation = QaLibrary.DetermineAttenuation(startInputAmplitudedBV + voltageDiffdBV);
+                await Qa40x.SetInputRange(newAttenuation);
 
+                // Set generator
+                await Qa40x.SetGen1(testFrequency, generatorVoltagedBV, true);    // Set the generator in dBV
+                if (i == 0)
+                    await Qa40x.SetOutputSource(OutputSources.Sine);            // We need to call this to make the averages in QA40x software reset
 
+                LeftRightSeries lrfs = await QaLibrary.DoAcquisitions(Data.Settings.Averages);  // Do acquisitions
+            
                 FrequencyThdStep step = new()
                 {
-                    FundamentalFrequency = stepBins[f],
+                    FundamentalFrequency = testFrequency,
+                    GeneratorVoltage = generatorVoltageV,
                     fftData = lrfs.FreqInput,
                     timeData = lrfs.TimeInput,
                     DcComponent = lrfs.TimeInput.Left.Average()
                 };
-
-                uint fundamentalBin = QaLibrary.GetBinOfFrequency(step.FundamentalFrequency, binSize);
-                if (fundamentalBin >= lrfs.FreqInput.Left.Length)               // Check in bin within range
+              
+                if (fundamentalBin >= lrfs.FreqInput.Left.Length)               // Check if bin within array bounds
                     break;
 
+                // Get and store step data
                 step.AmplitudeVolts = lrfs.FreqInput.Left[fundamentalBin];
                 step.AmplitudeDbV = 20 * Math.Log10(lrfs.FreqInput.Left[fundamentalBin]);
-                step.MagnitudeDb = 20 * Math.Log10(step.AmplitudeVolts / Math.Pow(10, data.Settings.GenAmplitudeDbV / 20));
-                step.NoiseFloorV = data.NoiseFloor.FreqInput.Left               // Average noise floor
+                step.MagnitudeDb = 20 * Math.Log10(step.AmplitudeVolts / generatorVoltageV);
+                // Calculate average noise floor 
+                step.NoiseFloorV = Data.NoiseFloor.FreqInput.Left               // Store noise floor in V
                     .Select((v, i) => new { Index = i, Value = v })
-                    .Where(p => p.Index > fundamentalBin)
+                    .Where(p => p.Index > fundamentalBin)                       // Only higher frequencies. We do not have fundamentals in lower frequencies
                     .Select(v => v.Value)
                     .Average();
-                step.NoiseFloorDbV = 20 * Math.Log10(step.NoiseFloorV);
+                step.NoiseFloorDbV = 20 * Math.Log10(step.NoiseFloorV);         // Store noise floor in dBV
 
                 // Plot the mini graphs
-                PlotMiniFftGraph(lrfs.FreqInput);
+                //InitMiniFftPlot(10, 100000, -150, step.AmplitudeDbV);
+                QaLibrary.PlotMiniFftGraph(graphFft, lrfs.FreqInput);
                 PlotMiniTimeGraph(lrfs.TimeInput, step.FundamentalFrequency);
 
+                // Reset harmonic distortion variables
                 double distortionSqrtTotal = 0;
                 double distiortionD6plus = 0;
 
-                // Loop through harmonics
+                // Loop through harmonics up tot the 12th
                 for (int h = 2; h <= 12; h++)                                   // For now up to 12 harmonics, start at 2nd
                 {
+                    var harmonicFrequency = testFrequency * h;
                     HarmonicData harmonic = new()
                     {
                         HarmonicNr = h,
-                        Frequency = stepBins[f] * h
+                        Frequency = harmonicFrequency
                     };
 
                     uint bin = QaLibrary.GetBinOfFrequency(harmonic.Frequency, binSize);        // Calculate bin of the harmonic frequency
@@ -491,6 +250,7 @@ namespace QA40x_AUDIO_ANALYSER
                         // The harmonics 6-12 will be added together and displayed as D6+
                         if (h >= 6)
                             distiortionD6plus += Math.Pow(harmonic.AmplitudeVolts, 2);          // Add to total distortion
+
                         // All harmonics together for THD
                         distortionSqrtTotal += Math.Pow(harmonic.AmplitudeVolts, 2);            // Add to total distortion
                     }
@@ -500,14 +260,14 @@ namespace QA40x_AUDIO_ANALYSER
                     step.Harmonics.Add(harmonic);           
                 }
 
-                // Calculate THD
+                // Calculate THD of current step
                 if (distortionSqrtTotal != 0)
                 {
                     step.ThdPercent = (Math.Sqrt(distortionSqrtTotal) / step.AmplitudeVolts) * 100;
                     step.ThdDb = 20 * Math.Log10(step.ThdPercent / 100.0);
                 }
 
-                // Calculate D6+
+                // Calculate D6+ (D6 - D12)
                 if (distiortionD6plus != 0)
                 {
                     step.D6PlusDbV = 20 * Math.Log10(Math.Sqrt(distiortionD6plus));
@@ -516,8 +276,8 @@ namespace QA40x_AUDIO_ANALYSER
                 }
 
                 // If load not zero then calculate load power
-                if (data.Settings.Load != 0)
-                    step.PowerWatt = Math.Pow(step.AmplitudeVolts, 2) / data.Settings.Load;
+                if (Data.Settings.Load != 0)
+                    step.PowerWatt = Math.Pow(step.AmplitudeVolts, 2) / Data.Settings.Load;
 
                 // Calculate THD+N      TODO: Check, I don't think this is correct.
                 step.ThdDbN = lrfs.FreqInput.Left
@@ -527,50 +287,12 @@ namespace QA40x_AUDIO_ANALYSER
 
                 step.ThdDbN = (Math.Sqrt(step.ThdDbN) / lrfs.FreqInput.Left[fundamentalBin]) * 100;
 
-
                 // Add step data to list
-                data.StepData.Add(step);
+                Data.StepData.Add(step);
 
-                // Plot the data
-                if (gbThdFreq_dBV_Range.Visible)
-                {
-                    // dBV plot is selected
-                    PlotMagnitude(data);
-                    // Plot current measurement texts
-                    WriteCursorTextsdB(step.FundamentalFrequency
-                        , step.MagnitudeDb
-                        , step.ThdDb - step.AmplitudeDbV
-                        , (step.Harmonics.Count > 0 ? step.Harmonics[0].AmplitudeDbV - step.AmplitudeDbV : 0)   // 2nd harmonic
-                        , (step.Harmonics.Count > 1 ? step.Harmonics[1].AmplitudeDbV - step.AmplitudeDbV : 0)
-                        , (step.Harmonics.Count > 3 ? step.Harmonics[2].AmplitudeDbV - step.AmplitudeDbV : 0)
-                        , (step.Harmonics.Count > 4 ? step.Harmonics[3].AmplitudeDbV - step.AmplitudeDbV : 0)
-                        , (step.Harmonics.Count > 5 ? step.D6PlusDbV - step.AmplitudeDbV : 0)                   // 6+ harmonics
-                        , step.DcComponent
-                        , step.PowerWatt
-                        , step.NoiseFloorDbV - step.AmplitudeDbV
-                        , data.Settings.Load
-                        );
-                }
-                else
-                {
-                    // Thd percent plot is selected
-                    PlotThd(data);
-                    // Plot current measurement texts
-                    WriteCursorTextsD(step.FundamentalFrequency
-                        , step.MagnitudeDb
-                        , step.ThdPercent
-                        , (step.Harmonics.Count > 0 ? step.Harmonics[0].ThdPercent : 0)                         // 2nd harmonic
-                        , (step.Harmonics.Count > 1 ? step.Harmonics[1].ThdPercent : 0)
-                        , (step.Harmonics.Count > 3 ? step.Harmonics[2].ThdPercent : 0)
-                        , (step.Harmonics.Count > 4 ? step.Harmonics[3].ThdPercent : 0)
-                        , (step.Harmonics.Count > 5 ? step.ThdPercentD6plus : 0)                                // 6+ harmonics
-                        , step.DcComponent
-                        , step.PowerWatt
-                        , (step.NoiseFloorV / step.AmplitudeVolts) % 100
-                        , data.Settings.Load
-                        );
-                }
+                PlotMeasurementData(step);
 
+                // Check if cancel button pressed
                 if (ct.IsCancellationRequested)
                 {
                     await Qa40x.SetOutputSource(OutputSources.Off);                                             // Be sure to switch gen off
@@ -582,35 +304,57 @@ namespace QA40x_AUDIO_ANALYSER
             await Qa40x.SetOutputSource(OutputSources.Off);
 
             // Show message
-            ShowMessage($"Measurment finished!");
-            await Task.Delay(500);
-            ClearMessage();
-
-            // Hide progressbar
-            Program.MainForm.HideProgressBar();
-
+            await Program.MainForm.ShowMessage($"Measurement finished!", 500);
+          
             return true;
         }
 
         /// <summary>
-        ///  Determine the best attenuation for the output amplitude
+        /// Plot the measurement step in the graph and the cursor text.
         /// </summary>
-        /// <returns></returns>
-        private async Task DetermineAttenuation()
+        /// <param name="step"></param>
+        private void PlotMeasurementData(FrequencyThdStep step)
         {
-            await Qa40x.SetInputRange(42);                                      // Set input range to safe range
-            await Qa40x.SetGen1(1000, data.Settings.GenAmplitudeDbV, true);     // Enable generator at set voltage
-            await Qa40x.SetOutputSource(OutputSources.Sine);
-            LeftRightSeries as1 = await QaLibrary.DoAcquisitions(1);            // Do acquisition
-            LeftRightPair plrp = await Qa40x.GetPeakDbv(995, 1005);             // Get peak value at 1 kHz
-            data.Settings.AmpOutputAmplitudeDbV = plrp.Left;                    // Set settings
-            data.Settings.InputRange = QaLibrary.DetermineAttenuation(data.Settings.AmpOutputAmplitudeDbV);     // Determine attenuation and set input range
-            await Qa40x.SetOutputSource(OutputSources.Off);                     // Disable generator
-
-            PlotMiniFftGraph(as1.FreqInput);                                    // Plot the data in the mini graph
-            PlotMiniTimeGraph(as1.TimeInput, 1000);
+            // Plot the data depending on selected graph
+            if (gbDbv_Range.Visible)
+            {
+                // dBV plot is selected
+                PlotMagnitude(Data);
+                // Plot current measurement texts
+                WriteCursorTextsdB(step.FundamentalFrequency
+                    , step.MagnitudeDb
+                    , step.ThdDb - step.AmplitudeDbV
+                    , (step.Harmonics.Count > 0 ? step.Harmonics[0].AmplitudeDbV - step.AmplitudeDbV : 0)   // 2nd harmonic
+                    , (step.Harmonics.Count > 1 ? step.Harmonics[1].AmplitudeDbV - step.AmplitudeDbV : 0)
+                    , (step.Harmonics.Count > 3 ? step.Harmonics[2].AmplitudeDbV - step.AmplitudeDbV : 0)
+                    , (step.Harmonics.Count > 4 ? step.Harmonics[3].AmplitudeDbV - step.AmplitudeDbV : 0)
+                    , (step.Harmonics.Count > 5 ? step.D6PlusDbV - step.AmplitudeDbV : 0)                   // 6+ harmonics
+                    , step.DcComponent
+                    , step.PowerWatt
+                    , step.NoiseFloorDbV - step.AmplitudeDbV
+                    , Data.Settings.Load
+                    );
+            }
+            else
+            {
+                // Thd percent plot is selected
+                PlotThd(Data);
+                // Plot current measurement texts
+                WriteCursorTextsD(step.FundamentalFrequency
+                    , step.MagnitudeDb
+                    , step.ThdPercent
+                    , (step.Harmonics.Count > 0 ? step.Harmonics[0].ThdPercent : 0)                         // 2nd harmonic
+                    , (step.Harmonics.Count > 1 ? step.Harmonics[1].ThdPercent : 0)
+                    , (step.Harmonics.Count > 3 ? step.Harmonics[2].ThdPercent : 0)
+                    , (step.Harmonics.Count > 4 ? step.Harmonics[3].ThdPercent : 0)
+                    , (step.Harmonics.Count > 5 ? step.ThdPercentD6plus : 0)                                // 6+ harmonics
+                    , step.DcComponent
+                    , step.PowerWatt
+                    , (step.NoiseFloorV / step.AmplitudeVolts) % 100
+                    , Data.Settings.Load
+                    );
+            }
         }
-
 
 
         /// <summary>
@@ -628,25 +372,25 @@ namespace QA40x_AUDIO_ANALYSER
         /// <param name="power">Amount of power in Watt</param>
         /// <param name="noiseFloor">The noise floor in dB</param>
         /// <param name="load">The amplifier load</param>
-        void WriteCursorTextsD(double f, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double dc, double power, double noiseFloor, double load)
+        void WriteCursorTextsD(double amplitudeV, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double dc, double power, double noiseFloor, double load)
         {
-            lblThdFreq_Frequency.Text = $"Frequency: {f:0.## Hz}";
-            lblThdFreq_Magnitude.Text = $"Magn: {magnitude:0.## dB}";
-            lblThdFreq_THD.Text = $"THD: {thd:0.0000# \\%}";
+            lblCursor_Voltage.Text = $"Amplitude: {amplitudeV:##0.000 V}";
+            lblCursor_Magnitude.Text = $"Magn: {magnitude:0.## dB}";
+            lblCursor_THD.Text = $"THD: {thd:0.0000# \\%}";
 
-            lblThdFreq_D2.Text = $"D2: {D2:0.0000# \\%}";
-            lblThdFreq_D3.Text = $"D3: {D3:0.0000# \\%}";
-            lblThdFreq_D4.Text = $"D4: {D4:0.0000# \\%}";
-            lblThdFreq_D5.Text = $"D5: {D5:0.0000# \\%}";
-            lblThdFreq_D6.Text = $"D6+: {D6:0.0000# \\%}";
-            lblThdFreq_DC.Text = $"DC: {dc * 1000:0.0# mV}";
+            lblCursor_D2.Text = $"D2: {D2:0.0000# \\%}";
+            lblCursor_D3.Text = $"D3: {D3:0.0000# \\%}";
+            lblCursor_D4.Text = $"D4: {D4:0.0000# \\%}";
+            lblCursor_D5.Text = $"D5: {D5:0.0000# \\%}";
+            lblCursor_D6.Text = $"D6+: {D6:0.0000# \\%}";
+            lblCursor_DC.Text = $"DC: {dc * 1000:0.0# mV}";
 
             if (power < 1)
-                lblThdFreq_Power.Text = $"Power: {power * 1000:0.0# mW} ({load:0.##} Ω)";
+                lblCursor_Power.Text = $"Power: {power * 1000:0.0# mW} ({load:0.##} Ω)";
             else
-                lblThdFreq_Power.Text = $"Power: {power:0.00# W} ({load:0.##} Ω)";
+                lblCursor_Power.Text = $"Power: {power:0.00# W} ({load:0.##} Ω)";
 
-            lblThdFreq_NoiseFloor.Text = $"Noise floor: {noiseFloor:##0.0# dB}";
+            lblCursor_NoiseFloor.Text = $"Noise floor: {noiseFloor:##0.0# dB}";
 
         }
 
@@ -665,140 +409,29 @@ namespace QA40x_AUDIO_ANALYSER
         /// <param name="power">Amount of power in Watt</param>
         /// <param name="noiseFloor">The noise floor in dB</param>
         /// <param name="load">The amplifier load</param>
-        void WriteCursorTextsdB(double f, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double dc, double power, double noiseFloor, double load)
+        void WriteCursorTextsdB(double amplitudeV, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double dc, double power, double noiseFloor, double load)
         {
-            lblThdFreq_Frequency.Text = $"Frequency: {f:0.## Hz}";
-            lblThdFreq_Magnitude.Text = $"Magn: {magnitude:0.## dB}";
-            lblThdFreq_THD.Text = $"THD: {thd:0.0# dB}";
+            lblCursor_Voltage.Text = $"Amplitude: {amplitudeV:##0.000 V}";
+            lblCursor_Magnitude.Text = $"Magn: {magnitude:0.## dB}";
+            lblCursor_THD.Text = $"THD: {thd:0.0# dB}";
 
-            lblThdFreq_D2.Text = $"D2: {D2:##0.0# dB}";
-            lblThdFreq_D3.Text = $"D3: {D3:##0.0# dB}";
-            lblThdFreq_D4.Text = $"D4: {D4:##0.0# dB}";
-            lblThdFreq_D5.Text = $"D5: {D5:##0.0# dB}";
-            lblThdFreq_D6.Text = $"D6+: {D6:##0.0# dB}";
-            lblThdFreq_DC.Text = $"DC: {dc * 1000:0.0# mV}";
+            lblCursor_D2.Text = $"D2: {D2:##0.0# dB}";
+            lblCursor_D3.Text = $"D3: {D3:##0.0# dB}";
+            lblCursor_D4.Text = $"D4: {D4:##0.0# dB}";
+            lblCursor_D5.Text = $"D5: {D5:##0.0# dB}";
+            lblCursor_D6.Text = $"D6+: {D6:##0.0# dB}";
+            lblCursor_DC.Text = $"DC: {dc * 1000:0.0# mV}";
 
             if (power < 1)
-                lblThdFreq_Power.Text = $"Power: {power * 1000:0.0# mW} ({load:0.##} Ω)";
+                lblCursor_Power.Text = $"Power: {power * 1000:0.0# mW} ({load:0.##} Ω)";
             else
-                lblThdFreq_Power.Text = $"Power: {power:0.00# W} ({load:0.##} Ω)";
+                lblCursor_Power.Text = $"Power: {power:0.00# W} ({load:0.##} Ω)";
 
-            lblThdFreq_NoiseFloor.Text = $"Noise floor: {noiseFloor:##0.0# dB}";
+            lblCursor_NoiseFloor.Text = $"Noise floor: {noiseFloor:##0.0# dB}";
         }
 
-        /// <summary>
-        /// Initlialize the THD frequency plot
-        /// </summary>
-        /// <param name="startFrequency"></param>
-        /// <param name="endFrequency"></param>
-        /// <param name="minDbV"></param>
-        /// <param name="maxDbV"></param>
-        void InitFftPlot(double startFrequency, double endFrequency, double minDbV, double maxDbV)
-        {
-            graphFft.Plot.Clear();
-
-            // create a minor tick generator that places log-distributed minor ticks
-            ScottPlot.TickGenerators.LogMinorTickGenerator minorTickGen = new()
-            {
-                Divisions = 1
-            };
-
-            // create a numeric tick generator that uses our custom minor tick generator
-            ScottPlot.TickGenerators.NumericAutomatic tickGen = new()
-            {
-                MinorTickGenerator = minorTickGen
-            };
-
-            // create a custom tick formatter to set the label text for each tick
-            //static string LogTickLabelFormatter(double y) => $"{Math.Pow(10, y):G}";
-
-            // tell our major tick generator to only show major ticks that are whole integers
-            //tickGen.IntegerTicksOnly = true;
-
-            // tell our custom tick generator to use our new label formatter
-            // tickGen.LabelFormatter = LogTickLabelFormatter;
-
-            // tell the left axis to use our custom tick generator
-            graphFft.Plot.Axes.Left.TickGenerator = tickGen;
-
-
-
-            // create a minor tick generator that places log-distributed minor ticks
-            ScottPlot.TickGenerators.LogMinorTickGenerator minorTickGenX = new();
-
-            // create a numeric tick generator that uses our custom minor tick generator
-            //ScottPlot.TickGenerators.NumericAutomatic tickGenX = new();
-            //tickGenX.MinorTickGenerator = minorTickGenX;
-
-            // create a manual tick generator and add ticks
-            ScottPlot.TickGenerators.NumericManual tickGenX = new();
-
-            // add major ticks with their labels
-            tickGenX.AddMajor(Math.Log10(1), "1");
-            tickGenX.AddMajor(Math.Log10(10), "10");
-            tickGenX.AddMajor(Math.Log10(100), "100");
-            tickGenX.AddMajor(Math.Log10(1000), "1k");
-            tickGenX.AddMajor(Math.Log10(10000), "10k");
-            tickGenX.AddMajor(Math.Log10(100000), "100k");
-
-            graphFft.Plot.Axes.Bottom.TickGenerator = tickGenX;
-
-
-            // show grid lines for minor ticks
-            graphFft.Plot.Grid.MajorLineColor = Colors.Black.WithOpacity(.25);
-            graphFft.Plot.Grid.MinorLineColor = Colors.Black.WithOpacity(.08);
-            graphFft.Plot.Grid.MinorLineWidth = 1;
-
-            graphFft.Plot.Axes.SetLimits((data.Settings.StartFrequency < 10 ? Math.Log10(1) : Math.Log10(10)), Math.Log10(100000), minDbV, maxDbV);
-            graphFft.Plot.Title("dBV");
-            graphFft.Plot.Axes.Title.Label.FontSize = 12;
-            graphFft.Plot.Axes.Title.Label.OffsetY = 8;
-            graphFft.Plot.Axes.Title.Label.Bold = false;
-
-            graphFft.Plot.XLabel("Hz");
-            graphFft.Plot.Axes.Bottom.Label.OffsetX = 85;
-            graphFft.Plot.Axes.Bottom.Label.OffsetY = -5;
-            graphFft.Plot.Axes.Bottom.Label.FontSize = 12;
-            graphFft.Plot.Axes.Bottom.Label.Bold = false;
-            graphFft.Plot.Axes.Bottom.Label.IsVisible = true;
-
-            graphFft.Plot.Legend.IsVisible = false;
-
-            graphFft.Refresh();
-
-        }
-
-        void PlotMiniFftGraph(LeftRightFrequencySeries fftData)
-        {
-            graphFft.Plot.Clear();
-
-            List<double> freqX = [];
-            List<double> dbVY = [];
-            double frequency = 0;
-
-            for (int f = 0; f < fftData.Left.Length; f++)
-            {
-                frequency += fftData.Df;
-                freqX.Add(frequency);
-                dbVY.Add(20 * Math.Log10(fftData.Left[f]));
-            }
-
-            // add a scatter plot to the plot
-            double[] logFreqX = freqX.Select(Math.Log10).ToArray();
-
-            double[] logHTotY = dbVY.ToArray();
-            var plotTot = graphFft.Plot.Add.Scatter(logFreqX, logHTotY);
-            plotTot.LineWidth = 1;
-            plotTot.Color = ScottPlot.Color.FromColor(System.Drawing.Color.FromArgb(1, 97, 170));
-            plotTot.MarkerSize = 1;
-
-            graphFft.Refresh();
-        }
-
-
-
-
-        void InitTimePlot(double startTime, double endTime, double minVoltage, double maxVoltage)
+       
+        void InitMiniTimePlot(double startTime, double endTime, double minVoltage, double maxVoltage)
         {
             graphTime.Plot.Clear();
 
@@ -911,15 +544,19 @@ namespace QA40x_AUDIO_ANALYSER
             graphTime.Refresh();
         }
 
-
-        void clearThdPlot()
+        /// <summary>
+        /// Clear the plot
+        /// </summary>
+        void clearPlot()
         {
             thdPlot.Plot.Clear();
             thdPlot.Refresh();
         }
 
-
-        void initThdPlot()
+        /// <summary>
+        /// Initialize the THD % plot
+        /// </summary>
+        void InitializeThdPlot()
         {
             thdPlot.Plot.Clear();
 
@@ -953,36 +590,17 @@ namespace QA40x_AUDIO_ANALYSER
 
             // create a minor tick generator that places log-distributed minor ticks
             ScottPlot.TickGenerators.LogMinorTickGenerator minorTickGenX = new();
-
             // create a numeric tick generator that uses our custom minor tick generator
-            //ScottPlot.TickGenerators.NumericAutomatic tickGenX = new();
-            //tickGenX.MinorTickGenerator = minorTickGenX;
+            ScottPlot.TickGenerators.NumericAutomatic tickGenX = new();
 
-            // create a manual tick generator and add ticks
-            ScottPlot.TickGenerators.NumericManual tickGenX = new();
+            minorTickGenX.Divisions = 10;
+            tickGenX.MinorTickGenerator = minorTickGenX;
 
-            // add major ticks with their labels
-            tickGenX.AddMajor(Math.Log10(1), "1");
-            tickGenX.AddMajor(Math.Log10(2), "2");
-            tickGenX.AddMajor(Math.Log10(5), "5");
-            tickGenX.AddMajor(Math.Log10(10), "10");
-            tickGenX.AddMajor(Math.Log10(20), "20");
-            tickGenX.AddMajor(Math.Log10(50), "50");
-            tickGenX.AddMajor(Math.Log10(100), "100");
-            tickGenX.AddMajor(Math.Log10(200), "200");
-            tickGenX.AddMajor(Math.Log10(500), "500");
-            tickGenX.AddMajor(Math.Log10(1000), "1k");
-            tickGenX.AddMajor(Math.Log10(2000), "2k");
-            tickGenX.AddMajor(Math.Log10(5000), "5k");
-            tickGenX.AddMajor(Math.Log10(10000), "10k");
-            tickGenX.AddMajor(Math.Log10(20000), "20k");
-            tickGenX.AddMajor(Math.Log10(50000), "50k");
-            tickGenX.AddMajor(Math.Log10(100000), "100k");
-
-
-
+            tickGenX.TargetTickCount = 25;
+            // tell our major tick generator to only show major ticks that are whole integers
+            tickGenX.IntegerTicksOnly = true;
             // tell our custom tick generator to use our new label formatter
-            //    tickGenX.LabelFormatter = LogTickLabelFormatterX;
+            tickGenX.LabelFormatter = LogTickLabelFormatter;
             thdPlot.Plot.Axes.Bottom.TickGenerator = tickGenX;
 
 
@@ -993,12 +611,12 @@ namespace QA40x_AUDIO_ANALYSER
 
 
             //thdPlot.Plot.Axes.AutoScale();
-            if (cmbThdFreq_Graph_From.SelectedIndex > -1 && cmbThdFreq_Graph_To.SelectedIndex > -1 && cmbThdFreq_D_Graph_Bottom.SelectedIndex > -1 && cmbThdFreq_D_Graph_Top.SelectedIndex > -1)
-                thdPlot.Plot.Axes.SetLimits(Math.Log10(Convert.ToDouble(cmbThdFreq_Graph_From.Text)), Math.Log10(Convert.ToDouble(cmbThdFreq_Graph_To.Text)), Math.Log10(Convert.ToDouble(cmbThdFreq_D_Graph_Bottom.Text)), Math.Log10(Convert.ToDouble(cmbThdFreq_D_Graph_Top.Text)));
+            if (cmbVoltageGraph_From.SelectedIndex > -1 && cmbVoltageGraph_To.SelectedIndex > -1 && cmbD_Graph_Bottom.SelectedIndex > -1 && cmbD_Graph_Top.SelectedIndex > -1)
+                thdPlot.Plot.Axes.SetLimits(Math.Log10(Convert.ToDouble(cmbVoltageGraph_From.Text)), Math.Log10(Convert.ToDouble(cmbVoltageGraph_To.Text)), Math.Log10(Convert.ToDouble(cmbD_Graph_Bottom.Text)), Math.Log10(Convert.ToDouble(cmbD_Graph_Top.Text)));
             thdPlot.Plot.Title("Distortion (%)");
             thdPlot.Plot.Axes.Title.Label.FontSize = 17;
 
-            thdPlot.Plot.XLabel("Frequency (Hz)");
+            thdPlot.Plot.XLabel("Amplitude (Vrms)");
             thdPlot.Plot.Axes.Bottom.Label.OffsetX = 330;
             thdPlot.Plot.Axes.Bottom.Label.FontSize = 15;
             thdPlot.Plot.Axes.Bottom.Label.Bold = false;
@@ -1013,51 +631,55 @@ namespace QA40x_AUDIO_ANALYSER
 
         }
 
+        /// <summary>
+        /// Plot the THD % data
+        /// </summary>
+        /// <param name="data"></param>
         void PlotThd(ThdAmplitudeMeasurementData data)
         {
             thdPlot.Plot.Remove<Scatter>();
 
-            List<double> freqX = new List<double>();
-            List<double> hTotY = new List<double>();
-            List<double> h2Y = new List<double>();
-            List<double> h3Y = new List<double>();
-            List<double> h4Y = new List<double>();
-            List<double> h5Y = new List<double>();
-            List<double> h6Y = new List<double>();
-            List<double> noiseY = new List<double>();
+            List<double> freqX = [];
+            List<double> hTotY = [];
+            List<double> h2Y = [];
+            List<double> h3Y = [];
+            List<double> h4Y = [];
+            List<double> h5Y = [];
+            List<double> h6Y = [];
+            List<double> noiseY = [];
 
-            for (int f = 0; f < data.StepData.Count; f++)
+            for (int i = 0; i < data.StepData.Count; i++)
             {
-                freqX.Add(data.StepData[f].FundamentalFrequency);
+                freqX.Add(data.StepData[i].AmplitudeVolts);
 
-                if (data.StepData[f].Harmonics.Count > 0 && chkThdFreq_ShowThd.Checked)
-                    hTotY.Add(data.StepData[f].ThdPercent);
-                if (data.StepData[f].Harmonics.Count > 0 && chkThdFreq_ShowD2.Checked)
-                    h2Y.Add(data.StepData[f].Harmonics[0].ThdPercent);
-                if (data.StepData[f].Harmonics.Count > 1 && chkThdFreq_ShowD3.Checked)
-                    h3Y.Add(data.StepData[f].Harmonics[1].ThdPercent);
-                if (data.StepData[f].Harmonics.Count > 2 && chkThdFreq_ShowD4.Checked)
-                    h4Y.Add(data.StepData[f].Harmonics[2].ThdPercent);
-                if (data.StepData[f].Harmonics.Count > 3 && chkThdFreq_ShowD5.Checked)
-                    h5Y.Add(data.StepData[f].Harmonics[3].ThdPercent);
-                if (data.StepData[f].Harmonics.Count > 4 && data.StepData[f].ThdPercentD6plus != 0 && chkThdFreq_ShowD6.Checked)
-                    h6Y.Add(data.StepData[f].ThdPercentD6plus);        // D6+
-                if (chkThdFreq_ShowNoiseFloor.Checked)
-                    noiseY.Add((data.StepData[f].NoiseFloorV / data.StepData[f].AmplitudeVolts) * 100);
+                if (data.StepData[i].Harmonics.Count > 0 && chkShowThd.Checked)
+                    hTotY.Add(data.StepData[i].ThdPercent);
+                if (data.StepData[i].Harmonics.Count > 0 && chkShowD2.Checked)
+                    h2Y.Add(data.StepData[i].Harmonics[0].ThdPercent);
+                if (data.StepData[i].Harmonics.Count > 1 && chkShowD3.Checked)
+                    h3Y.Add(data.StepData[i].Harmonics[1].ThdPercent);
+                if (data.StepData[i].Harmonics.Count > 2 && chkShowD4.Checked)
+                    h4Y.Add(data.StepData[i].Harmonics[2].ThdPercent);
+                if (data.StepData[i].Harmonics.Count > 3 && chkShowD5.Checked)
+                    h5Y.Add(data.StepData[i].Harmonics[3].ThdPercent);
+                if (data.StepData[i].Harmonics.Count > 4 && data.StepData[i].ThdPercentD6plus != 0 && chkShowD6.Checked)
+                    h6Y.Add(data.StepData[i].ThdPercentD6plus);        // D6+
+                if (chkShowNoiseFloor.Checked)
+                    noiseY.Add((data.StepData[i].NoiseFloorV / data.StepData[i].AmplitudeVolts) * 100);
             }
 
             IPalette palette = new ScottPlot.Palettes.Category10();
             float lineWidth = 1;
             float markerSize = 1;
-            if (chkThdFreq_ThickLines.Checked)
+            if (chkThickLines.Checked)
                 lineWidth = 2;
-            if (chkThdFreq_ShowMarkers.Checked)
+            if (chkShowDataPoints.Checked)
                 markerSize = lineWidth + 3;
 
             // add a scatter plot to the plot
             double[] logFreqX = freqX.Select(Math.Log10).ToArray();
 
-            if (chkThdFreq_ShowThd.Checked)
+            if (chkShowThd.Checked)
             {
                 double[] logHTotY = hTotY.Select(Math.Log10).ToArray();
                 var plotTot = thdPlot.Plot.Add.Scatter(logFreqX, logHTotY);
@@ -1067,7 +689,7 @@ namespace QA40x_AUDIO_ANALYSER
                 plotTot.LegendText = "THD";
             }
 
-            if (chkThdFreq_ShowD2.Checked)
+            if (chkShowD2.Checked)
             {
                 double[] logH2Y = h2Y.Select(Math.Log10).ToArray();
                 var plot1 = thdPlot.Plot.Add.Scatter(logFreqX, logH2Y);
@@ -1078,7 +700,7 @@ namespace QA40x_AUDIO_ANALYSER
                 plot1.LegendText = "D2";
             }
 
-            if (chkThdFreq_ShowD3.Checked)
+            if (chkShowD3.Checked)
             {
                 double[] logH3Y = h3Y.Select(Math.Log10).ToArray();
                 var plot2 = thdPlot.Plot.Add.Scatter(logFreqX, logH3Y);
@@ -1089,7 +711,7 @@ namespace QA40x_AUDIO_ANALYSER
                 plot2.LegendText = "D3";
             }
 
-            if (chkThdFreq_ShowD4.Checked)
+            if (chkShowD4.Checked)
             {
                 double[] logH4Y = h4Y.Select(Math.Log10).ToArray();
                 var plot3 = thdPlot.Plot.Add.Scatter(logFreqX, logH4Y);
@@ -1100,7 +722,7 @@ namespace QA40x_AUDIO_ANALYSER
                 plot3.LegendText = "D4";
             }
 
-            if (chkThdFreq_ShowD5.Checked)
+            if (chkShowD5.Checked)
             {
                 double[] logH5Y = h5Y.Select(Math.Log10).ToArray();
                 var plot4 = thdPlot.Plot.Add.Scatter(logFreqX, logH5Y);
@@ -1111,7 +733,7 @@ namespace QA40x_AUDIO_ANALYSER
                 plot4.LegendText = "D5";
             }
 
-            if (chkThdFreq_ShowD6.Checked)
+            if (chkShowD6.Checked)
             {
                 double[] logH6Y = h6Y.Select(Math.Log10).ToArray();
                 var plot5 = thdPlot.Plot.Add.Scatter(logFreqX, logH6Y);
@@ -1123,7 +745,7 @@ namespace QA40x_AUDIO_ANALYSER
             }
 
 
-            if (chkThdFreq_ShowNoiseFloor.Checked)
+            if (chkShowNoiseFloor.Checked)
             {
                 double[] logNoiseY = noiseY.Select(Math.Log10).ToArray();
                 var plot5 = thdPlot.Plot.Add.Scatter(logFreqX, logNoiseY);
@@ -1135,67 +757,43 @@ namespace QA40x_AUDIO_ANALYSER
             }
 
             if (markerIndex != -1)
-                PlotCursorMarker(1, LinePattern.Solid, markerDataPoint);
+                QaLibrary.PlotCursorMarker(thdPlot, 1, LinePattern.Solid, markerDataPoint);
 
             thdPlot.Refresh();
         }
 
 
-
-
-
+        /// <summary>
+        /// Initialize the THD magnitude (dB) plot
+        /// </summary>
         void InitializeMagnitudePlot()
         {
             thdPlot.Plot.Clear();
 
-
-            // create a minor tick generator that places log-distributed minor ticks
-            //ScottPlot.TickGenerators. minorTickGen = new();
-            //minorTickGen.Divisions = 1;
-
+            // Y - axis
             // create a numeric tick generator that uses our custom minor tick generator
             ScottPlot.TickGenerators.EvenlySpacedMinorTickGenerator minorTickGen = new(1);
-
+            // create a numeric tick generator that uses our custom minor tick generator
             ScottPlot.TickGenerators.NumericAutomatic tickGenY = new();
             tickGenY.TargetTickCount = 15;
             tickGenY.MinorTickGenerator = minorTickGen;
 
-
-
             // tell the left axis to use our custom tick generator
             thdPlot.Plot.Axes.Left.TickGenerator = tickGenY;
 
-
-
-
+            // X - axis
             // create a minor tick generator that places log-distributed minor ticks
             ScottPlot.TickGenerators.LogMinorTickGenerator minorTickGenX = new();
-
             // create a numeric tick generator that uses our custom minor tick generator
-            //ScottPlot.TickGenerators.NumericAutomatic tickGenX = new();
-            //tickGenX.MinorTickGenerator = minorTickGenX;
-
-            // create a manual tick generator and add ticks
-            ScottPlot.TickGenerators.NumericManual tickGenX = new();
-
-            // add major ticks with their labels
-            tickGenX.AddMajor(Math.Log10(1), "1");
-            tickGenX.AddMajor(Math.Log10(2), "2");
-            tickGenX.AddMajor(Math.Log10(5), "5");
-            tickGenX.AddMajor(Math.Log10(10), "10");
-            tickGenX.AddMajor(Math.Log10(20), "20");
-            tickGenX.AddMajor(Math.Log10(50), "50");
-            tickGenX.AddMajor(Math.Log10(100), "100");
-            tickGenX.AddMajor(Math.Log10(200), "200");
-            tickGenX.AddMajor(Math.Log10(500), "500");
-            tickGenX.AddMajor(Math.Log10(1000), "1k");
-            tickGenX.AddMajor(Math.Log10(2000), "2k");
-            tickGenX.AddMajor(Math.Log10(5000), "5k");
-            tickGenX.AddMajor(Math.Log10(10000), "10k");
-            tickGenX.AddMajor(Math.Log10(20000), "20k");
-            tickGenX.AddMajor(Math.Log10(50000), "50k");
-            tickGenX.AddMajor(Math.Log10(100000), "100k");
-
+            ScottPlot.TickGenerators.NumericAutomatic tickGenX = new();
+            minorTickGenX.Divisions = 10;
+            tickGenX.MinorTickGenerator = minorTickGenX;
+            tickGenX.TargetTickCount = 25;
+            // tell our major tick generator to only show major ticks that are whole integers
+            tickGenX.IntegerTicksOnly = true;
+            // tell our custom tick generator to use our new label formatter
+            static string LogTickLabelFormatter(double y) => $"{Math.Pow(10, Math.Round(y, 10)):#0.######}";
+            tickGenX.LabelFormatter = LogTickLabelFormatter;
             thdPlot.Plot.Axes.Bottom.TickGenerator = tickGenX;
 
 
@@ -1204,85 +802,78 @@ namespace QA40x_AUDIO_ANALYSER
             thdPlot.Plot.Grid.MinorLineColor = Colors.Black.WithOpacity(.10);
             thdPlot.Plot.Grid.MinorLineWidth = 1;
 
-
-            // show grid lines for minor ticks
-            thdPlot.Plot.Grid.MajorLineColor = Colors.Black.WithOpacity(.25);
-            thdPlot.Plot.Grid.MinorLineColor = Colors.Black.WithOpacity(.10);
-            thdPlot.Plot.Grid.MinorLineWidth = 1;
-
-
-            //thdPlot.Plot.Axes.AutoScale();
-            if (cmbThdFreq_Graph_From.SelectedIndex > -1 && cmbThdFreq_Graph_To.SelectedIndex > -1)
-                thdPlot.Plot.Axes.SetLimits(Math.Log10(Convert.ToDouble(cmbThdFreq_Graph_From.Text)), Math.Log10(Convert.ToDouble(cmbThdFreq_Graph_To.Text)), Convert.ToDouble(cmbThdFreq_dBV_Graph_Bottom.Value), Convert.ToDouble(cmbThdFreq_dBV_Graph_Top.Value));
+            if (cmbVoltageGraph_From.SelectedIndex > -1 && cmbVoltageGraph_To.SelectedIndex > -1)
+                thdPlot.Plot.Axes.SetLimits(Math.Log10(Convert.ToDouble(cmbVoltageGraph_From.Text)), Math.Log10(Convert.ToDouble(cmbVoltageGraph_To.Text)), Convert.ToDouble(cmbDbV_Graph_Bottom.Value), Convert.ToDouble(cmbDbV_Graph_Top.Value));
+            
             thdPlot.Plot.Title("Magnitude (dB)");
             thdPlot.Plot.Axes.Title.Label.FontSize = 17;
 
-            thdPlot.Plot.XLabel("Frequency (Hz)");
+            thdPlot.Plot.XLabel("Amplitude (Vrms)");
             thdPlot.Plot.Axes.Bottom.Label.OffsetX = 330;
             thdPlot.Plot.Axes.Bottom.Label.FontSize = 15;
             thdPlot.Plot.Axes.Bottom.Label.Bold = false;
 
-
+            // Lengend
             thdPlot.Plot.Legend.IsVisible = true;
             thdPlot.Plot.Legend.Orientation = ScottPlot.Orientation.Horizontal;
             thdPlot.Plot.Legend.Alignment = ScottPlot.Alignment.UpperRight;
             thdPlot.Plot.ShowLegend();
             thdPlot.Refresh();
-
         }
 
 
-
+        /// <summary>
+        /// Plot the  THD magnitude (dB) data
+        /// </summary>
+        /// <param name="data">The data to plot</param>
         void PlotMagnitude(ThdAmplitudeMeasurementData data)
         {
-            thdPlot.Plot.Remove<Scatter>();
+            thdPlot.Plot.Remove<Scatter>();             // Remove Scatter plots
+            // Create lists for line data
+            List<double> freqX = [];
+            List<double> magnY = [];
+            List<double> hTotY = [];
+            List<double> h2Y = [];
+            List<double> h3Y = [];
+            List<double> h4Y = [];
+            List<double> h5Y = [];
+            List<double> h6Y = [];
+            List<double> noiseY = [];
 
-            List<double> freqX = new List<double>();
-            List<double> magnY = new List<double>();
-            List<double> hTotY = new List<double>();
-            List<double> h2Y = new List<double>();
-            List<double> h3Y = new List<double>();
-            List<double> h4Y = new List<double>();
-            List<double> h5Y = new List<double>();
-            List<double> h6Y = new List<double>();
-            List<double> noiseY = new List<double>();
-
-            for (int f = 0; f < data.StepData.Count; f++)
+            // Add data to the line lists
+            for (int i = 0; i < data.StepData.Count; i++)
             {
-                freqX.Add(data.StepData[f].FundamentalFrequency);
+                freqX.Add(data.StepData[i].AmplitudeVolts);
 
-                if (chkThdFreq_ShowMagnitude.Checked)
-                    magnY.Add(data.StepData[f].MagnitudeDb);
+                if (chkShowMagnitude.Checked)
+                    magnY.Add(data.StepData[i].MagnitudeDb);
 
-                if (data.StepData[f].Harmonics.Count > 0)
+                if (data.StepData[i].Harmonics.Count > 0)
                 {
-                    hTotY.Add(data.StepData[f].ThdDb + data.StepData[f].MagnitudeDb);
-                    h2Y.Add(data.StepData[f].Harmonics[0].AmplitudeDbV - data.StepData[f].AmplitudeDbV + data.StepData[f].MagnitudeDb);
+                    hTotY.Add(data.StepData[i].ThdDb + data.StepData[i].MagnitudeDb);
+                    h2Y.Add(data.StepData[i].Harmonics[0].AmplitudeDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
                 }
-                if (data.StepData[f].Harmonics.Count > 1)
-                    h3Y.Add(data.StepData[f].Harmonics[1].AmplitudeDbV - data.StepData[f].AmplitudeDbV + data.StepData[f].MagnitudeDb);
-                if (data.StepData[f].Harmonics.Count > 2)
-                    h4Y.Add(data.StepData[f].Harmonics[2].AmplitudeDbV - data.StepData[f].AmplitudeDbV + data.StepData[f].MagnitudeDb);
-                if (data.StepData[f].Harmonics.Count > 3)
-                    h5Y.Add(data.StepData[f].Harmonics[3].AmplitudeDbV - data.StepData[f].AmplitudeDbV + data.StepData[f].MagnitudeDb);
-                if (data.StepData[f].D6PlusDbV != 0 && data.StepData[f].Harmonics.Count > 4 && chkThdFreq_ShowD6.Checked)
-                    h6Y.Add(data.StepData[f].D6PlusDbV - data.StepData[f].AmplitudeDbV + data.StepData[f].MagnitudeDb);
-                if (chkThdFreq_ShowNoiseFloor.Checked)
-                    noiseY.Add(data.StepData[f].NoiseFloorDbV - data.StepData[f].AmplitudeDbV + data.StepData[f].MagnitudeDb);
+                if (data.StepData[i].Harmonics.Count > 1)
+                    h3Y.Add(data.StepData[i].Harmonics[1].AmplitudeDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
+                if (data.StepData[i].Harmonics.Count > 2)
+                    h4Y.Add(data.StepData[i].Harmonics[2].AmplitudeDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
+                if (data.StepData[i].Harmonics.Count > 3)
+                    h5Y.Add(data.StepData[i].Harmonics[3].AmplitudeDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
+                if (data.StepData[i].D6PlusDbV != 0 && data.StepData[i].Harmonics.Count > 4 && chkShowD6.Checked)
+                    h6Y.Add(data.StepData[i].D6PlusDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
+                if (chkShowNoiseFloor.Checked)
+                    noiseY.Add(data.StepData[i].NoiseFloorDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
             }
 
             // add a scatter plot to the plot
             double[] logFreqX = freqX.Select(Math.Log10).ToArray();
-            float lineWidth = 1;
-            float markerSize = 1;
-            if (chkThdFreq_ThickLines.Checked)
-                lineWidth = 2;
-            if (chkThdFreq_ShowMarkers.Checked)
-                markerSize = lineWidth + 3;
+            float lineWidth = (chkThickLines.Checked ? 2 : 1);
+            float markerSize = (chkShowDataPoints.Checked ? lineWidth + 3 : 1);
+           
 
-            IPalette palette = new ScottPlot.Palettes.Category10();
+            IPalette palette = new ScottPlot.Palettes.Category10();     // Use certain color pallet
 
-            if (chkThdFreq_ShowMagnitude.Checked)
+            if (chkShowMagnitude.Checked)
             {
                 double[] logMagnY = magnY.ToArray();
                 var plot1 = thdPlot.Plot.Add.Scatter(logFreqX, logMagnY);
@@ -1293,7 +884,7 @@ namespace QA40x_AUDIO_ANALYSER
                 plot1.LegendText = "Magn";
             }
 
-            if (chkThdFreq_ShowThd.Checked)
+            if (chkShowThd.Checked)
             {
                 double[] logHTotY = hTotY.ToArray();
                 var plotTot = thdPlot.Plot.Add.Scatter(logFreqX, logHTotY);
@@ -1303,78 +894,71 @@ namespace QA40x_AUDIO_ANALYSER
                 plotTot.LegendText = "THD";
             }
 
-            if (chkThdFreq_ShowD2.Checked)
+            if (chkShowD2.Checked)
             {
                 double[] logH2Y = h2Y.ToArray();
                 var plot2 = thdPlot.Plot.Add.Scatter(logFreqX, logH2Y);
                 plot2.LineWidth = lineWidth;
-                //plot2.Color = ScottPlot.Color.FromColor(System.Drawing.Color.Orange);
                 plot2.Color = palette.GetColor(0);
                 plot2.MarkerSize = markerSize;
                 plot2.LegendText = "H2";
             }
 
-            if (chkThdFreq_ShowD3.Checked)
+            if (chkShowD3.Checked)
             {
                 double[] logH3Y = h3Y.ToArray();
                 var plot3 = thdPlot.Plot.Add.Scatter(logFreqX, logH3Y);
                 plot3.LineWidth = lineWidth;
-                //plot3.Color = ScottPlot.Color.FromColor(System.Drawing.Color.Green);
                 plot3.Color = palette.GetColor(1);
                 plot3.MarkerSize = markerSize;
                 plot3.LegendText = "H3";
             }
 
-            if (chkThdFreq_ShowD4.Checked)
+            if (chkShowD4.Checked)
             {
                 double[] logH4Y = h4Y.ToArray();
                 var plot4 = thdPlot.Plot.Add.Scatter(logFreqX, logH4Y);
-                plot4.LineWidth = lineWidth;
-                //plot4.Color = ScottPlot.Color.FromColor(System.Drawing.Color.Red);
+                plot4.LineWidth = lineWidth; 
                 plot4.Color = palette.GetColor(2);
                 plot4.MarkerSize = markerSize;
                 plot4.LegendText = "H4";
             }
 
-            if (chkThdFreq_ShowD5.Checked)
+            if (chkShowD5.Checked)
             {
                 double[] logH5Y = h5Y.ToArray();
                 var plot5 = thdPlot.Plot.Add.Scatter(logFreqX, logH5Y);
                 plot5.LineWidth = lineWidth;
-                //plot5.Color = ScottPlot.Color.FromColor(System.Drawing.Color.Purple);
                 plot5.Color = palette.GetColor(3);
                 plot5.MarkerSize = markerSize;
                 plot5.LegendText = "H5";
             }
 
-            if (chkThdFreq_ShowD6.Checked)
+            if (chkShowD6.Checked)
             {
                 double[] logH6Y = h6Y.ToArray();
                 var plot6 = thdPlot.Plot.Add.Scatter(logFreqX, logH6Y);
                 plot6.LineWidth = lineWidth;
-                //plot6.Color = ScottPlot.Color.FromColor(System.Drawing.Color.Brown);
                 plot6.Color = palette.GetColor(4);
                 plot6.MarkerSize = markerSize;
                 plot6.LegendText = "H6+";
             }
 
-            if (chkThdFreq_ShowNoiseFloor.Checked)
+            if (chkShowNoiseFloor.Checked)
             {
                 double[] logNoiseY = noiseY.ToArray();
                 var plot7 = thdPlot.Plot.Add.ScatterLine(logFreqX, logNoiseY);
                 plot7.LineWidth = lineWidth;
                 plot7.Color = ScottPlot.Color.FromColor(System.Drawing.Color.Gray);
-                //plot7.Color = palette.GetColor(6);
                 plot7.MarkerSize = markerSize;
                 plot7.LegendText = "Noise";
                 plot7.LinePattern = LinePattern.Dotted;
             }
 
+            // If marker selected draw marker line
             if (markerIndex != -1)
-            {
-                PlotCursorMarker(1, LinePattern.Solid, markerDataPoint);
-            }
-
+                QaLibrary.PlotCursorMarker(thdPlot, 1, LinePattern.Solid, markerDataPoint);
+            
             thdPlot.Refresh();
         }
 
@@ -1383,29 +967,28 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         void AttachThdFreqMouseEvent()
         {
-
+            // Attach the mouse move event
             thdPlot.MouseMove += (s, e) =>
             {
-
                 ShowCursorMiniGraphs(s, e);
                 SetCursorMarker(s, e, false);
-
             };
 
+            // Mouse is clicked
             thdPlot.MouseDown += (s, e) =>
             {
-                SetCursorMarker(s, e, true);      // Set fixed marker
+                SetCursorMarker(s, e, true);      // Set persistent marker
             };
 
+            // Mouse is leaving the graph
             thdPlot.MouseLeave += (s, e) =>
             {
-                // If clicked marker then show mini plots of that marker
+                // If persistent marker set then show mini plots of that marker
                 if (markerIndex >= 0)
                 {
-                    PlotMiniFftGraph(data.StepData[markerIndex].fftData);
-                    PlotMiniTimeGraph(data.StepData[markerIndex].timeData, data.StepData[markerIndex].FundamentalFrequency);
+                    QaLibrary.PlotMiniFftGraph(graphFft, Data.StepData[markerIndex].fftData);
+                    PlotMiniTimeGraph(Data.StepData[markerIndex].timeData, Data.StepData[markerIndex].FundamentalFrequency);
                 }
-
             };
 
         }
@@ -1430,8 +1013,8 @@ namespace QA40x_AUDIO_ANALYSER
             // place the crosshair over the highlighted point
             if (nearest1.IsReal)
             {
-                PlotMiniFftGraph(data.StepData[nearest1.Index].fftData);
-                PlotMiniTimeGraph(data.StepData[nearest1.Index].timeData, data.StepData[nearest1.Index].FundamentalFrequency);
+                QaLibrary.PlotMiniFftGraph(graphFft, Data.StepData[nearest1.Index].fftData);
+                PlotMiniTimeGraph(Data.StepData[nearest1.Index].timeData, Data.StepData[nearest1.Index].FundamentalFrequency);
             }
         }
 
@@ -1439,17 +1022,24 @@ namespace QA40x_AUDIO_ANALYSER
         int markerIndex = -1;
         DataPoint markerDataPoint;
 
+        /// <summary>
+        /// Set a cursor marker
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="e"></param>
+        /// <param name="isClick"></param>
         void SetCursorMarker(object s, MouseEventArgs e, bool isClick)
         {
-
-            if (MeasurementBusy)
+            if (MeasurementBusy)            // Do not show marker when measurement is still busy
                 return;
 
             // determine where the mouse is and get the nearest point
             Pixel mousePixel = new(e.Location.X, e.Location.Y);
             Coordinates mouseLocation = thdPlot.Plot.GetCoordinates(mousePixel);
-            if (thdPlot.Plot.GetPlottables<Scatter>().Count() == 0)
-                return;
+            if (thdPlot.Plot.GetPlottables<Scatter>().Count() == 0) 
+                return;                     // Nothing plotted
+
+            // Get nearest x-location in plotr
             DataPoint nearest1 = thdPlot.Plot.GetPlottables<Scatter>().First().Data.GetNearestX(mouseLocation, thdPlot.Plot.LastRender);
 
             // place the crosshair over the highlighted point
@@ -1461,7 +1051,7 @@ namespace QA40x_AUDIO_ANALYSER
                 if (isClick)
                 {
                     // Mouse click
-                    if (nearest1.Index == markerIndex)
+                    if (nearest1.Index == markerIndex)          // Clicked point is currently marked
                     {
                         // Remove marker
                         markerIndex = -1;
@@ -1470,7 +1060,8 @@ namespace QA40x_AUDIO_ANALYSER
                     }
                     else
                     {
-                        markerIndex = nearest1.Index;
+                        // Add solid marker line
+                        markerIndex = nearest1.Index;           // Remember marker
                         markerDataPoint = nearest1;
                         linePattern = LinePattern.Solid;
                     }
@@ -1482,16 +1073,17 @@ namespace QA40x_AUDIO_ANALYSER
                         return;                     // Do not show new marker. There is already a clicked marker
                 }
 
-                PlotCursorMarker(lineWidth, linePattern, nearest1);
+                QaLibrary.PlotCursorMarker(thdPlot, lineWidth, linePattern, nearest1);
 
-
-                if (data.StepData.Count > nearest1.Index)
+                // Check if index in StepData array
+                if (Data.StepData.Count > nearest1.Index)
                 {
-                    FrequencyThdStep step = data.StepData[nearest1.Index];
+                    FrequencyThdStep step = Data.StepData[nearest1.Index];
 
-                    if (gbThdFreq_dBV_Range.Visible)
+                    // Write cursor texts based in plot type
+                    if (gbDbv_Range.Visible)
                     {
-                        WriteCursorTextsdB(step.FundamentalFrequency
+                        WriteCursorTextsdB(step.AmplitudeVolts
                         , step.MagnitudeDb
                         , step.ThdDb - step.AmplitudeDbV
                         , (step.Harmonics.Count > 0 ? step.Harmonics[0].AmplitudeDbV - step.AmplitudeDbV : 0)   // 2nd harmonic
@@ -1502,12 +1094,12 @@ namespace QA40x_AUDIO_ANALYSER
                         , step.DcComponent
                         , step.PowerWatt
                         , step.NoiseFloorDbV - step.AmplitudeDbV
-                        , data.Settings.Load
+                        , Data.Settings.Load
                         );
                     }
                     else
                     {
-                        WriteCursorTextsD(step.FundamentalFrequency
+                        WriteCursorTextsD(step.AmplitudeVolts
                         , step.MagnitudeDb
                         , step.ThdPercent
                         , (step.Harmonics.Count > 0 ? step.Harmonics[0].ThdPercent : 0)     // 2nd harmonic
@@ -1518,139 +1110,21 @@ namespace QA40x_AUDIO_ANALYSER
                         , step.DcComponent
                         , step.PowerWatt
                         , (step.NoiseFloorV / step.AmplitudeVolts) % 100
-                        , data.Settings.Load
+                        , Data.Settings.Load
                         );
                     }
-
-
                 }
 
             }
         }
 
-        void PlotCursorMarker(float lineWidth, LinePattern linePattern, DataPoint point)
-        {
-            thdPlot.Plot.Remove<Crosshair>();
-
-            var myCrosshair = thdPlot.Plot.Add.Crosshair(point.Coordinates.X, point.Coordinates.Y);
-            myCrosshair.IsVisible = true;
-            myCrosshair.LineWidth = lineWidth;
-            myCrosshair.LineColor = Colors.Magenta;
-            myCrosshair.MarkerShape = MarkerShape.None;
-            myCrosshair.MarkerSize = 1;
-            myCrosshair.LinePattern = linePattern;
-            myCrosshair.HorizontalLine.IsVisible = false;
-            myCrosshair.Position = point.Coordinates;
-
-
-            thdPlot.Refresh();
-        }
-
+        
 
         /// <summary>
-        /// Function to allow only numeric input (integers or decimals)
+        /// Start measurement button clicked
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        /// <param name="integersOnly"></param>
-        public static void AllowNumericInput(object sender, KeyPressEventArgs e, bool integersOnly = false)
-        {
-            var textBox = sender as System.Windows.Forms.TextBox;
-
-            // Allow control keys (e.g., backspace)
-            if (char.IsControl(e.KeyChar))
-            {
-                return;
-            }
-
-            // Replace comma with decimal point
-            if (e.KeyChar == ',')
-            {
-                e.KeyChar = '.';
-            }
-
-            // Check if the key is a decimal point
-            if (e.KeyChar == '.')
-            {
-                // If there's already a decimal point, prevent input
-
-                if (textBox.Text.Contains("."))
-                {
-                    e.Handled = true;
-                    return;
-                }
-            }
-
-            // Handle negative sign
-            if (e.KeyChar == '-')
-            {
-                // Allow the negative sign only at the beginning of the text
-                if (textBox.SelectionStart != 0 || textBox.Text.Contains("-"))
-                {
-                    e.Handled = true; // Reject if not at the start or already present
-                }
-            }
-
-            if (integersOnly && e.KeyChar == '.' && e.KeyChar != '-')
-            {
-                e.Handled = true; // Reject invalid characters
-            }
-
-            // Allow only digits and optionally the decimal separator
-            if (!char.IsDigit(e.KeyChar) && e.KeyChar != '.' && e.KeyChar != '-')
-            {
-                e.Handled = true; // Reject invalid characters
-            }
-        }
-
-        /// <summary>
-        /// Function to check range and update text color
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="minimal"></param>
-        /// <param name="maximum"></param>
-        public static void CheckRangeAndUpdateColor(object sender, double minimal, double maximum)
-        {
-            // Get the TextBox object
-            var textBox = sender as System.Windows.Forms.TextBox;
-            if (textBox == null) return;
-
-            // Determine the culture-specific decimal separator
-            char decimalSeparator = Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
-
-            // Replace ',' with '.' if applicable
-            string text = textBox.Text.Replace(',', decimalSeparator).Replace('.', decimalSeparator);
-
-            // Try to parse the text as a double
-            if (double.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out double value))
-            {
-                // Check if the value is within the range
-                if (value >= minimal && value <= maximum)
-                {
-                    textBox.ForeColor = System.Drawing.Color.Black; // Valid input
-                }
-                else
-                {
-                    textBox.ForeColor = System.Drawing.Color.Red; // Out of range
-                }
-            }
-            else
-            {
-                textBox.ForeColor = System.Drawing.Color.Red; // Invalid input
-            }
-        }
-
-        private static double ParseTextToDouble(string text, double original)
-        {
-
-            if (double.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out double val))
-                return val;
-
-            return original;
-
-        }
-
-
         private async void btnStartThdMeasurement_Click(object sender, EventArgs e)
         {
             MeasurementBusy = true;
@@ -1660,6 +1134,8 @@ namespace QA40x_AUDIO_ANALYSER
             btnStartThdMeasurement.ForeColor = System.Drawing.Color.DimGray;
             ct = new();
             await PerformMeasurementSteps(ct.Token);
+            Program.MainForm.ClearMessage();
+            Program.MainForm.HideProgressBar();
             MeasurementBusy = false;
             btnStopThdMeasurement.Enabled = false;
             btnStopThdMeasurement.ForeColor = System.Drawing.Color.DimGray;
@@ -1667,304 +1143,265 @@ namespace QA40x_AUDIO_ANALYSER
             btnStartThdMeasurement.ForeColor = System.Drawing.Color.Black;
         }
 
-
-        private void btnCancelThdMeasurement_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Start voltage unit is changed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmbStartVoltageUnit_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ct.Cancel();
+            Data.Settings.StartAmplitudeUnit = (E_VoltageUnit)cmbStartVoltageUnit.SelectedIndex;
+            ValidateStartVoltage(txtStartVoltage);
+            ValidateEndVoltage(txtEndVoltage);
         }
 
-        private void graphTime_Load(object sender, EventArgs e)
+        private void cmbEndVoltageUnit_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            Data.Settings.EndAmplitudeUnit = (E_VoltageUnit)cmbEndVoltageUnit.SelectedIndex;
+            ValidateStartVoltage(txtStartVoltage);
+            ValidateEndVoltage(txtEndVoltage);
         }
 
-        private void cmbThdFreq_GenType_SelectedIndexChanged(object sender, EventArgs e)
+        
+        private void txtStartVoltage_KeyPress(object sender, KeyPressEventArgs e)
         {
-            ChangeThdFrqGenType();
+            // Text has been changed by user typing. Remember unit
+            Data.Settings.StartAmplitudeUnit = (E_VoltageUnit)cmbStartVoltageUnit.SelectedIndex;
+            QaLibrary.AllowNumericInput(sender, e, false);
         }
 
-        private void cmbThdFreq_VoltageUnit_SelectedIndexChanged(object sender, EventArgs e)
+        private void txtEndVoltage_KeyPress(object sender, KeyPressEventArgs e)
         {
-            ChangeGenVoltageUnit();
+            // Text has been changed by user typing. Remember unit
+            Data.Settings.EndAmplitudeUnit = (E_VoltageUnit)cmbEndVoltageUnit.SelectedIndex;
+            QaLibrary.AllowNumericInput(sender, e, false);
         }
 
-        private void txtThdFreq_GenVoltage_TextChanged(object sender, EventArgs e)
+        private void txtStartVoltage_TextChanged(object sender, EventArgs e)
         {
-            ChangeGenVoltage();
-
-            if (cmbThdFreq_GenVoltageUnit.SelectedIndex == 0)
-                CheckRangeAndUpdateColor(sender, 1, 7900);        // mV
-            else if (cmbThdFreq_GenVoltageUnit.SelectedIndex == 1)
-                CheckRangeAndUpdateColor(sender, 0.001, 7.9);     // V
-            else if (cmbThdFreq_GenVoltageUnit.SelectedIndex == 2)
-                CheckRangeAndUpdateColor(sender, -165, 18);       // dBV
+            Data.Settings.StartAmplitude = QaLibrary.ParseTextToDouble(txtStartVoltage.Text, Data.Settings.StartAmplitude);
+            ValidateStartVoltage(txtStartVoltage);
+            ValidateEndVoltage(txtEndVoltage);
         }
 
-        private void txtThdFreq_GenVoltage_KeyPress(object sender, KeyPressEventArgs e)
+        private void txtEndVoltage_TextChanged(object sender, EventArgs e)
         {
-            AllowNumericInput(sender, e, false);
+            Data.Settings.EndAmplitude = QaLibrary.ParseTextToDouble(txtEndVoltage.Text, Data.Settings.EndAmplitude);
+            ValidateStartVoltage(txtStartVoltage);
+            ValidateEndVoltage(txtEndVoltage);
         }
 
-        private void txtThdFreq_OutputLoad_TextChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Chcek if the start voltage is lower then the end voltage and within the device measurement range
+        /// </summary>
+        /// <param name="sender"></param>
+        private void ValidateStartVoltage(object sender)
         {
-            ChangeThdFrqGenType();
-            CheckRangeAndUpdateColor(sender, 0, 100000);
-        }
-
-        private void txtThdFreq_OutputPower_TextChanged(object sender, EventArgs e)
-        {
-            ChangeThdFrqGenType();
-            CheckRangeAndUpdateColor(sender, 0, 1000);
-        }
-
-
-
-        private void udThdFreq_StepsOctave_ValueChanged(object sender, EventArgs e)
-        {
-            data.Settings.StepsPerOctave = Convert.ToUInt16(udThdFreq_StepsOctave.Value);
-        }
-
-        private void udThdFreq_Averages_ValueChanged(object sender, EventArgs e)
-        {
-            data.Settings.Averages = Convert.ToUInt16(udThdFreq_Averages.Value);
-        }
-
-
-
-        private void txtThdFreq_OutputVoltage_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            AllowNumericInput(sender, e, false);
-        }
-
-        private void txtThdFreq_OutputVoltage_TextChanged(object sender, EventArgs e)
-        {
-            if (cmbThdFreq_OutputVoltageUnit.SelectedIndex == 0)
-                CheckRangeAndUpdateColor(sender, 0.001, 40);      // V
-            else if (cmbThdFreq_OutputVoltageUnit.SelectedIndex == 1)
-                CheckRangeAndUpdateColor(sender, 1, 40000);       // mV
-            else if (cmbThdFreq_OutputVoltageUnit.SelectedIndex == 2)
-                CheckRangeAndUpdateColor(sender, -165, 32);       // dBV
-
-        }
-
-        private void txtThdFreq_StartFreq_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            AllowNumericInput(sender, e, true);
-        }
-
-        private void txtThdFreq_StartFreq_TextChanged(object sender, EventArgs e)
-        {
-            CheckRangeAndUpdateColor(sender, 5, 96000);
-            data.Settings.StartFrequency = ParseTextToDouble(txtThdFreq_StartFreq.Text, data.Settings.StartFrequency);
-        }
-
-        private void txtThdFreq_EndFreq_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            AllowNumericInput(sender, e, true);
-        }
-
-        private void txtThdFreq_EndFreq_TextChanged(object sender, EventArgs e)
-        {
-            CheckRangeAndUpdateColor(sender, 5, 96000);
-            data.Settings.EndFrequency = ParseTextToDouble(txtThdFreq_EndFreq.Text, data.Settings.EndFrequency);
-        }
-
-        private void txtThdFreq_OutputLoad_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            AllowNumericInput(sender, e, false);
-        }
-
-
-
-        private void txtThdFreq_OutputPower_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            AllowNumericInput(sender, e, false);
-        }
-
-        private void cmbThdFreq_OutputVoltageUnit_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            ChangeAmpOutputVoltageUnit();
-        }
-
-
-        private void btnThdFreq_FitGraphX_Click(object sender, EventArgs e)
-        {
-            double startFreq = ParseTextToDouble(txtThdFreq_StartFreq.Text, 20);
-            if (startFreq <= 5)
-                cmbThdFreq_Graph_From.SelectedIndex = 0;
-            else if (startFreq <= 10)
-                cmbThdFreq_Graph_From.SelectedIndex = 1;
-            else if (startFreq <= 20)
-                cmbThdFreq_Graph_From.SelectedIndex = 2;
-            else if (startFreq <= 50)
-                cmbThdFreq_Graph_From.SelectedIndex = 3;
-            else if (startFreq <= 100)
-                cmbThdFreq_Graph_From.SelectedIndex = 4;
-            else if (startFreq <= 200)
-                cmbThdFreq_Graph_From.SelectedIndex = 5;
-            else
-                cmbThdFreq_Graph_From.SelectedIndex = 6;
-
-            double endFreq = ParseTextToDouble(txtThdFreq_EndFreq.Text, 20000);
-            if (endFreq <= 1000)
-                cmbThdFreq_Graph_To.SelectedIndex = 0;
-            else if (endFreq <= 2000)
-                cmbThdFreq_Graph_To.SelectedIndex = 1;
-            else if (endFreq <= 5000)
-                cmbThdFreq_Graph_To.SelectedIndex = 2;
-            else if (endFreq <= 10000)
-                cmbThdFreq_Graph_To.SelectedIndex = 3;
-            else if (endFreq <= 20000)
-                cmbThdFreq_Graph_To.SelectedIndex = 4;
-            else if (endFreq <= 50000)
-                cmbThdFreq_Graph_To.SelectedIndex = 5;
-            else
-                cmbThdFreq_Graph_To.SelectedIndex = 6;
-
-
-
-        }
-
-        private void cmbThdFreq_Graph_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (gbThdFreq_D_Range.Visible)
+            if (cmbStartVoltageUnit.SelectedIndex == (int)E_VoltageUnit.MilliVolt)
             {
-                initThdPlot();
-                PlotThd(data);
+                double endVoltageMv = QaLibrary.ConvertVoltage(Data.Settings.EndAmplitude, Data.Settings.EndAmplitudeUnit, E_VoltageUnit.MilliVolt); // Convert to mV
+                endVoltageMv = (endVoltageMv > QaLibrary.MAXIMUM_GENERATOR_VOLTAGE_MV ? QaLibrary.MAXIMUM_GENERATOR_VOLTAGE_MV : endVoltageMv);
+                QaLibrary.ValidateRangeAdorner(sender, QaLibrary.MINIMUM_GENERATOR_VOLTAGE_MV, endVoltageMv);        // mV
+            }
+            else
+            {
+                double endVoltageV = QaLibrary.ConvertVoltage(Data.Settings.EndAmplitude, Data.Settings.EndAmplitudeUnit, E_VoltageUnit.Volt); // Convert to V
+                endVoltageV = (endVoltageV > QaLibrary.MAXIMUM_GENERATOR_VOLTAGE_V ? QaLibrary.MAXIMUM_GENERATOR_VOLTAGE_V : endVoltageV);
+                QaLibrary.ValidateRangeAdorner(sender, QaLibrary.MINIMUM_GENERATOR_VOLTAGE_V, endVoltageV);     // V 
+            }
+        }
+
+
+        /// <summary>
+        /// Chcek if the end voltage is higher then the start voltage and within the device measurement range
+        /// </summary>
+        /// <param name="sender"></param>
+        private void ValidateEndVoltage(object sender)
+        {
+            if (cmbEndVoltageUnit.SelectedIndex == (int)E_VoltageUnit.MilliVolt)
+            {
+                double startVoltageMv = QaLibrary.ConvertVoltage(Data.Settings.StartAmplitude, Data.Settings.StartAmplitudeUnit, E_VoltageUnit.MilliVolt); // Convert to mV
+                startVoltageMv = (startVoltageMv < QaLibrary.MINIMUM_GENERATOR_VOLTAGE_MV ? QaLibrary.MINIMUM_GENERATOR_VOLTAGE_MV : startVoltageMv);
+                QaLibrary.ValidateRangeAdorner(sender, startVoltageMv, QaLibrary.MAXIMUM_GENERATOR_VOLTAGE_MV);        // mV
+            }
+            else
+            {
+                double startVoltageV = QaLibrary.ConvertVoltage(Data.Settings.StartAmplitude, Data.Settings.StartAmplitudeUnit, E_VoltageUnit.Volt); // Convert to V
+                startVoltageV = (startVoltageV < QaLibrary.MINIMUM_GENERATOR_VOLTAGE_V ? QaLibrary.MINIMUM_GENERATOR_VOLTAGE_V : startVoltageV);
+                QaLibrary.ValidateRangeAdorner(sender, startVoltageV, QaLibrary.MAXIMUM_GENERATOR_VOLTAGE_V);     // V 
+            }
+        }
+
+
+
+        private void txtOutputLoad_TextChanged(object sender, EventArgs e)
+        {
+            QaLibrary.ValidateRangeAdorner(sender, QaLibrary.MINIMUM_LOAD, QaLibrary.MAXIMUM_LOAD);
+        }
+
+
+        private void udStepsOctave_ValueChanged(object sender, EventArgs e)
+        {
+            Data.Settings.StepsPerOctave = Convert.ToUInt16(udStepsOctave.Value);
+        }
+
+        private void udAverages_ValueChanged(object sender, EventArgs e)
+        {
+            Data.Settings.Averages = Convert.ToUInt16(udAverages.Value);
+        }
+
+        private void txtOutputVoltage_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            QaLibrary.AllowNumericInput(sender, e, false);
+        }
+
+        private void txtStartFreq_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            QaLibrary.AllowNumericInput(sender, e, true);
+        }
+
+     
+        private void txtFrequency_TextChanged(object sender, EventArgs e)
+        {
+            QaLibrary.ValidateRangeAdorner(sender, 5, 96000);
+            Data.Settings.Frequency = QaLibrary.ParseTextToDouble(txtFrequency.Text, Data.Settings.Frequency);
+        }
+
+        private void txtOutputLoad_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            QaLibrary.AllowNumericInput(sender, e, false);
+        }
+
+
+        private void cmbGraph_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (gbD_Range.Visible)
+            {
+                InitializeThdPlot();
+                PlotThd(Data);
             }
             else
             {
                 InitializeMagnitudePlot();
-                PlotMagnitude(data);
+                PlotMagnitude(Data);
             }
         }
 
 
-
-        private void chkThdFreq_ShowThd_CheckedChanged(object sender, EventArgs e)
+        private void chkShowThd_CheckedChanged(object sender, EventArgs e)
         {
-            if (gbThdFreq_D_Range.Visible)
+            if (gbD_Range.Visible)
             {
-                initThdPlot();
-                PlotThd(data);
+                InitializeThdPlot();
+                PlotThd(Data);
             }
             else
             {
                 InitializeMagnitudePlot();
-                PlotMagnitude(data);
+                PlotMagnitude(Data);
             }
         }
 
-        private void btnFreqThd_Graph_dBV_Click(object sender, EventArgs e)
+        private void btnGraph_dBV_Click(object sender, EventArgs e)
         {
-            gbThdFreq_dBV_Range.Visible = true;
-            btnFreqThd_Graph_dBV.BackColor = System.Drawing.Color.Cornsilk;
-            gbThdFreq_D_Range.Visible = false;
-            btnFreqThd_Graph_D.BackColor = System.Drawing.Color.WhiteSmoke;
-            chkThdFreq_ShowMagnitude.Enabled = true;
-
+            gbDbv_Range.Visible = true;
+            btnGraph_dBV.BackColor = System.Drawing.Color.Cornsilk;
+            gbD_Range.Visible = false;
+            btnGraph_D.BackColor = System.Drawing.Color.WhiteSmoke;
+            chkShowMagnitude.Enabled = true;
 
             InitializeMagnitudePlot();
-            PlotMagnitude(data);
+            PlotMagnitude(Data);
         }
 
-        private void btnFreqThd_Graph_D_Click(object sender, EventArgs e)
+        private void btnGraph_D_Click(object sender, EventArgs e)
         {
-            gbThdFreq_dBV_Range.Visible = false;
-            btnFreqThd_Graph_dBV.BackColor = System.Drawing.Color.WhiteSmoke;
-            gbThdFreq_D_Range.Visible = true;
-            btnFreqThd_Graph_D.BackColor = System.Drawing.Color.Cornsilk;
-            chkThdFreq_ShowMagnitude.Enabled = false;
+            gbDbv_Range.Visible = false;
+            btnGraph_dBV.BackColor = System.Drawing.Color.WhiteSmoke;
+            gbD_Range.Visible = true;
+            btnGraph_D.BackColor = System.Drawing.Color.Cornsilk;
+            chkShowMagnitude.Enabled = false;
 
 
-
-            initThdPlot();
-            PlotThd(data);
+            InitializeThdPlot();
+            PlotThd(Data);
         }
 
-        private void cmbThdFreq_dBV_Graph_Top_ValueChanged(object sender, EventArgs e)
+        private void cmbDbv_Graph_Top_ValueChanged(object sender, EventArgs e)
         {
             InitializeMagnitudePlot();
-            PlotMagnitude(data);
+            PlotMagnitude(Data);
         }
 
-        private void btnThdFreq_FitDGraphY_Click(object sender, EventArgs e)
+        private void btnFitDGraphY_Click(object sender, EventArgs e)
         {
-            if (data.StepData.Count == 0)
+            if (Data.StepData.Count == 0)
                 return;
 
             // Determine top Y
-            double maxThd = data.StepData.Max(d => d.ThdPercent);
+            double maxThd = Data.StepData.Max(d => d.ThdPercent);
 
             if (maxThd <= 1)
-                cmbThdFreq_D_Graph_Top.SelectedIndex = 2;
+                cmbD_Graph_Top.SelectedIndex = 2;
             else if (maxThd <= 10)
-                cmbThdFreq_D_Graph_Top.SelectedIndex = 1;
+                cmbD_Graph_Top.SelectedIndex = 1;
             else
-                cmbThdFreq_D_Graph_Top.SelectedIndex = 0;
+                cmbD_Graph_Top.SelectedIndex = 0;
 
 
             // Determine bottom Y
-            double minThd = (data.StepData.Min(d => (d.NoiseFloorV / d.AmplitudeVolts) * 100));
+            double minThd = (Data.StepData.Min(d => (d.NoiseFloorV / d.AmplitudeVolts) * 100));
             if (minThd > 0.1)
-                cmbThdFreq_D_Graph_Bottom.SelectedIndex = 0;
+                cmbD_Graph_Bottom.SelectedIndex = 0;
             else if (minThd > 0.01)
-                cmbThdFreq_D_Graph_Bottom.SelectedIndex = 1;
+                cmbD_Graph_Bottom.SelectedIndex = 1;
             else if (minThd > 0.001)
-                cmbThdFreq_D_Graph_Bottom.SelectedIndex = 2;
+                cmbD_Graph_Bottom.SelectedIndex = 2;
             else if (minThd > 0.0001)
-                cmbThdFreq_D_Graph_Bottom.SelectedIndex = 3;
+                cmbD_Graph_Bottom.SelectedIndex = 3;
             else if (minThd > 0.00001)
-                cmbThdFreq_D_Graph_Bottom.SelectedIndex = 4;
+                cmbD_Graph_Bottom.SelectedIndex = 4;
             else
-                cmbThdFreq_D_Graph_Bottom.SelectedIndex = 5;
+                cmbD_Graph_Bottom.SelectedIndex = 5;
 
         }
 
-        private void btnThdFreq_FitDbGraphY_Click(object sender, EventArgs e)
+        private void btnFitDbGraphY_Click(object sender, EventArgs e)
         {
 
-            if (data.StepData.Count == 0)
+            if (Data.StepData.Count == 0)
                 return;
 
             // Determine top Y
 
-            double maxDb = data.StepData.Max(d => d.MagnitudeDb);
+            double maxDb = Data.StepData.Max(d => d.MagnitudeDb);
             if (maxDb >= 100)
-                cmbThdFreq_dBV_Graph_Top.Value = Math.Ceiling((decimal)((int)(maxDb / 10) + 1) * 10);
+                cmbDbV_Graph_Top.Value = Math.Ceiling((decimal)((int)(maxDb / 10) + 1) * 10);
             else if (maxDb >= 10)
-                cmbThdFreq_dBV_Graph_Top.Value = (Math.Ceiling((decimal)((int)maxDb) / 10) * 10) + 10;
+                cmbDbV_Graph_Top.Value = (Math.Ceiling((decimal)((int)maxDb) / 10) * 10) + 10;
             else
-                cmbThdFreq_dBV_Graph_Top.Value = Math.Ceiling((decimal)((int)(maxDb * 10) + 1) / 10);
+                cmbDbV_Graph_Top.Value = Math.Ceiling((decimal)((int)(maxDb * 10) + 1) / 10);
 
             // Determine bottom Y
-            double minDb = data.StepData.Min(d => d.NoiseFloorDbV) + data.StepData[0].MagnitudeDb;
+            double minDb = Data.StepData.Min(d => d.NoiseFloorDbV) + Data.StepData[0].MagnitudeDb;
 
-            cmbThdFreq_dBV_Graph_Bottom.Value = Math.Ceiling((decimal)((int)(minDb / 10) - 2) * 10);
+            cmbDbV_Graph_Bottom.Value = Math.Ceiling((decimal)((int)(minDb / 10) - 2) * 10);
         }
 
-        private bool IsServerRunning()
-        {
-            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            {
-                var result = socket.BeginConnect("localhost", 9402, null, null);
-
-                // test the connection for 3 seconds
-                bool success = result.AsyncWaitHandle.WaitOne(1000, false);
-
-                var resturnVal = socket.Connected;
-                if (socket.Connected)
-                    socket.Disconnect(true);
-
-                return resturnVal;
-            }
-
-
-        }
-
+        
+        /// <summary>
+        /// Measurement cancel button clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnStopThdMeasurement_Click(object sender, EventArgs e)
         {
             ct.Cancel();
+        }
+
+        private void lblThdFreq_GenVoltage_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -154,6 +154,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\E_VoltageUnit.cs" />
     <Compile Include="Data\FrequencyThdStep.cs" />
     <Compile Include="Data\ThdAmplitudeMeasurementData.cs" />
     <Compile Include="Data\ThdAmplitudeMeasurementSettings.cs" />
@@ -170,11 +171,11 @@
     <Compile Include="frmThdAmplitude.Designer.cs">
       <DependentUpon>frmThdAmplitude.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmThdFreq.cs">
+    <Compile Include="frmThdFrequency.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmThdFreq.Designer.cs">
-      <DependentUpon>frmThdFreq.cs</DependentUpon>
+    <Compile Include="frmThdFrequency.Designer.cs">
+      <DependentUpon>frmThdFrequency.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\HarmonicData.cs" />
     <Compile Include="Program.cs" />
@@ -189,8 +190,8 @@
     <EmbeddedResource Include="frmThdAmplitude.resx">
       <DependentUpon>frmThdAmplitude.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmThdFreq.resx">
-      <DependentUpon>frmThdFreq.cs</DependentUpon>
+    <EmbeddedResource Include="frmThdFrequency.resx">
+      <DependentUpon>frmThdFrequency.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

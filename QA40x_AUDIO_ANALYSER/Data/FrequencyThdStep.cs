@@ -7,6 +7,7 @@ namespace QaControl
     public class FrequencyThdStep
     {
         public double FundamentalFrequency { get; set; }
+        public double GeneratorVoltage { get; set; }
         public double AmplitudeVolts { get; set; }
         public double AmplitudeDbV { get; set; }
         public double MagnitudeDb { get; set; }

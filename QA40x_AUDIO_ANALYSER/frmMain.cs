@@ -42,7 +42,7 @@ namespace QA40x_AUDIO_ANALYSER
 
         private void LoadThdFrequencyForm()
         {
-            frmThdFreq frm = new frmThdFreq();
+            frmThdFrequency frm = new frmThdFrequency();
             frm.Dock = DockStyle.Fill;
             frm.TopLevel = false;
             MeasurementPanel.Controls.Clear();
@@ -79,9 +79,11 @@ namespace QA40x_AUDIO_ANALYSER
             progressBar1.Visible = false;
         }
 
-        public void ShowMessage(string message)
+        public async Task ShowMessage(string message, int delay = 0)
         {
             lbl_Message.Text = message;
+            if (delay > 0) 
+                await Task.Delay(delay);
         }
 
         public void ClearMessage()

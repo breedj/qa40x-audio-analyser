@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Threading;
@@ -38,7 +39,7 @@ namespace QA40x_AUDIO_ANALYSER
             InitializeMagnitudePlot();
             AttachThdFreqMouseEvent();
             QaLibrary.InitMiniFftPlot(graphFft, 10, 100000, -150, 20);
-            InitMiniTimePlot(0, 4, -1, 1);
+            QaLibrary.InitMiniTimePlot(graphTime, 0, 4, -1, 1);
         }
 
         /// <summary>
@@ -52,7 +53,7 @@ namespace QA40x_AUDIO_ANALYSER
             Data.Settings.FftSize = 65536 * 2;
             Data.Settings.WindowingFunction = Windowing.Hann;
             Data.Settings.StepsPerOctave = 5;
-            Data.Settings.StartAmplitude = 0.01;
+            Data.Settings.StartAmplitude = 0.001;
             Data.Settings.StartAmplitudeUnit = E_VoltageUnit.Volt;
             Data.Settings.EndAmplitude = 1;
             Data.Settings.EndAmplitudeUnit = E_VoltageUnit.Volt;
@@ -108,7 +109,7 @@ namespace QA40x_AUDIO_ANALYSER
 
             // Init mini plots
             QaLibrary.InitMiniFftPlot(graphFft, 10, 100000, -150, 20);
-            InitMiniTimePlot(0, 4, -1, 1);
+            QaLibrary.InitMiniTimePlot(graphTime, 0, 4, -1, 1);
 
             // Check if webserver available and device connected
             if (await QaLibrary.CheckDeviceConnected() == false)
@@ -135,16 +136,15 @@ namespace QA40x_AUDIO_ANALYSER
             // Determine correct input attenuation
             var result = await QaLibrary.DetermineAttenuationForGeneratorVoltage(generatorAmplitudedBV, testFrequency, 42);
             QaLibrary.PlotMiniFftGraph(graphFft, result.Item3.FreqInput);
-            PlotMiniTimeGraph(result.Item3.TimeInput, testFrequency);
+            QaLibrary.PlotMiniTimeGraph(graphTime, result.Item3.TimeInput, testFrequency);
             //var startAttenuationdBV = data.Settings.InputRange;
-            var startInputAmplitudedBV = result.Item2;
+            var prevInputAmplitudedBV = result.Item2;
 
             // Set attenuation
             await Qa40x.SetInputRange(result.Item1);
 
-            await Program.MainForm.ShowMessage($"Found correct input attenuation of {result.Item1:0} dBV for an amplifier amplitude of {result.Item2:0.00#} dBV.");
-            await Task.Delay(500);
-
+            await Program.MainForm.ShowMessage($"Found correct input attenuation of {result.Item1:0} dBV for an amplifier amplitude of {result.Item2:0.00#} dBV.", 500);
+          
             if (ct.IsCancellationRequested)
                 return false;
 
@@ -152,7 +152,7 @@ namespace QA40x_AUDIO_ANALYSER
             // Generate a list of voltages evenly spaced in log scale
             // ********************************************************************
             var startAmplitudeV = QaLibrary.ConvertVoltage(Data.Settings.StartAmplitude, Data.Settings.StartAmplitudeUnit, E_VoltageUnit.Volt);
-            var startAmplitudedBV = QaLibrary.ConvertVoltage(Data.Settings.StartAmplitude, Data.Settings.StartAmplitudeUnit, E_VoltageUnit.dBV);
+            var prevGeneratorVoltagedBV = QaLibrary.ConvertVoltage(Data.Settings.StartAmplitude, Data.Settings.StartAmplitudeUnit, E_VoltageUnit.dBV);
             var endAmplitudeV = QaLibrary.ConvertVoltage(Data.Settings.EndAmplitude, Data.Settings.EndAmplitudeUnit, E_VoltageUnit.Volt);
             var stepVoltages = QaLibrary.GetLineairSpacedLogarithmicValuesPerOctave(startAmplitudeV, endAmplitudeV, Data.Settings.StepsPerOctave);
 
@@ -170,6 +170,8 @@ namespace QA40x_AUDIO_ANALYSER
             var binSize = QaLibrary.CalcBinSize(Data.Settings.SampleRate, Data.Settings.FftSize);
             uint fundamentalBin = QaLibrary.GetBinOfFrequency(testFrequency, binSize);
 
+            var newAttenuation = 0;
+            var prevAttenuation = 0;
             // ********************************************************************
             // Step through the list of voltages
             // ********************************************************************
@@ -183,17 +185,64 @@ namespace QA40x_AUDIO_ANALYSER
                 var generatorVoltagedBV = QaLibrary.ConvertVoltage(generatorVoltageV, E_VoltageUnit.Volt, E_VoltageUnit.dBV);   // Convert to dBV
 
                 // Determine attanuation needed
-                var voltageDiffdBV = generatorVoltagedBV - startAmplitudedBV;
-                var newAttenuation = QaLibrary.DetermineAttenuation(startInputAmplitudedBV + voltageDiffdBV);
-                await Qa40x.SetInputRange(newAttenuation);
+                var voltageDiffdBV = generatorVoltagedBV - prevGeneratorVoltagedBV;             // Calculate voltage rise of amplifier output
+                var predictedAttenuation = QaLibrary.DetermineAttenuation(prevInputAmplitudedBV + voltageDiffdBV); // Predict attenuation
+                newAttenuation = predictedAttenuation > newAttenuation ? predictedAttenuation : newAttenuation;
+                await Qa40x.SetInputRange(newAttenuation);                          // Set attenuation
+                prevGeneratorVoltagedBV = generatorVoltagedBV;
+                if (newAttenuation > prevAttenuation && newAttenuation == 24)
+                {
+                    // Attenuation changed. Get new noise floor
+                    await Program.MainForm.ShowMessage($"Attenuation changed. Measuring new noise floor.");
+                    await Qa40x.SetOutputSource(OutputSources.Off);
+                    await Qa40x.DoAcquisition();
+                    noiseFloor = await QaLibrary.DoAcquisitions(Data.Settings.Averages);
+                    Data.NoiseFloor = noiseFloor;
+                    await Qa40x.SetOutputSource(OutputSources.Sine);
+                }
+                prevAttenuation = newAttenuation;
 
                 // Set generator
-                await Qa40x.SetGen1(testFrequency, generatorVoltagedBV, true);    // Set the generator in dBV
+                await Qa40x.SetGen1(testFrequency, generatorVoltagedBV, true);      // Set the generator in dBV
                 if (i == 0)
-                    await Qa40x.SetOutputSource(OutputSources.Sine);            // We need to call this to make the averages in QA40x software reset
+                    await Qa40x.SetOutputSource(OutputSources.Sine);                // We need to call this the first time
 
-                LeftRightSeries lrfs = await QaLibrary.DoAcquisitions(Data.Settings.Averages);  // Do acquisitions
-            
+                LeftRightSeries lrfs = null;
+                do
+                {
+                    try
+                    {
+                        lrfs = await QaLibrary.DoAcquisitions(Data.Settings.Averages);  // Do acquisitions
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        if (ex.Message.Contains("400 (Acquisition Overload)"))
+                        {
+                            // Detected overload. Increase attenuation to next step.
+                            newAttenuation += 6;
+                            if (newAttenuation > 42)
+                            {
+                                MessageBox.Show($"Maximum attenuation reached.\nMeasurements are stopped", "Maximum attenuation reached", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                await Qa40x.SetOutputSource(OutputSources.Off);
+                                return false;
+                            }
+                            await Qa40x.SetInputRange(newAttenuation);
+                            
+                            if (newAttenuation == 24)
+                            {
+                                // Attenuation changed. Get new noise floor
+                                await Program.MainForm.ShowMessage($"Attenuation changed. Measuring new noise floor.");
+                                await Qa40x.SetOutputSource(OutputSources.Off);
+                                await Qa40x.DoAcquisition();
+                                noiseFloor = await QaLibrary.DoAcquisitions(Data.Settings.Averages);
+                                Data.NoiseFloor = noiseFloor;
+                                await Qa40x.SetOutputSource(OutputSources.Sine);
+                            }
+                        }
+                    }
+                } while (lrfs == null);     // Loop until we have an acquisition result
+
+
                 FrequencyThdStep step = new()
                 {
                     FundamentalFrequency = testFrequency,
@@ -205,6 +254,8 @@ namespace QA40x_AUDIO_ANALYSER
               
                 if (fundamentalBin >= lrfs.FreqInput.Left.Length)               // Check if bin within array bounds
                     break;
+
+                prevInputAmplitudedBV = 20 * Math.Log10(lrfs.FreqInput.Left.Max());    // Get maximum signal for attenuation prediction of next step
 
                 // Get and store step data
                 step.AmplitudeVolts = lrfs.FreqInput.Left[fundamentalBin];
@@ -218,10 +269,9 @@ namespace QA40x_AUDIO_ANALYSER
                     .Average();
                 step.NoiseFloorDbV = 20 * Math.Log10(step.NoiseFloorV);         // Store noise floor in dBV
 
-                // Plot the mini graphs
-                //InitMiniFftPlot(10, 100000, -150, step.AmplitudeDbV);
+                // Plot the mini graphs           
                 QaLibrary.PlotMiniFftGraph(graphFft, lrfs.FreqInput);
-                PlotMiniTimeGraph(lrfs.TimeInput, step.FundamentalFrequency);
+                QaLibrary.PlotMiniTimeGraph(graphTime, lrfs.TimeInput, step.FundamentalFrequency);
 
                 // Reset harmonic distortion variables
                 double distortionSqrtTotal = 0;
@@ -431,119 +481,6 @@ namespace QA40x_AUDIO_ANALYSER
         }
 
        
-        void InitMiniTimePlot(double startTime, double endTime, double minVoltage, double maxVoltage)
-        {
-            graphTime.Plot.Clear();
-
-            ScottPlot.TickGenerators.EvenlySpacedMinorTickGenerator minorTickGenX = new(2);
-            ScottPlot.TickGenerators.NumericAutomatic tickGenX = new();
-            tickGenX.TargetTickCount = 4;
-            tickGenX.MinorTickGenerator = minorTickGenX;
-            graphTime.Plot.Axes.Bottom.TickGenerator = tickGenX;
-
-            ScottPlot.TickGenerators.EvenlySpacedMinorTickGenerator minorTickGenY = new(2);
-            ScottPlot.TickGenerators.NumericAutomatic tickGenY = new();
-            tickGenY.TargetTickCount = 4;
-            tickGenY.MinorTickGenerator = minorTickGenY;
-            graphTime.Plot.Axes.Left.TickGenerator = tickGenY;
-
-
-
-            // show grid lines for minor ticks
-            graphTime.Plot.Grid.MajorLineColor = Colors.Black.WithOpacity(.25);
-            graphTime.Plot.Grid.MinorLineColor = Colors.Black.WithOpacity(.08);
-            graphTime.Plot.Grid.MinorLineWidth = 1;
-
-
-            //thdPlot.Plot.Axes.AutoScale();
-            graphTime.Plot.Axes.SetLimits(startTime, endTime, minVoltage, maxVoltage);
-            graphTime.Plot.Title("V (input)");
-            graphTime.Plot.Axes.Title.Label.FontSize = 12;
-            graphTime.Plot.Axes.Title.Label.OffsetY = 8;
-            graphTime.Plot.Axes.Title.Label.Bold = false;
-
-            graphTime.Plot.XLabel("ms");
-            graphTime.Plot.Axes.Bottom.Label.OffsetX = 90;
-            graphTime.Plot.Axes.Bottom.Label.OffsetY = -5;
-            graphTime.Plot.Axes.Bottom.Label.FontSize = 12;
-            graphTime.Plot.Axes.Bottom.Label.Bold = false;
-
-
-            graphTime.Plot.Legend.IsVisible = false;
-
-            graphTime.Refresh();
-
-        }
-
-
-        void PlotMiniTimeGraph(LeftRightTimeSeries timeData, double frequency)
-        {
-            graphTime.Plot.Clear();
-
-            List<double> timeX = [];
-            List<double> voltY = [];
-            double time = 0;
-
-            double period = 1 / frequency;
-            double displayTime = period * 1;
-            if (period < 0.00005)
-                displayTime = period * 4;
-            else if (period < 0.0001)
-                displayTime = period * 2;
-            else if (period < 0.0002)
-                displayTime = period * 1.5;
-
-            // Get first zero-crossing
-            int startStep = 0;
-            for (int f = 1; f < timeData.Left.Length; f++)
-            {
-                if (timeData.Left[f - 1] < 0 && timeData.Left[f] >= 0)
-                {
-                    startStep = f;
-                    break;
-                }
-            }
-
-            // Determine start index of array at zero-crossing
-            double displaySteps = (displayTime / timeData.dt) + startStep;
-            if (displaySteps > timeData.Left.Length)
-                displaySteps = timeData.Left.Length;
-
-            double maxVolt = 0;
-            for (int f = startStep; f < displaySteps; f++)
-            {
-                timeX.Add(time);
-                voltY.Add(timeData.Left[f]);
-                if (maxVolt < Math.Abs(timeData.Left[f]))
-                    maxVolt = Math.Abs(timeData.Left[f]);
-                time += timeData.dt * 1000;
-            }
-
-            maxVolt *= 1.1;
-            if (maxVolt > 1)
-                maxVolt = Math.Ceiling(maxVolt);
-            else if (maxVolt > 0.1)
-                maxVolt = Math.Ceiling(maxVolt * 10) / 10;
-            else if (maxVolt > 0.01)
-                maxVolt = Math.Ceiling(maxVolt * 100) / 100;
-            else if (maxVolt > 0.001)
-                maxVolt = Math.Ceiling(maxVolt * 1000) / 1000;
-            else if (maxVolt > 0.0001)
-                maxVolt = Math.Ceiling(maxVolt * 10000) / 10000;
-            else if (maxVolt > 0.00001)
-                maxVolt = Math.Ceiling(maxVolt * 100000) / 100000;
-
-            // add a scatter plot to the plot
-            var plotTot = graphTime.Plot.Add.Scatter(timeX, voltY);
-            plotTot.LineWidth = 1;
-            plotTot.Color = ScottPlot.Color.FromColor(System.Drawing.Color.FromArgb(1, 97, 170));
-            plotTot.MarkerSize = 1;
-
-            graphTime.Plot.Axes.SetLimits(0, time, -maxVolt, maxVolt);
-
-            graphTime.Refresh();
-        }
-
         /// <summary>
         /// Clear the plot
         /// </summary>
@@ -987,7 +924,7 @@ namespace QA40x_AUDIO_ANALYSER
                 if (markerIndex >= 0)
                 {
                     QaLibrary.PlotMiniFftGraph(graphFft, Data.StepData[markerIndex].fftData);
-                    PlotMiniTimeGraph(Data.StepData[markerIndex].timeData, Data.StepData[markerIndex].FundamentalFrequency);
+                    QaLibrary.PlotMiniTimeGraph(graphTime, Data.StepData[markerIndex].timeData, Data.StepData[markerIndex].FundamentalFrequency);
                 }
             };
 
@@ -1014,7 +951,7 @@ namespace QA40x_AUDIO_ANALYSER
             if (nearest1.IsReal)
             {
                 QaLibrary.PlotMiniFftGraph(graphFft, Data.StepData[nearest1.Index].fftData);
-                PlotMiniTimeGraph(Data.StepData[nearest1.Index].timeData, Data.StepData[nearest1.Index].FundamentalFrequency);
+                QaLibrary.PlotMiniTimeGraph(graphTime, Data.StepData[nearest1.Index].timeData, Data.StepData[nearest1.Index].FundamentalFrequency);
             }
         }
 
@@ -1402,6 +1339,53 @@ namespace QA40x_AUDIO_ANALYSER
         private void lblThdFreq_GenVoltage_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void btnAutoFitX_Click(object sender, EventArgs e)
+        {
+            double minVoltage = Data.StepData.Min(v => v.AmplitudeVolts);
+            
+            if (minVoltage < 0.0002)
+                cmbVoltageGraph_From.SelectedIndex = 0;
+            else if (minVoltage < 0.0005)
+                cmbVoltageGraph_From.SelectedIndex = 1;
+            else if (minVoltage < 0.001)
+                cmbVoltageGraph_From.SelectedIndex = 2;
+            else if (minVoltage < 0.002)
+                cmbVoltageGraph_From.SelectedIndex = 3;
+            else if (minVoltage < 0.005)
+                cmbVoltageGraph_From.SelectedIndex = 6;
+            else if (minVoltage < 0.01)
+                cmbVoltageGraph_From.SelectedIndex = 5;
+            else if (minVoltage < 0.02)
+                cmbVoltageGraph_From.SelectedIndex = 6;
+            else if (minVoltage < 0.05)
+                cmbVoltageGraph_From.SelectedIndex = 7;
+            else if (minVoltage < 0.1)
+                cmbVoltageGraph_From.SelectedIndex = 8;
+            else if (minVoltage < 0.2)
+                cmbVoltageGraph_From.SelectedIndex = 9;
+            else if (minVoltage < 0.5)
+                cmbVoltageGraph_From.SelectedIndex = 10;
+            else
+                cmbVoltageGraph_From.SelectedIndex = 11;
+
+
+            double maxVoltage = Data.StepData.Max(v => v.AmplitudeVolts);
+            if (maxVoltage <= 1)
+                cmbVoltageGraph_To.SelectedIndex = 0;
+            else if (maxVoltage <= 2)
+                cmbVoltageGraph_To.SelectedIndex = 1;
+            else if (maxVoltage <= 5)
+                cmbVoltageGraph_To.SelectedIndex = 2;
+            else if (maxVoltage <= 10)
+                cmbVoltageGraph_To.SelectedIndex = 3;
+            else if (maxVoltage <= 20)
+                cmbVoltageGraph_To.SelectedIndex = 4;
+            else if (maxVoltage <= 50)
+                cmbVoltageGraph_To.SelectedIndex = 5;
+            else
+                cmbVoltageGraph_To.SelectedIndex = 6;
         }
     }
 }

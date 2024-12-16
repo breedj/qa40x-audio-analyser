@@ -39,7 +39,7 @@ namespace QA40x_AUDIO_ANALYSER
             InitializeMagnitudePlot();
             AttachThdFreqMouseEvent();
             QaLibrary.InitMiniFftPlot(graphFft, Data.Settings.StartFrequency, Data.Settings.EndFrequency, -150, 20);
-            QaLibrary.InitTimePlot(graphTime, 0, 4, -1, 1);
+            QaLibrary.InitMiniTimePlot(graphTime, 0, 4, -1, 1);
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace QA40x_AUDIO_ANALYSER
 
             // Init mini plots
             QaLibrary.InitMiniFftPlot(graphFft, Data.Settings.StartFrequency, Data.Settings.EndFrequency, -150, 20);
-            QaLibrary.InitTimePlot(graphTime, 0, 4, -1, 1);
+            QaLibrary.InitMiniTimePlot(graphTime, 0, 4, -1, 1);
 
             // Check if webserver available and device connected
             if (await QaLibrary.CheckDeviceConnected() == false)
@@ -1369,18 +1369,18 @@ namespace QA40x_AUDIO_ANALYSER
         private void btnThdFreq_FitGraphX_Click(object sender, EventArgs e)
         {
             double startFreq = QaLibrary.ParseTextToDouble(txtStartFrequency.Text, 20);
-            if (startFreq <= 5)
+            if (startFreq < 10)
                 cmbGraph_From.SelectedIndex = 0;
-            else if (startFreq <= 10)
+            else if (startFreq < 20)
                 cmbGraph_From.SelectedIndex = 1;
-            else if (startFreq <= 20)
+            else if (startFreq < 50)
                 cmbGraph_From.SelectedIndex = 2;
-            else if (startFreq <= 50)
+            else if (startFreq < 100)
                 cmbGraph_From.SelectedIndex = 3;
-            else if (startFreq <= 100)
+            else if (startFreq < 200)
                 cmbGraph_From.SelectedIndex = 4;
-            else if (startFreq <= 200)
-                cmbGraph_From.SelectedIndex = 5;
+            else if (startFreq < 500)
+                cmbGraph_From.SelectedIndex = 4;
             else
                 cmbGraph_From.SelectedIndex = 6;
 

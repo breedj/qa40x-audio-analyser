@@ -662,7 +662,7 @@ namespace QaControl
 
 
 
-        public static void InitTimePlot(FormsPlot plot, double startTime, double endTime, double minVoltage, double maxVoltage)
+        public static void InitMiniTimePlot(FormsPlot plot, double startTime, double endTime, double minVoltage, double maxVoltage)
         {
             plot.Plot.Clear();
 

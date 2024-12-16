@@ -32,11 +32,29 @@ namespace QA40x_AUDIO_ANALYSER
 
         private void btnMeasurement_ThdFreq_Click(object sender, EventArgs e)
         {
+            if (MeasurementPanel.Controls.Count > 0)
+            {
+                Form frm = (Form)MeasurementPanel.Controls[0];
+                if (frm != null && frm is frmThdAmplitude)
+                {
+                    if (((frmThdAmplitude)frm).MeasurementBusy)
+                        return;
+                }
+            }
             LoadThdFrequencyForm();
         }
 
         private void btnMeasurement_ThdAmplitude_Click(object sender, EventArgs e)
         {
+            if (MeasurementPanel.Controls.Count > 0)
+            {
+                Form frm = (Form)MeasurementPanel.Controls[0];
+                if (frm != null && frm is frmThdFrequency)
+                {
+                    if (((frmThdFrequency)frm).MeasurementBusy)
+                        return;
+                }
+            }
             LoadThdAmplitudeForm();
         }
 

@@ -5,15 +5,12 @@ using ScottPlot.Plottables;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+
 
 
 namespace QA40x_AUDIO_ANALYSER
@@ -29,8 +26,9 @@ namespace QA40x_AUDIO_ANALYSER
         /// <summary>
         /// Constructor
         /// </summary>
-        public frmThdAmplitude()
+        public frmThdAmplitude(ref ThdAmplitudeMeasurementData data)
         {
+            Data = data;
             ct = new CancellationTokenSource();
             InitializeComponent();
             Program.MainForm.ClearMessage();
@@ -40,6 +38,12 @@ namespace QA40x_AUDIO_ANALYSER
             AttachThdFreqMouseEvent();
             QaLibrary.InitMiniFftPlot(graphFft, 10, 100000, -150, 20);
             QaLibrary.InitMiniTimePlot(graphTime, 0, 4, -1, 1);
+
+            if (data.StepData.Count > 0)
+            {
+                InitializeMagnitudePlot();
+                PlotMagnitude(Data);
+            }
         }
 
         /// <summary>
@@ -47,7 +51,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         void InitSettings()
         {
-            Data = new();
+            //Data = new();
             Data.Settings.Frequency = 1000;
             Data.Settings.SampleRate = 192000;
             Data.Settings.FftSize = 65536 * 2;

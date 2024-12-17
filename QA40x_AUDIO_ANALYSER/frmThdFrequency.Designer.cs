@@ -247,7 +247,7 @@
             this.cmbAmplifierOutputVoltageUnit.Name = "cmbAmplifierOutputVoltageUnit";
             this.cmbAmplifierOutputVoltageUnit.Size = new System.Drawing.Size(48, 21);
             this.cmbAmplifierOutputVoltageUnit.TabIndex = 27;
-            this.cmbAmplifierOutputVoltageUnit.SelectedIndexChanged += new System.EventHandler(this.cmbThdFreq_OutputVoltageUnit_SelectedIndexChanged);
+            this.cmbAmplifierOutputVoltageUnit.SelectedIndexChanged += new System.EventHandler(this.cmbOutputVoltageUnit_SelectedIndexChanged);
             // 
             // lblAmplifierOutputVoltage
             // 
@@ -267,8 +267,8 @@
             this.txtAmplifierOutputVoltage.Name = "txtAmplifierOutputVoltage";
             this.txtAmplifierOutputVoltage.Size = new System.Drawing.Size(58, 20);
             this.txtAmplifierOutputVoltage.TabIndex = 25;
-            this.txtAmplifierOutputVoltage.TextChanged += new System.EventHandler(this.txtThdFreq_OutputVoltage_TextChanged);
-            this.txtAmplifierOutputVoltage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtThdFreq_OutputVoltage_KeyPress);
+            this.txtAmplifierOutputVoltage.TextChanged += new System.EventHandler(this.txtOutputVoltage_TextChanged);
+            this.txtAmplifierOutputVoltage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtOutputVoltage_KeyPress);
             // 
             // udAverages
             // 
@@ -292,7 +292,7 @@
             0,
             0,
             0});
-            this.udAverages.ValueChanged += new System.EventHandler(this.udThdFreq_Averages_ValueChanged);
+            this.udAverages.ValueChanged += new System.EventHandler(this.udAverages_ValueChanged);
             // 
             // lblAverages
             // 
@@ -335,8 +335,8 @@
             this.txtEndFrequency.Size = new System.Drawing.Size(59, 20);
             this.txtEndFrequency.TabIndex = 20;
             this.txtEndFrequency.Text = "20000";
-            this.txtEndFrequency.TextChanged += new System.EventHandler(this.txtThdFreq_EndFreq_TextChanged);
-            this.txtEndFrequency.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtThdFreq_EndFreq_KeyPress);
+            this.txtEndFrequency.TextChanged += new System.EventHandler(this.txtEndFreq_TextChanged);
+            this.txtEndFrequency.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtEndFreq_KeyPress);
             // 
             // txtStartFrequency
             // 
@@ -346,8 +346,8 @@
             this.txtStartFrequency.Size = new System.Drawing.Size(59, 20);
             this.txtStartFrequency.TabIndex = 19;
             this.txtStartFrequency.Text = "20";
-            this.txtStartFrequency.TextChanged += new System.EventHandler(this.txtThdFreq_StartFreq_TextChanged);
-            this.txtStartFrequency.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtThdFreq_StartFreq_KeyPress);
+            this.txtStartFrequency.TextChanged += new System.EventHandler(this.txtStartFreq_TextChanged);
+            this.txtStartFrequency.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtStartFreq_KeyPress);
             // 
             // lblAmplifierOutputPowerUnit
             // 
@@ -379,8 +379,8 @@
             this.txtAmplifierOutputPower.Size = new System.Drawing.Size(59, 20);
             this.txtAmplifierOutputPower.TabIndex = 16;
             this.txtAmplifierOutputPower.Text = "1";
-            this.txtAmplifierOutputPower.TextChanged += new System.EventHandler(this.txtThdFreq_OutputPower_TextChanged);
-            this.txtAmplifierOutputPower.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtThdFreq_OutputPower_KeyPress);
+            this.txtAmplifierOutputPower.TextChanged += new System.EventHandler(this.txtOutputPower_TextChanged);
+            this.txtAmplifierOutputPower.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtOutputPower_KeyPress);
             // 
             // lblAmplifierLoadUnit
             // 
@@ -412,8 +412,8 @@
             this.txtOutputLoad.Size = new System.Drawing.Size(59, 20);
             this.txtOutputLoad.TabIndex = 13;
             this.txtOutputLoad.Text = "8";
-            this.txtOutputLoad.TextChanged += new System.EventHandler(this.txtThdFreq_OutputLoad_TextChanged);
-            this.txtOutputLoad.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtThdFreq_OutputLoad_KeyPress);
+            this.txtOutputLoad.TextChanged += new System.EventHandler(this.txtOutputLoad_TextChanged);
+            this.txtOutputLoad.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtOutputLoad_KeyPress);
             // 
             // cmbGeneratorVoltageUnit
             // 
@@ -429,7 +429,7 @@
             this.cmbGeneratorVoltageUnit.Name = "cmbGeneratorVoltageUnit";
             this.cmbGeneratorVoltageUnit.Size = new System.Drawing.Size(48, 21);
             this.cmbGeneratorVoltageUnit.TabIndex = 12;
-            this.cmbGeneratorVoltageUnit.SelectedIndexChanged += new System.EventHandler(this.cmbThdFreq_VoltageUnit_SelectedIndexChanged);
+            this.cmbGeneratorVoltageUnit.SelectedIndexChanged += new System.EventHandler(this.cmbVoltageUnit_SelectedIndexChanged);
             // 
             // lblGeneratorVoltage
             // 
@@ -449,8 +449,8 @@
             this.txtGeneratorVoltage.Name = "txtGeneratorVoltage";
             this.txtGeneratorVoltage.Size = new System.Drawing.Size(59, 20);
             this.txtGeneratorVoltage.TabIndex = 10;
-            this.txtGeneratorVoltage.TextChanged += new System.EventHandler(this.txtThdFreq_GenVoltage_TextChanged);
-            this.txtGeneratorVoltage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtThdFreq_GenVoltage_KeyPress);
+            this.txtGeneratorVoltage.TextChanged += new System.EventHandler(this.txtGenVoltage_TextChanged);
+            this.txtGeneratorVoltage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtGenVoltage_KeyPress);
             // 
             // lblGeneratorType
             // 
@@ -476,7 +476,7 @@
             this.cmbGeneratorType.Name = "cmbGeneratorType";
             this.cmbGeneratorType.Size = new System.Drawing.Size(113, 21);
             this.cmbGeneratorType.TabIndex = 8;
-            this.cmbGeneratorType.SelectedIndexChanged += new System.EventHandler(this.cmbThdFreq_GenType_SelectedIndexChanged);
+            this.cmbGeneratorType.SelectedIndexChanged += new System.EventHandler(this.cmbGenType_SelectedIndexChanged);
             // 
             // udStepsOctave
             // 
@@ -500,7 +500,7 @@
             0,
             0,
             0});
-            this.udStepsOctave.ValueChanged += new System.EventHandler(this.udThdFreq_StepsOctave_ValueChanged);
+            this.udStepsOctave.ValueChanged += new System.EventHandler(this.udStepsOctave_ValueChanged);
             // 
             // lblStepsPerOctave
             // 
@@ -614,7 +614,7 @@
             this.chkShowMarkers.TabIndex = 45;
             this.chkShowMarkers.Text = "Show data points";
             this.chkShowMarkers.UseVisualStyleBackColor = true;
-            this.chkShowMarkers.CheckedChanged += new System.EventHandler(this.chkThdFreq_ShowThd_CheckedChanged);
+            this.chkShowMarkers.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
             // chkThickLines
             // 
@@ -627,7 +627,7 @@
             this.chkThickLines.TabIndex = 44;
             this.chkThickLines.Text = "Thick lines";
             this.chkThickLines.UseVisualStyleBackColor = true;
-            this.chkThickLines.CheckedChanged += new System.EventHandler(this.chkThdFreq_ShowThd_CheckedChanged);
+            this.chkThickLines.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
             // gbdB_Range
             // 
@@ -670,7 +670,7 @@
             0,
             0,
             0});
-            this.cmbdB_Graph_Bottom.ValueChanged += new System.EventHandler(this.cmbThdFreq_dBV_Graph_Top_ValueChanged);
+            this.cmbdB_Graph_Bottom.ValueChanged += new System.EventHandler(this.cmb_dBV_Graph_Top_ValueChanged);
             // 
             // cmbdB_Graph_Top
             // 
@@ -699,7 +699,7 @@
             0,
             0,
             0});
-            this.cmbdB_Graph_Top.ValueChanged += new System.EventHandler(this.cmbThdFreq_dBV_Graph_Top_ValueChanged);
+            this.cmbdB_Graph_Top.ValueChanged += new System.EventHandler(this.cmb_dBV_Graph_Top_ValueChanged);
             // 
             // label10
             // 
@@ -731,7 +731,7 @@
             this.btndB_FitGraphY.TabIndex = 25;
             this.btndB_FitGraphY.Text = "Autofit";
             this.btndB_FitGraphY.UseVisualStyleBackColor = true;
-            this.btndB_FitGraphY.Click += new System.EventHandler(this.btnThdFreq_FitDbGraphY_Click);
+            this.btndB_FitGraphY.Click += new System.EventHandler(this.btnFitDbGraphY_Click);
             // 
             // gbHarmonics
             // 
@@ -761,7 +761,7 @@
             this.chkShowMagnitude.TabIndex = 43;
             this.chkShowMagnitude.Text = "Magnitude";
             this.chkShowMagnitude.UseVisualStyleBackColor = true;
-            this.chkShowMagnitude.CheckedChanged += new System.EventHandler(this.chkThdFreq_ShowThd_CheckedChanged);
+            this.chkShowMagnitude.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
             // chkShowNoiseFloor
             // 
@@ -774,7 +774,7 @@
             this.chkShowNoiseFloor.TabIndex = 42;
             this.chkShowNoiseFloor.Text = "Noise floor";
             this.chkShowNoiseFloor.UseVisualStyleBackColor = true;
-            this.chkShowNoiseFloor.CheckedChanged += new System.EventHandler(this.chkThdFreq_ShowThd_CheckedChanged);
+            this.chkShowNoiseFloor.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
             // chkShowD6
             // 
@@ -787,7 +787,7 @@
             this.chkShowD6.TabIndex = 41;
             this.chkShowD6.Text = "D6+";
             this.chkShowD6.UseVisualStyleBackColor = true;
-            this.chkShowD6.CheckedChanged += new System.EventHandler(this.chkThdFreq_ShowThd_CheckedChanged);
+            this.chkShowD6.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
             // chkShowD5
             // 
@@ -800,7 +800,7 @@
             this.chkShowD5.TabIndex = 40;
             this.chkShowD5.Text = "D5";
             this.chkShowD5.UseVisualStyleBackColor = true;
-            this.chkShowD5.CheckedChanged += new System.EventHandler(this.chkThdFreq_ShowThd_CheckedChanged);
+            this.chkShowD5.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
             // chkShowD4
             // 
@@ -813,7 +813,7 @@
             this.chkShowD4.TabIndex = 39;
             this.chkShowD4.Text = "D4";
             this.chkShowD4.UseVisualStyleBackColor = true;
-            this.chkShowD4.CheckedChanged += new System.EventHandler(this.chkThdFreq_ShowThd_CheckedChanged);
+            this.chkShowD4.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
             // chkShowD3
             // 
@@ -826,7 +826,7 @@
             this.chkShowD3.TabIndex = 38;
             this.chkShowD3.Text = "D3";
             this.chkShowD3.UseVisualStyleBackColor = true;
-            this.chkShowD3.CheckedChanged += new System.EventHandler(this.chkThdFreq_ShowThd_CheckedChanged);
+            this.chkShowD3.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
             // chkShowD2
             // 
@@ -839,7 +839,7 @@
             this.chkShowD2.TabIndex = 37;
             this.chkShowD2.Text = "D2";
             this.chkShowD2.UseVisualStyleBackColor = true;
-            this.chkShowD2.CheckedChanged += new System.EventHandler(this.chkThdFreq_ShowThd_CheckedChanged);
+            this.chkShowD2.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
             // chkShowThd
             // 
@@ -852,7 +852,7 @@
             this.chkShowThd.TabIndex = 36;
             this.chkShowThd.Text = "THD";
             this.chkShowThd.UseVisualStyleBackColor = true;
-            this.chkShowThd.CheckedChanged += new System.EventHandler(this.chkThdFreq_ShowThd_CheckedChanged);
+            this.chkShowThd.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
             // btnGraph_dB
             // 
@@ -866,7 +866,7 @@
             this.btnGraph_dB.TabIndex = 28;
             this.btnGraph_dB.Text = "D (dB)";
             this.btnGraph_dB.UseVisualStyleBackColor = false;
-            this.btnGraph_dB.Click += new System.EventHandler(this.btnFreqThd_Graph_dBV_Click);
+            this.btnGraph_dB.Click += new System.EventHandler(this.btnGraph_dBV_Click);
             // 
             // btnGraph_D_Percent
             // 
@@ -880,7 +880,7 @@
             this.btnGraph_D_Percent.TabIndex = 27;
             this.btnGraph_D_Percent.Text = "D (%)";
             this.btnGraph_D_Percent.UseVisualStyleBackColor = false;
-            this.btnGraph_D_Percent.Click += new System.EventHandler(this.btnFreqThd_Graph_D_Click);
+            this.btnGraph_D_Percent.Click += new System.EventHandler(this.btnGraph_D_Click);
             // 
             // gbFrequencyRange
             // 
@@ -924,7 +924,7 @@
             this.cmbGraph_To.Name = "cmbGraph_To";
             this.cmbGraph_To.Size = new System.Drawing.Size(94, 21);
             this.cmbGraph_To.TabIndex = 33;
-            this.cmbGraph_To.SelectedIndexChanged += new System.EventHandler(this.cmbThdFreq_Graph_SelectedIndexChanged);
+            this.cmbGraph_To.SelectedIndexChanged += new System.EventHandler(this.cmbGraph_SelectedIndexChanged);
             // 
             // label9
             // 
@@ -954,7 +954,7 @@
             this.cmbGraph_From.Name = "cmbGraph_From";
             this.cmbGraph_From.Size = new System.Drawing.Size(94, 21);
             this.cmbGraph_From.TabIndex = 31;
-            this.cmbGraph_From.SelectedIndexChanged += new System.EventHandler(this.cmbThdFreq_Graph_SelectedIndexChanged);
+            this.cmbGraph_From.SelectedIndexChanged += new System.EventHandler(this.cmbGraph_SelectedIndexChanged);
             // 
             // btnFitGraphX
             // 
@@ -964,7 +964,7 @@
             this.btnFitGraphX.TabIndex = 30;
             this.btnFitGraphX.Text = "Autofit";
             this.btnFitGraphX.UseVisualStyleBackColor = true;
-            this.btnFitGraphX.Click += new System.EventHandler(this.btnThdFreq_FitGraphX_Click);
+            this.btnFitGraphX.Click += new System.EventHandler(this.btnFitGraphX_Click);
             // 
             // gbD_Range
             // 
@@ -1007,7 +1007,7 @@
             this.cmbD_Graph_Bottom.Name = "cmbD_Graph_Bottom";
             this.cmbD_Graph_Bottom.Size = new System.Drawing.Size(94, 21);
             this.cmbD_Graph_Bottom.TabIndex = 28;
-            this.cmbD_Graph_Bottom.SelectedIndexChanged += new System.EventHandler(this.cmbThdFreq_Graph_SelectedIndexChanged);
+            this.cmbD_Graph_Bottom.SelectedIndexChanged += new System.EventHandler(this.cmbGraph_SelectedIndexChanged);
             // 
             // label6
             // 
@@ -1033,7 +1033,7 @@
             this.cmbD_Graph_Top.Name = "cmbD_Graph_Top";
             this.cmbD_Graph_Top.Size = new System.Drawing.Size(94, 21);
             this.cmbD_Graph_Top.TabIndex = 26;
-            this.cmbD_Graph_Top.SelectedIndexChanged += new System.EventHandler(this.cmbThdFreq_Graph_SelectedIndexChanged);
+            this.cmbD_Graph_Top.SelectedIndexChanged += new System.EventHandler(this.cmbGraph_SelectedIndexChanged);
             // 
             // btnD_FitGraphY
             // 
@@ -1043,7 +1043,7 @@
             this.btnD_FitGraphY.TabIndex = 25;
             this.btnD_FitGraphY.Text = "Autofit";
             this.btnD_FitGraphY.UseVisualStyleBackColor = true;
-            this.btnD_FitGraphY.Click += new System.EventHandler(this.btnThdFreq_FitDGraphY_Click);
+            this.btnD_FitGraphY.Click += new System.EventHandler(this.btnFitDGraphY_Click);
             // 
             // lblCuror_NoiseFloor
             // 

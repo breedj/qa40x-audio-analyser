@@ -12,6 +12,7 @@ using ScottPlot;
 using ScottPlot.WinForms;
 using QA40x_AUDIO_ANALYSER;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace QaControl
 {
@@ -773,6 +774,20 @@ namespace QaControl
             plot.Plot.Axes.SetLimits(0, time, -maxVolt, maxVolt);
 
             plot.Refresh();
+        }
+
+
+        public static System.Drawing.Image CopyControlToImage(Control theControl)
+        {
+            // Copy the whole control to a clicp board
+            Bitmap bm = new Bitmap(theControl.Width, theControl.Height);
+            theControl.DrawToBitmap(bm, new System.Drawing.Rectangle(0, 0, theControl.Width, theControl.Height));
+            return bm;
+        }
+
+        public static void BitmapToClipboard(System.Drawing.Image bm)
+        {
+            Clipboard.SetImage(bm);
         }
     }
 }           

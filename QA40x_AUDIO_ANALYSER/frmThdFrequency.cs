@@ -29,8 +29,9 @@ namespace QA40x_AUDIO_ANALYSER
         /// <summary>
         /// Constructor
         /// </summary>
-        public frmThdFrequency()
+        public frmThdFrequency(ref ThdFrequencyMeasurementData data)
         {
+            Data = data;
             ct = new CancellationTokenSource();
             InitializeComponent();
             Program.MainForm.ClearMessage();
@@ -40,6 +41,12 @@ namespace QA40x_AUDIO_ANALYSER
             AttachThdFreqMouseEvent();
             QaLibrary.InitMiniFftPlot(graphFft, Data.Settings.StartFrequency, Data.Settings.EndFrequency, -150, 20);
             QaLibrary.InitMiniTimePlot(graphTime, 0, 4, -1, 1);
+
+            if (data.StepData.Count > 0)
+            {
+                InitializeMagnitudePlot();
+                PlotMagnitude(Data);
+            }
         }
 
         /// <summary>
@@ -48,7 +55,7 @@ namespace QA40x_AUDIO_ANALYSER
         void InitSettings()
         {
             // Clear data and initialize with default settings
-            Data = new();
+            //Data = new();
             Data.Settings.StartFrequency = 20;
             Data.Settings.EndFrequency = 20000;
             Data.Settings.SampleRate = 192000;
@@ -424,7 +431,11 @@ namespace QA40x_AUDIO_ANALYSER
             return true;
         }
 
-       
+
+        /// <summary>
+        /// Plot the data.
+        /// </summary>
+        /// <param name="step"></param>
         private void PlotMeasurementData(FrequencyThdStep step)
         {
             // Plot the data depending on selected graph
@@ -542,21 +553,20 @@ namespace QA40x_AUDIO_ANALYSER
             lblCuror_NoiseFloor.Text = $"Noise floor: {noiseFloor:##0.0# dB}";
         }
 
-       
-        
+             
 
-
-
-
-
-
+        /// <summary>
+        /// Clear the plot
+        /// </summary>
         void clearPlot()
         {
             thdPlot.Plot.Clear();
             thdPlot.Refresh();
         }
 
-
+        /// <summary>
+        /// Ititialize the THD % plot
+        /// </summary>
         void initThdPlot()
         {
             thdPlot.Plot.Clear();
@@ -651,6 +661,10 @@ namespace QA40x_AUDIO_ANALYSER
 
         }
 
+        /// <summary>
+        /// Plot the THD % graph
+        /// </summary>
+        /// <param name="data"></param>
         void PlotThd(ThdFrequencyMeasurementData data)
         {
             thdPlot.Plot.Remove<Scatter>();
@@ -775,8 +789,9 @@ namespace QA40x_AUDIO_ANALYSER
 
 
 
-
-
+        /// <summary>
+        /// Initialize the magnitude plot
+        /// </summary>
         void InitializeMagnitudePlot()
         {
             thdPlot.Plot.Clear();
@@ -865,7 +880,10 @@ namespace QA40x_AUDIO_ANALYSER
         }
 
 
-
+        /// <summary>
+        /// Plot the magnitude graph
+        /// </summary>
+        /// <param name="data">Data to plot</param>
         void PlotMagnitude(ThdFrequencyMeasurementData data)
         {
             thdPlot.Plot.Remove<Scatter>();
@@ -1064,6 +1082,12 @@ namespace QA40x_AUDIO_ANALYSER
         int markerIndex = -1;
         DataPoint markerDataPoint;
 
+        /// <summary>
+        /// Draw a cursor marker and update cursor texts
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="e"></param>
+        /// <param name="isClick"></param>
         void SetCursorMarker(object s, MouseEventArgs e, bool isClick)
         {
 
@@ -1178,17 +1202,32 @@ namespace QA40x_AUDIO_ANALYSER
         }
 
 
-        private void cmbThdFreq_GenType_SelectedIndexChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Generator type changed event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmbGenType_SelectedIndexChanged(object sender, EventArgs e)
         {
             ChangeThdFrqGenType();
         }
 
-        private void cmbThdFreq_VoltageUnit_SelectedIndexChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Voltage unit changed event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmbVoltageUnit_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateGeneratorVoltageDisplay();
         }
 
-        private void txtThdFreq_GenVoltage_TextChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Generator voltage change event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtGenVoltage_TextChanged(object sender, EventArgs e)
         {
             if (txtGeneratorVoltage.Focused)
             {
@@ -1198,6 +1237,10 @@ namespace QA40x_AUDIO_ANALYSER
             ValidateGeneratorAmplitude(sender);
         }
 
+        /// <summary>
+        /// Validate the generator voltage and show red text if invalid
+        /// </summary>
+        /// <param name="sender"></param>
         private void ValidateGeneratorAmplitude(object sender)
         {
             if (cmbGeneratorVoltageUnit.SelectedIndex == (int)E_VoltageUnit.MilliVolt)
@@ -1208,18 +1251,33 @@ namespace QA40x_AUDIO_ANALYSER
                 QaLibrary.ValidateRangeAdorner(sender, QaLibrary.MINIMUM_GENERATOR_VOLTAGE_DBV, QaLibrary.MAXIMUM_GENERATOR_VOLTAGE_DBV);       // dBV
         }
 
-        private void txtThdFreq_GenVoltage_KeyPress(object sender, KeyPressEventArgs e)
+        /// <summary>
+        /// Generator voltage keypress event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtGenVoltage_KeyPress(object sender, KeyPressEventArgs e)
         {
             QaLibrary.AllowNumericInput(sender, e, false);
         }
 
-        private void txtThdFreq_OutputLoad_TextChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Output load change event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtOutputLoad_TextChanged(object sender, EventArgs e)
         {
             ChangeThdFrqGenType();
             QaLibrary.ValidateRangeAdorner(sender, 0, 100000);
         }
 
-        private void txtThdFreq_OutputPower_TextChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Output power change event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtOutputPower_TextChanged(object sender, EventArgs e)
         {
             Data.Settings.AmpOutputPower = QaLibrary.ParseTextToDouble(txtAmplifierOutputPower.Text, Data.Settings.AmpOutputPower);
             ChangeThdFrqGenType();
@@ -1227,13 +1285,22 @@ namespace QA40x_AUDIO_ANALYSER
         }
 
 
-
-        private void udThdFreq_StepsOctave_ValueChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Amount of steps per octave change event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void udStepsOctave_ValueChanged(object sender, EventArgs e)
         {
             Data.Settings.StepsPerOctave = Convert.ToUInt16(udStepsOctave.Value);
         }
 
-        private void udThdFreq_Averages_ValueChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Amount of averages change event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void udAverages_ValueChanged(object sender, EventArgs e)
         {
             Data.Settings.Averages = Convert.ToUInt16(udAverages.Value);
         }
@@ -1245,7 +1312,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void txtThdFreq_OutputVoltage_KeyPress(object sender, KeyPressEventArgs e)
+        private void txtOutputVoltage_KeyPress(object sender, KeyPressEventArgs e)
         {
             QaLibrary.AllowNumericInput(sender, e, false);
         }
@@ -1256,7 +1323,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void txtThdFreq_OutputVoltage_TextChanged(object sender, EventArgs e)
+        private void txtOutputVoltage_TextChanged(object sender, EventArgs e)
         {
             if (txtAmplifierOutputVoltage.Focused)
             {
@@ -1287,7 +1354,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void txtThdFreq_StartFreq_KeyPress(object sender, KeyPressEventArgs e)
+        private void txtStartFreq_KeyPress(object sender, KeyPressEventArgs e)
         {
             QaLibrary.AllowNumericInput(sender, e, true);
         }
@@ -1298,7 +1365,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void txtThdFreq_StartFreq_TextChanged(object sender, EventArgs e)
+        private void txtStartFreq_TextChanged(object sender, EventArgs e)
         {
             QaLibrary.ValidateRangeAdorner(sender, QaLibrary.MINIMUM_GENERATOR_FREQUENCY_HZ, QaLibrary.MAXIMUM_GENERATOR_FREQUENCY_HZ);
             Data.Settings.StartFrequency = QaLibrary.ParseTextToDouble(txtStartFrequency.Text, Data.Settings.StartFrequency);
@@ -1310,7 +1377,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void txtThdFreq_EndFreq_KeyPress(object sender, KeyPressEventArgs e)
+        private void txtEndFreq_KeyPress(object sender, KeyPressEventArgs e)
         {
             QaLibrary.AllowNumericInput(sender, e, true);
         }
@@ -1321,7 +1388,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void txtThdFreq_EndFreq_TextChanged(object sender, EventArgs e)
+        private void txtEndFreq_TextChanged(object sender, EventArgs e)
         {
             QaLibrary.ValidateRangeAdorner(sender, 5, 96000);
             Data.Settings.EndFrequency = QaLibrary.ParseTextToDouble(txtEndFrequency.Text, Data.Settings.EndFrequency);
@@ -1333,7 +1400,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void txtThdFreq_OutputLoad_KeyPress(object sender, KeyPressEventArgs e)
+        private void txtOutputLoad_KeyPress(object sender, KeyPressEventArgs e)
         {
             QaLibrary.AllowNumericInput(sender, e, false);
         }
@@ -1345,7 +1412,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void txtThdFreq_OutputPower_KeyPress(object sender, KeyPressEventArgs e)
+        private void txtOutputPower_KeyPress(object sender, KeyPressEventArgs e)
         {
             QaLibrary.AllowNumericInput(sender, e, false);
         }
@@ -1356,7 +1423,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void cmbThdFreq_OutputVoltageUnit_SelectedIndexChanged(object sender, EventArgs e)
+        private void cmbOutputVoltageUnit_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateAmpOutputVoltageDisplay();
         }
@@ -1366,7 +1433,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnThdFreq_FitGraphX_Click(object sender, EventArgs e)
+        private void btnFitGraphX_Click(object sender, EventArgs e)
         {
             double startFreq = QaLibrary.ParseTextToDouble(txtStartFrequency.Text, 20);
             if (startFreq < 10)
@@ -1406,7 +1473,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void cmbThdFreq_Graph_SelectedIndexChanged(object sender, EventArgs e)
+        private void cmbGraph_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (gbD_Range.Visible)
             {
@@ -1426,7 +1493,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void chkThdFreq_ShowThd_CheckedChanged(object sender, EventArgs e)
+        private void chkShowThd_CheckedChanged(object sender, EventArgs e)
         {
             if (gbD_Range.Visible)
             {
@@ -1445,7 +1512,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnFreqThd_Graph_dBV_Click(object sender, EventArgs e)
+        private void btnGraph_dBV_Click(object sender, EventArgs e)
         {
             gbdB_Range.Visible = true;
             btnGraph_dB.BackColor = System.Drawing.Color.Cornsilk;
@@ -1462,7 +1529,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnFreqThd_Graph_D_Click(object sender, EventArgs e)
+        private void btnGraph_D_Click(object sender, EventArgs e)
         {
             gbdB_Range.Visible = false;
             btnGraph_dB.BackColor = System.Drawing.Color.WhiteSmoke;
@@ -1479,7 +1546,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void cmbThdFreq_dBV_Graph_Top_ValueChanged(object sender, EventArgs e)
+        private void cmb_dBV_Graph_Top_ValueChanged(object sender, EventArgs e)
         {
             InitializeMagnitudePlot();
             PlotMagnitude(Data);
@@ -1490,7 +1557,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnThdFreq_FitDGraphY_Click(object sender, EventArgs e)
+        private void btnFitDGraphY_Click(object sender, EventArgs e)
         {
             if (Data.StepData.Count == 0)
                 return;
@@ -1528,7 +1595,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnThdFreq_FitDbGraphY_Click(object sender, EventArgs e)
+        private void btnFitDbGraphY_Click(object sender, EventArgs e)
         {
 
             if (Data.StepData.Count == 0)
@@ -1550,7 +1617,11 @@ namespace QA40x_AUDIO_ANALYSER
             cmbdB_Graph_Bottom.Value = Math.Ceiling((decimal)((int)(minDb / 10) - 2) * 10);
         }
 
-
+        /// <summary>
+        ///  Cancel measurement
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnStopMeasurement_Click(object sender, EventArgs e)
         {
             ct.Cancel();

@@ -72,9 +72,9 @@
             this.btnMeasurement_ThdAmplitude.FlatAppearance.BorderColor = System.Drawing.Color.Peru;
             this.btnMeasurement_ThdAmplitude.FlatAppearance.BorderSize = 2;
             this.btnMeasurement_ThdAmplitude.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnMeasurement_ThdAmplitude.Location = new System.Drawing.Point(122, 4);
+            this.btnMeasurement_ThdAmplitude.Location = new System.Drawing.Point(171, 3);
             this.btnMeasurement_ThdAmplitude.Name = "btnMeasurement_ThdAmplitude";
-            this.btnMeasurement_ThdAmplitude.Size = new System.Drawing.Size(113, 54);
+            this.btnMeasurement_ThdAmplitude.Size = new System.Drawing.Size(128, 54);
             this.btnMeasurement_ThdAmplitude.TabIndex = 10;
             this.btnMeasurement_ThdAmplitude.Text = "THD vs Amplitude";
             this.btnMeasurement_ThdAmplitude.UseVisualStyleBackColor = false;
@@ -106,9 +106,10 @@
             this.btnMeasurement_ThdFreq.FlatAppearance.BorderColor = System.Drawing.Color.Peru;
             this.btnMeasurement_ThdFreq.FlatAppearance.BorderSize = 2;
             this.btnMeasurement_ThdFreq.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnMeasurement_ThdFreq.Location = new System.Drawing.Point(3, 3);
+            this.btnMeasurement_ThdFreq.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnMeasurement_ThdFreq.Location = new System.Drawing.Point(36, 3);
             this.btnMeasurement_ThdFreq.Name = "btnMeasurement_ThdFreq";
-            this.btnMeasurement_ThdFreq.Size = new System.Drawing.Size(113, 54);
+            this.btnMeasurement_ThdFreq.Size = new System.Drawing.Size(129, 54);
             this.btnMeasurement_ThdFreq.TabIndex = 7;
             this.btnMeasurement_ThdFreq.Text = "THD vs Frequency";
             this.btnMeasurement_ThdFreq.UseVisualStyleBackColor = false;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QaControl;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,6 +17,14 @@ namespace QA40x_AUDIO_ANALYSER
     {
         public static Panel MeasurementPanel;
 
+        private static ThdFrequencyMeasurementData ThdFrequencyData = new();
+
+        private static ThdAmplitudeMeasurementData ThdAmplitudeData = new();
+
+        frmThdAmplitude frmThdAmplitude;
+
+        frmThdFrequency frmThdFrequency;
+
         public frmMain()
         {
             InitializeComponent();
@@ -27,7 +36,7 @@ namespace QA40x_AUDIO_ANALYSER
             MeasurementPanel = splitContainer1.Panel2;
             HideProgressBar();
             ClearMessage();
-            LoadThdFrequencyForm();
+            ShowThdFrequencyForm();
         }
 
         private void btnMeasurement_ThdFreq_Click(object sender, EventArgs e)
@@ -41,7 +50,9 @@ namespace QA40x_AUDIO_ANALYSER
                         return;
                 }
             }
-            LoadThdFrequencyForm();
+            ShowThdFrequencyForm();
+            btnMeasurement_ThdFreq.Font = new Font(btnMeasurement_ThdFreq.Font, FontStyle.Bold);
+            btnMeasurement_ThdAmplitude.Font = new Font(btnMeasurement_ThdAmplitude.Font, FontStyle.Regular);
         }
 
         private void btnMeasurement_ThdAmplitude_Click(object sender, EventArgs e)
@@ -55,27 +66,35 @@ namespace QA40x_AUDIO_ANALYSER
                         return;
                 }
             }
-            LoadThdAmplitudeForm();
+            ShowThdAmplitudeForm();
+            btnMeasurement_ThdFreq.Font = new Font(btnMeasurement_ThdFreq.Font, FontStyle.Regular);
+            btnMeasurement_ThdAmplitude.Font = new Font(btnMeasurement_ThdAmplitude.Font, FontStyle.Bold);
         }
 
-        private void LoadThdFrequencyForm()
+        private void ShowThdFrequencyForm()
         {
-            frmThdFrequency frm = new frmThdFrequency();
-            frm.Dock = DockStyle.Fill;
-            frm.TopLevel = false;
+            if (frmThdFrequency == null)
+            {
+                frmThdFrequency = new frmThdFrequency(ref ThdFrequencyData);
+                frmThdFrequency.Dock = DockStyle.Fill;
+                frmThdFrequency.TopLevel = false;
+            }
             MeasurementPanel.Controls.Clear();
-            MeasurementPanel.Controls.Add(frm);
-            frm.Show();
+            MeasurementPanel.Controls.Add(frmThdFrequency);
+            frmThdFrequency.Show();
         }
 
-        private void LoadThdAmplitudeForm()
+        private void ShowThdAmplitudeForm()
         {
-            frmThdAmplitude frm = new frmThdAmplitude();
-            frm.Dock = DockStyle.Fill;
-            frm.TopLevel = false;
+            if (frmThdAmplitude == null)
+            {
+                frmThdAmplitude = new frmThdAmplitude(ref ThdAmplitudeData);
+                frmThdAmplitude.Dock = DockStyle.Fill;
+                frmThdAmplitude.TopLevel = false;    
+            }
             MeasurementPanel.Controls.Clear();
-            MeasurementPanel.Controls.Add(frm);
-            frm.Show();
+            MeasurementPanel.Controls.Add(frmThdAmplitude);
+            frmThdAmplitude.Show();
         }
 
         public void SetupProgressBar(int min, int max)

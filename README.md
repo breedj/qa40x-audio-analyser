@@ -1,9 +1,14 @@
 # qa40x-audio-analyser
 An audio analyser program for the Quant Asylum QA40x series
 
-First version. Currently only left channel is supported. Right channel and more features will be added soon.
+Distortion vs. Ouput amplitude measurement has been added.
+
+Currently only left channel is supported. Right channel and more features will be added soon.
 
 ![Github screenshot 1](https://github.com/user-attachments/assets/d5b7a46a-cb92-4634-a7d5-8b6794b2b76d)
+
+![image](https://github.com/user-attachments/assets/0e787dd2-3658-45df-ae43-7ca2205278d2)
+
 
 **DONE:**
 - [x] THD vs frequency measurement
@@ -12,10 +17,10 @@ First version. Currently only left channel is supported. Right channel and more 
 - [x] Cursors with data
 - [x] Mini plots with frequency and time domain data
 - [x] Autofitting if graph data
-- [x] Plotting of noise floor in graphs  
+- [x] Plotting of noise floor in graphs
+- [x] THD vs Output amplitude measurement 
       
 **TODO:**
-- [ ] THD vs Output amplitude measurement
 - [ ] FFT with automatic peak search
 - [ ] Amplifier impedance vs frequency measurement
 - [ ] Saving of data to json file
@@ -28,7 +33,7 @@ First version. Currently only left channel is supported. Right channel and more 
 
 ## INSTALLATION NOTES
 
-To install download the msi here: https://github.com/breedj/qa40x-audio-analyser/releases/download/V0.2/QA40xAudioAnalyserSetup.msi
+To install download the msi here: https://github.com/breedj/qa40x-audio-analyser/releases/download/V0.3/QA40xAudioAnalyserSetup.msi
 
 The applicaton requires .net framework 4.8.
 

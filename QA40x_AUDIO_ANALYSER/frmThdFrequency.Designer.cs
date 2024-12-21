@@ -94,14 +94,13 @@
             this.btnD_FitGraphY = new System.Windows.Forms.Button();
             this.lblCuror_NoiseFloor = new System.Windows.Forms.Label();
             this.lblCuror_Power = new System.Windows.Forms.Label();
-            this.lblCuror_DC = new System.Windows.Forms.Label();
             this.lblCuror_D6 = new System.Windows.Forms.Label();
             this.lblCuror_D5 = new System.Windows.Forms.Label();
             this.lblCuror_D4 = new System.Windows.Forms.Label();
             this.lblCuror_D3 = new System.Windows.Forms.Label();
             this.lblCuror_D2 = new System.Windows.Forms.Label();
             this.lblCuror_THD = new System.Windows.Forms.Label();
-            this.lblCuror_Magnitude = new System.Windows.Forms.Label();
+            this.lblCursor_Magnitude = new System.Windows.Forms.Label();
             this.lblCuror_Frequency = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.scThdVsFreq)).BeginInit();
             this.scThdVsFreq.Panel1.SuspendLayout();
@@ -555,14 +554,13 @@
             this.scGraphCursors.Panel2.BackColor = System.Drawing.SystemColors.Control;
             this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_NoiseFloor);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_Power);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_DC);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_D6);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_D5);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_D4);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_D3);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_D2);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_THD);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_Magnitude);
+            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_Magnitude);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_Frequency);
             this.scGraphCursors.Size = new System.Drawing.Size(836, 765);
             this.scGraphCursors.SplitterDistance = 710;
@@ -1058,23 +1056,13 @@
             // lblCuror_Power
             // 
             this.lblCuror_Power.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_Power.Location = new System.Drawing.Point(583, 3);
+            this.lblCuror_Power.Location = new System.Drawing.Point(341, 3);
             this.lblCuror_Power.MinimumSize = new System.Drawing.Size(100, 13);
             this.lblCuror_Power.Name = "lblCuror_Power";
-            this.lblCuror_Power.Size = new System.Drawing.Size(203, 15);
+            this.lblCuror_Power.Size = new System.Drawing.Size(178, 15);
             this.lblCuror_Power.TabIndex = 19;
             this.lblCuror_Power.Text = "Power: 0 mW";
-            // 
-            // lblCuror_DC
-            // 
-            this.lblCuror_DC.AutoSize = true;
-            this.lblCuror_DC.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_DC.Location = new System.Drawing.Point(471, 3);
-            this.lblCuror_DC.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCuror_DC.Name = "lblCuror_DC";
-            this.lblCuror_DC.Size = new System.Drawing.Size(100, 15);
-            this.lblCuror_DC.TabIndex = 18;
-            this.lblCuror_DC.Text = "DC: 0 V";
+            this.lblCuror_Power.Click += new System.EventHandler(this.lblCuror_Power_Click);
             // 
             // lblCuror_D6
             // 
@@ -1135,23 +1123,23 @@
             // 
             this.lblCuror_THD.AutoSize = true;
             this.lblCuror_THD.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_THD.Location = new System.Drawing.Point(342, 3);
+            this.lblCuror_THD.Location = new System.Drawing.Point(219, 3);
             this.lblCuror_THD.MinimumSize = new System.Drawing.Size(100, 13);
             this.lblCuror_THD.Name = "lblCuror_THD";
             this.lblCuror_THD.Size = new System.Drawing.Size(100, 15);
             this.lblCuror_THD.TabIndex = 12;
             this.lblCuror_THD.Text = "THD: 0.00 %";
             // 
-            // lblCuror_Magnitude
+            // lblCursor_Magnitude
             // 
-            this.lblCuror_Magnitude.AutoSize = true;
-            this.lblCuror_Magnitude.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_Magnitude.Location = new System.Drawing.Point(226, 3);
-            this.lblCuror_Magnitude.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCuror_Magnitude.Name = "lblCuror_Magnitude";
-            this.lblCuror_Magnitude.Size = new System.Drawing.Size(100, 15);
-            this.lblCuror_Magnitude.TabIndex = 11;
-            this.lblCuror_Magnitude.Text = "Magn: 0.00 dB";
+            this.lblCursor_Magnitude.AutoSize = true;
+            this.lblCursor_Magnitude.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_Magnitude.Location = new System.Drawing.Point(525, 3);
+            this.lblCursor_Magnitude.MinimumSize = new System.Drawing.Size(100, 13);
+            this.lblCursor_Magnitude.Name = "lblCursor_Magnitude";
+            this.lblCursor_Magnitude.Size = new System.Drawing.Size(100, 15);
+            this.lblCursor_Magnitude.TabIndex = 11;
+            this.lblCursor_Magnitude.Text = "Magn: 0.00 dB";
             // 
             // lblCuror_Frequency
             // 
@@ -1276,14 +1264,13 @@
         private System.Windows.Forms.Button btnD_FitGraphY;
         private System.Windows.Forms.Label lblCuror_NoiseFloor;
         private System.Windows.Forms.Label lblCuror_Power;
-        private System.Windows.Forms.Label lblCuror_DC;
         private System.Windows.Forms.Label lblCuror_D6;
         private System.Windows.Forms.Label lblCuror_D5;
         private System.Windows.Forms.Label lblCuror_D4;
         private System.Windows.Forms.Label lblCuror_D3;
         private System.Windows.Forms.Label lblCuror_D2;
         private System.Windows.Forms.Label lblCuror_THD;
-        private System.Windows.Forms.Label lblCuror_Magnitude;
+        private System.Windows.Forms.Label lblCursor_Magnitude;
         private System.Windows.Forms.Label lblCuror_Frequency;
     }
 }

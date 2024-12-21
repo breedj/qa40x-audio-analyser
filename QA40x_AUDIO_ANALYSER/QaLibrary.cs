@@ -13,6 +13,7 @@ using ScottPlot.WinForms;
 using QA40x_AUDIO_ANALYSER;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 
 namespace QaControl
 {
@@ -202,13 +203,19 @@ namespace QaControl
             return binnedFrequencies;
         }
 
-        static public async Task<LeftRightSeries> DoAcquisitions(int averages)
+        static public async Task<LeftRightSeries> DoAcquisitions(int averages, CancellationToken ct)
         {
             LeftRightSeries leftRightSeries = new LeftRightSeries();
 
             await Qa40x.DoAcquisition();
+            if (ct.IsCancellationRequested)
+                return null;
             leftRightSeries.FreqInput = await Qa40x.GetInputFrequencySeries();
+            if (ct.IsCancellationRequested)
+                return null;
             leftRightSeries.TimeInput = await Qa40x.GetInputTimeSeries();
+            if (ct.IsCancellationRequested)
+                return null;
 
             if (averages <= 1)
                 return leftRightSeries;        // Only one measurement
@@ -216,6 +223,8 @@ namespace QaControl
             for (int i = 1; i < averages; i++)
             {
                 await Qa40x.DoAcquisition();
+                if (ct.IsCancellationRequested)
+                    return null;
                 LeftRightSeries leftRightSeries2 = new LeftRightSeries();
                 leftRightSeries2.FreqInput = await Qa40x.GetInputFrequencySeries();
       
@@ -319,12 +328,12 @@ namespace QaControl
         /// <param name="testFrequency">The generator frequency</param>
         /// <param name="testAttenuation">The test attenuation</param>
         /// <returns>The attanuation determined by the test</returns>
-        public static async Task<(int, double, LeftRightSeries)> DetermineAttenuationForGeneratorVoltage(double voltageDbv, double testFrequency = 1000, int testAttenuation = 42)
+        public static async Task<(int, double, LeftRightSeries)> DetermineAttenuationForGeneratorVoltage(double voltageDbv, double testFrequency, int testAttenuation, CancellationToken ct)
         {
             await Qa40x.SetInputRange(testAttenuation);                         // Set input range to initial range
             await Qa40x.SetGen1(testFrequency, voltageDbv, true);               // Enable generator at set voltage
             await Qa40x.SetOutputSource(OutputSources.Sine);
-            LeftRightSeries acqData = await DoAcquisitions(1);        // Do acquisition
+            LeftRightSeries acqData = await DoAcquisitions(1, ct);        // Do acquisition
             LeftRightPair plrp = await Qa40x.GetPeakDbv(testFrequency - 5, testFrequency + 5);        // Get peak value at 1 kHz
             var attenuation = DetermineAttenuation(plrp.Left);         // Determine attenuation and set input range
             await Qa40x.SetOutputSource(OutputSources.Off);                     // Disable generator
@@ -339,12 +348,12 @@ namespace QaControl
         /// <param name="startGeneratorAmplitude">The amplitude to start with. Should be small but the output should be detectable</param>
         /// <param name="desiredOutputAmplitude">The desired output amplitude</param>
         /// <returns>Generator amplitude in dBV</returns>
-        public static async Task<(double, LeftRightSeries)> DetermineGenAmplitudeByOutputAmplitude(double startGeneratorAmplitude, double desiredOutputAmplitude)
+        public static async Task<(double, LeftRightSeries)> DetermineGenAmplitudeByOutputAmplitude(double testFrequency, double startGeneratorAmplitude, double desiredOutputAmplitude, CancellationToken ct)
         {
-            await Qa40x.SetGen1(1000, startGeneratorAmplitude, true);           // Enable generator with start amplitude at 1 kHz
+            await Qa40x.SetGen1(testFrequency, startGeneratorAmplitude, true);           // Enable generator with start amplitude at 1 kHz
             await Qa40x.SetOutputSource(OutputSources.Sine);                    // Set sine wave
-            LeftRightSeries acqData = await DoAcquisitions(1);            // Do a single aqcuisition
-            LeftRightPair plrp = await Qa40x.GetPeakDbv(995, 1005);             // Get peak amplitude around 1 kHz
+            LeftRightSeries acqData = await DoAcquisitions(1, ct);            // Do a single aqcuisition
+            LeftRightPair plrp = await Qa40x.GetPeakDbv(testFrequency - 5, testFrequency + 5);             // Get peak amplitude around 1 kHz
             double leftPeakDbV = plrp.Left;
             //double rightPeak = plrp.Right;
             double amplitude = startGeneratorAmplitude + (desiredOutputAmplitude - leftPeakDbV);    // Determine amplitude for desired output amplitude based on measurement
@@ -608,7 +617,7 @@ namespace QaControl
             plot.Plot.Grid.MinorLineWidth = 1;
 
             plot.Plot.Axes.SetLimits(startFrequency < 10 ? Math.Log10(1) : Math.Log10(10), Math.Log10(100000), minDbV, maxDbV);
-            plot.Plot.Title("dBV");
+            plot.Plot.Title("dBV (output)");
             plot.Plot.Axes.Title.Label.FontSize = 12;
             plot.Plot.Axes.Title.Label.OffsetY = 8;
             plot.Plot.Axes.Title.Label.Bold = false;
@@ -689,7 +698,7 @@ namespace QaControl
 
             //thdPlot.Plot.Axes.AutoScale();
             plot.Plot.Axes.SetLimits(startTime, endTime, minVoltage, maxVoltage);
-            plot.Plot.Title("V (input)");
+            plot.Plot.Title("V (output)");
             plot.Plot.Axes.Title.Label.FontSize = 12;
             plot.Plot.Axes.Title.Label.OffsetY = 8;
             plot.Plot.Axes.Title.Label.Bold = false;

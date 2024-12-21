@@ -73,7 +73,7 @@
             this.chkShowThd = new System.Windows.Forms.CheckBox();
             this.btnGraph_dBV = new System.Windows.Forms.Button();
             this.btnGraph_D = new System.Windows.Forms.Button();
-            this.gbThdFreq_FrequencyRange = new System.Windows.Forms.GroupBox();
+            this.gbXAxisRange = new System.Windows.Forms.GroupBox();
             this.btnAutoFitX = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
             this.cmbVoltageGraph_To = new System.Windows.Forms.ComboBox();
@@ -87,7 +87,6 @@
             this.btnD_FitGraphY = new System.Windows.Forms.Button();
             this.lblCursor_NoiseFloor = new System.Windows.Forms.Label();
             this.lblCursor_Power = new System.Windows.Forms.Label();
-            this.lblCursor_DC = new System.Windows.Forms.Label();
             this.lblCursor_D6 = new System.Windows.Forms.Label();
             this.lblCursor_D5 = new System.Windows.Forms.Label();
             this.lblCursor_D4 = new System.Windows.Forms.Label();
@@ -95,7 +94,10 @@
             this.lblCursor_D2 = new System.Windows.Forms.Label();
             this.lblCursor_THD = new System.Windows.Forms.Label();
             this.lblCursor_Magnitude = new System.Windows.Forms.Label();
-            this.lblCursor_Voltage = new System.Windows.Forms.Label();
+            this.lblCursor_VoltageOut = new System.Windows.Forms.Label();
+            this.cmbXAxis = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.lblCursor_VoltageIn = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.scThdVsFreq)).BeginInit();
             this.scThdVsFreq.Panel1.SuspendLayout();
             this.scThdVsFreq.Panel2.SuspendLayout();
@@ -115,7 +117,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.cmbDbV_Graph_Bottom)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cmbDbV_Graph_Top)).BeginInit();
             this.gbThdFreq_Harmonics.SuspendLayout();
-            this.gbThdFreq_FrequencyRange.SuspendLayout();
+            this.gbXAxisRange.SuspendLayout();
             this.gbD_Range.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -457,9 +459,9 @@
             // scGraphCursors.Panel2
             // 
             this.scGraphCursors.Panel2.BackColor = System.Drawing.SystemColors.Control;
+            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_VoltageIn);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_NoiseFloor);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_Power);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_DC);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_D6);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_D5);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_D4);
@@ -467,7 +469,7 @@
             this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_D2);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_THD);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_Magnitude);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_Voltage);
+            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_VoltageOut);
             this.scGraphCursors.Size = new System.Drawing.Size(836, 765);
             this.scGraphCursors.SplitterDistance = 710;
             this.scGraphCursors.TabIndex = 0;
@@ -487,13 +489,15 @@
             // scGraphSettings.Panel2
             // 
             this.scGraphSettings.Panel2.BackColor = System.Drawing.SystemColors.Control;
+            this.scGraphSettings.Panel2.Controls.Add(this.label3);
             this.scGraphSettings.Panel2.Controls.Add(this.chkShowDataPoints);
             this.scGraphSettings.Panel2.Controls.Add(this.chkThickLines);
+            this.scGraphSettings.Panel2.Controls.Add(this.cmbXAxis);
             this.scGraphSettings.Panel2.Controls.Add(this.gbDbv_Range);
             this.scGraphSettings.Panel2.Controls.Add(this.gbThdFreq_Harmonics);
             this.scGraphSettings.Panel2.Controls.Add(this.btnGraph_dBV);
             this.scGraphSettings.Panel2.Controls.Add(this.btnGraph_D);
-            this.scGraphSettings.Panel2.Controls.Add(this.gbThdFreq_FrequencyRange);
+            this.scGraphSettings.Panel2.Controls.Add(this.gbXAxisRange);
             this.scGraphSettings.Panel2.Controls.Add(this.gbD_Range);
             this.scGraphSettings.Size = new System.Drawing.Size(836, 710);
             this.scGraphSettings.SplitterDistance = 709;
@@ -512,7 +516,7 @@
             // chkShowDataPoints
             // 
             this.chkShowDataPoints.AutoSize = true;
-            this.chkShowDataPoints.Location = new System.Drawing.Point(12, 596);
+            this.chkShowDataPoints.Location = new System.Drawing.Point(12, 632);
             this.chkShowDataPoints.Name = "chkShowDataPoints";
             this.chkShowDataPoints.Size = new System.Drawing.Size(108, 17);
             this.chkShowDataPoints.TabIndex = 45;
@@ -525,7 +529,7 @@
             this.chkThickLines.AutoSize = true;
             this.chkThickLines.Checked = true;
             this.chkThickLines.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkThickLines.Location = new System.Drawing.Point(12, 576);
+            this.chkThickLines.Location = new System.Drawing.Point(12, 611);
             this.chkThickLines.Name = "chkThickLines";
             this.chkThickLines.Size = new System.Drawing.Size(77, 17);
             this.chkThickLines.TabIndex = 44;
@@ -647,9 +651,9 @@
             this.gbThdFreq_Harmonics.Controls.Add(this.chkShowD3);
             this.gbThdFreq_Harmonics.Controls.Add(this.chkShowD2);
             this.gbThdFreq_Harmonics.Controls.Add(this.chkShowThd);
-            this.gbThdFreq_Harmonics.Location = new System.Drawing.Point(4, 363);
+            this.gbThdFreq_Harmonics.Location = new System.Drawing.Point(4, 397);
             this.gbThdFreq_Harmonics.Name = "gbThdFreq_Harmonics";
-            this.gbThdFreq_Harmonics.Size = new System.Drawing.Size(111, 207);
+            this.gbThdFreq_Harmonics.Size = new System.Drawing.Size(111, 208);
             this.gbThdFreq_Harmonics.TabIndex = 29;
             this.gbThdFreq_Harmonics.TabStop = false;
             this.gbThdFreq_Harmonics.Text = "Graph data";
@@ -764,7 +768,7 @@
             this.btnGraph_dBV.FlatAppearance.BorderColor = System.Drawing.Color.CornflowerBlue;
             this.btnGraph_dBV.FlatAppearance.BorderSize = 2;
             this.btnGraph_dBV.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnGraph_dBV.Location = new System.Drawing.Point(9, 626);
+            this.btnGraph_dBV.Location = new System.Drawing.Point(9, 659);
             this.btnGraph_dBV.Name = "btnGraph_dBV";
             this.btnGraph_dBV.Size = new System.Drawing.Size(52, 37);
             this.btnGraph_dBV.TabIndex = 28;
@@ -778,7 +782,7 @@
             this.btnGraph_D.FlatAppearance.BorderColor = System.Drawing.Color.CornflowerBlue;
             this.btnGraph_D.FlatAppearance.BorderSize = 2;
             this.btnGraph_D.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnGraph_D.Location = new System.Drawing.Point(67, 626);
+            this.btnGraph_D.Location = new System.Drawing.Point(67, 660);
             this.btnGraph_D.Name = "btnGraph_D";
             this.btnGraph_D.Size = new System.Drawing.Size(49, 37);
             this.btnGraph_D.TabIndex = 27;
@@ -786,19 +790,19 @@
             this.btnGraph_D.UseVisualStyleBackColor = false;
             this.btnGraph_D.Click += new System.EventHandler(this.btnGraph_D_Click);
             // 
-            // gbThdFreq_FrequencyRange
+            // gbXAxisRange
             // 
-            this.gbThdFreq_FrequencyRange.Controls.Add(this.btnAutoFitX);
-            this.gbThdFreq_FrequencyRange.Controls.Add(this.label8);
-            this.gbThdFreq_FrequencyRange.Controls.Add(this.cmbVoltageGraph_To);
-            this.gbThdFreq_FrequencyRange.Controls.Add(this.label9);
-            this.gbThdFreq_FrequencyRange.Controls.Add(this.cmbVoltageGraph_From);
-            this.gbThdFreq_FrequencyRange.Location = new System.Drawing.Point(3, 195);
-            this.gbThdFreq_FrequencyRange.Name = "gbThdFreq_FrequencyRange";
-            this.gbThdFreq_FrequencyRange.Size = new System.Drawing.Size(112, 162);
-            this.gbThdFreq_FrequencyRange.TabIndex = 26;
-            this.gbThdFreq_FrequencyRange.TabStop = false;
-            this.gbThdFreq_FrequencyRange.Text = "Voltage range";
+            this.gbXAxisRange.Controls.Add(this.btnAutoFitX);
+            this.gbXAxisRange.Controls.Add(this.label8);
+            this.gbXAxisRange.Controls.Add(this.cmbVoltageGraph_To);
+            this.gbXAxisRange.Controls.Add(this.label9);
+            this.gbXAxisRange.Controls.Add(this.cmbVoltageGraph_From);
+            this.gbXAxisRange.Location = new System.Drawing.Point(3, 238);
+            this.gbXAxisRange.Name = "gbXAxisRange";
+            this.gbXAxisRange.Size = new System.Drawing.Size(112, 150);
+            this.gbXAxisRange.TabIndex = 26;
+            this.gbXAxisRange.TabStop = false;
+            this.gbXAxisRange.Text = "Voltage range";
             // 
             // btnAutoFitX
             // 
@@ -833,7 +837,8 @@
             "10",
             "20",
             "50",
-            "100"});
+            "100",
+            "200"});
             this.cmbVoltageGraph_To.Location = new System.Drawing.Point(6, 82);
             this.cmbVoltageGraph_To.Name = "cmbVoltageGraph_To";
             this.cmbVoltageGraph_To.Size = new System.Drawing.Size(94, 21);
@@ -882,7 +887,7 @@
             this.gbD_Range.Controls.Add(this.label6);
             this.gbD_Range.Controls.Add(this.cmbD_Graph_Top);
             this.gbD_Range.Controls.Add(this.btnD_FitGraphY);
-            this.gbD_Range.Location = new System.Drawing.Point(3, 46);
+            this.gbD_Range.Location = new System.Drawing.Point(3, 44);
             this.gbD_Range.Name = "gbD_Range";
             this.gbD_Range.Size = new System.Drawing.Size(113, 143);
             this.gbD_Range.TabIndex = 25;
@@ -967,23 +972,12 @@
             // lblCursor_Power
             // 
             this.lblCursor_Power.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_Power.Location = new System.Drawing.Point(583, 3);
+            this.lblCursor_Power.Location = new System.Drawing.Point(404, 3);
             this.lblCursor_Power.MinimumSize = new System.Drawing.Size(100, 13);
             this.lblCursor_Power.Name = "lblCursor_Power";
-            this.lblCursor_Power.Size = new System.Drawing.Size(203, 15);
+            this.lblCursor_Power.Size = new System.Drawing.Size(170, 15);
             this.lblCursor_Power.TabIndex = 19;
             this.lblCursor_Power.Text = "Power: 0 mW";
-            // 
-            // lblCursor_DC
-            // 
-            this.lblCursor_DC.AutoSize = true;
-            this.lblCursor_DC.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_DC.Location = new System.Drawing.Point(471, 3);
-            this.lblCursor_DC.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_DC.Name = "lblCursor_DC";
-            this.lblCursor_DC.Size = new System.Drawing.Size(100, 15);
-            this.lblCursor_DC.TabIndex = 18;
-            this.lblCursor_DC.Text = "DC: 0 V";
             // 
             // lblCursor_D6
             // 
@@ -1044,7 +1038,7 @@
             // 
             this.lblCursor_THD.AutoSize = true;
             this.lblCursor_THD.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_THD.Location = new System.Drawing.Point(342, 3);
+            this.lblCursor_THD.Location = new System.Drawing.Point(282, 3);
             this.lblCursor_THD.MinimumSize = new System.Drawing.Size(100, 13);
             this.lblCursor_THD.Name = "lblCursor_THD";
             this.lblCursor_THD.Size = new System.Drawing.Size(100, 15);
@@ -1055,23 +1049,64 @@
             // 
             this.lblCursor_Magnitude.AutoSize = true;
             this.lblCursor_Magnitude.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_Magnitude.Location = new System.Drawing.Point(214, 3);
+            this.lblCursor_Magnitude.Location = new System.Drawing.Point(654, 3);
             this.lblCursor_Magnitude.MinimumSize = new System.Drawing.Size(100, 13);
             this.lblCursor_Magnitude.Name = "lblCursor_Magnitude";
             this.lblCursor_Magnitude.Size = new System.Drawing.Size(100, 15);
             this.lblCursor_Magnitude.TabIndex = 11;
             this.lblCursor_Magnitude.Text = "Magn: 0.00 dB";
             // 
-            // lblCursor_Voltage
+            // lblCursor_VoltageOut
             // 
-            this.lblCursor_Voltage.AutoSize = true;
-            this.lblCursor_Voltage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_Voltage.Location = new System.Drawing.Point(41, 3);
-            this.lblCursor_Voltage.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_Voltage.Name = "lblCursor_Voltage";
-            this.lblCursor_Voltage.Size = new System.Drawing.Size(127, 15);
-            this.lblCursor_Voltage.TabIndex = 10;
-            this.lblCursor_Voltage.Text = "Amplitude: 0.000 V";
+            this.lblCursor_VoltageOut.AutoSize = true;
+            this.lblCursor_VoltageOut.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_VoltageOut.Location = new System.Drawing.Point(161, 3);
+            this.lblCursor_VoltageOut.MinimumSize = new System.Drawing.Size(100, 13);
+            this.lblCursor_VoltageOut.Name = "lblCursor_VoltageOut";
+            this.lblCursor_VoltageOut.Size = new System.Drawing.Size(101, 15);
+            this.lblCursor_VoltageOut.TabIndex = 10;
+            this.lblCursor_VoltageOut.Text = "V(out): 0.000 V";
+            // 
+            // cmbXAxis
+            // 
+            this.cmbXAxis.AutoCompleteCustomSource.AddRange(new string[] {
+            "Output voltage",
+            "Output power",
+            "Inpur voltage"});
+            this.cmbXAxis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbXAxis.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cmbXAxis.FormattingEnabled = true;
+            this.cmbXAxis.Items.AddRange(new object[] {
+            "Output voltage",
+            "Output power",
+            "Input voltage"});
+            this.cmbXAxis.Location = new System.Drawing.Point(8, 208);
+            this.cmbXAxis.Name = "cmbXAxis";
+            this.cmbXAxis.Size = new System.Drawing.Size(103, 21);
+            this.cmbXAxis.TabIndex = 46;
+            this.cmbXAxis.SelectedIndexChanged += new System.EventHandler(this.cmbXAxis_SelectedIndexChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label3.Location = new System.Drawing.Point(11, 190);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(35, 13);
+            this.label3.TabIndex = 36;
+            this.label3.Text = "X-axis";
+            // 
+            // lblCursor_VoltageIn
+            // 
+            this.lblCursor_VoltageIn.AutoSize = true;
+            this.lblCursor_VoltageIn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_VoltageIn.Location = new System.Drawing.Point(41, 3);
+            this.lblCursor_VoltageIn.MinimumSize = new System.Drawing.Size(100, 13);
+            this.lblCursor_VoltageIn.Name = "lblCursor_VoltageIn";
+            this.lblCursor_VoltageIn.Size = new System.Drawing.Size(100, 15);
+            this.lblCursor_VoltageIn.TabIndex = 21;
+            this.lblCursor_VoltageIn.Text = "V(in): 0.000 V";
             // 
             // frmThdAmplitude
             // 
@@ -1110,8 +1145,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.cmbDbV_Graph_Top)).EndInit();
             this.gbThdFreq_Harmonics.ResumeLayout(false);
             this.gbThdFreq_Harmonics.PerformLayout();
-            this.gbThdFreq_FrequencyRange.ResumeLayout(false);
-            this.gbThdFreq_FrequencyRange.PerformLayout();
+            this.gbXAxisRange.ResumeLayout(false);
+            this.gbXAxisRange.PerformLayout();
             this.gbD_Range.ResumeLayout(false);
             this.gbD_Range.PerformLayout();
             this.ResumeLayout(false);
@@ -1162,7 +1197,7 @@
         private System.Windows.Forms.CheckBox chkShowThd;
         private System.Windows.Forms.Button btnGraph_dBV;
         private System.Windows.Forms.Button btnGraph_D;
-        private System.Windows.Forms.GroupBox gbThdFreq_FrequencyRange;
+        private System.Windows.Forms.GroupBox gbXAxisRange;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.ComboBox cmbVoltageGraph_To;
         private System.Windows.Forms.Label label9;
@@ -1175,7 +1210,6 @@
         private System.Windows.Forms.Button btnD_FitGraphY;
         private System.Windows.Forms.Label lblCursor_NoiseFloor;
         private System.Windows.Forms.Label lblCursor_Power;
-        private System.Windows.Forms.Label lblCursor_DC;
         private System.Windows.Forms.Label lblCursor_D6;
         private System.Windows.Forms.Label lblCursor_D5;
         private System.Windows.Forms.Label lblCursor_D4;
@@ -1183,10 +1217,13 @@
         private System.Windows.Forms.Label lblCursor_D2;
         private System.Windows.Forms.Label lblCursor_THD;
         private System.Windows.Forms.Label lblCursor_Magnitude;
-        private System.Windows.Forms.Label lblCursor_Voltage;
+        private System.Windows.Forms.Label lblCursor_VoltageOut;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TextBox txtEndVoltage;
         private System.Windows.Forms.ComboBox cmbEndVoltageUnit;
         private System.Windows.Forms.Button btnAutoFitX;
+        private System.Windows.Forms.ComboBox cmbXAxis;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lblCursor_VoltageIn;
     }
 }

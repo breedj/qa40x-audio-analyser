@@ -215,6 +215,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="QA40x_AUDIO_ANALYSER_TemporaryKey.pfx" />
+    <Content Include="Settings\Default.settings">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

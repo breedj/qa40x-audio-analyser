@@ -187,6 +187,7 @@ namespace QA40x_AUDIO_ANALYSER
         async Task<bool> PerformMeasurementSteps(CancellationToken ct)
         {
             clearPlot();
+            ClearCursorTexts();
 
             Data.StepData = [];
 
@@ -209,11 +210,12 @@ namespace QA40x_AUDIO_ANALYSER
             await Qa40x.SetBufferSize(Data.Settings.FftSize);
             await Qa40x.SetWindowing(Data.Settings.WindowingFunction);
             await Qa40x.SetRoundFrequencies(true);
-            
+
 
             // ********************************************************************
             // Determine input level
             // ********************************************************************
+            double testFrequency = QaLibrary.GetNearestBinFrequency(1000, Data.Settings.SampleRate, Data.Settings.FftSize);
             if (cmbGeneratorType.SelectedIndex == 1 || cmbGeneratorType.SelectedIndex == 2)     // Based on output
             {
                 double amplifierOutputVoltagedBV = QaLibrary.ConvertVoltage(Data.Settings.AmpOutputAmplitude, Data.Settings.AmpOutputAmplitudeUnit, E_VoltageUnit.dBV);
@@ -225,11 +227,13 @@ namespace QA40x_AUDIO_ANALYSER
                 // Get input voltage based on desired output voltage
                 Data.Settings.InputRange = QaLibrary.DetermineAttenuation(amplifierOutputVoltagedBV);
                 double startAmplitude = -40;  // We start a measurement with a 10 mV signal.
-                var result = await QaLibrary.DetermineGenAmplitudeByOutputAmplitude(startAmplitude, amplifierOutputVoltagedBV);
-                Data.Settings.GeneratorAmplitude = result.Item1;
+                var result = await QaLibrary.DetermineGenAmplitudeByOutputAmplitude(testFrequency, startAmplitude, amplifierOutputVoltagedBV, ct);
+                if (ct.IsCancellationRequested)
+                    return false;
+                Data.Settings.GeneratorAmplitude = result.Item1; 
                 Data.Settings.GeneratorAmplitudeUnit = E_VoltageUnit.dBV;
                 QaLibrary.PlotMiniFftGraph(graphFft, result.Item2.FreqInput);                                             // Plot fft data in mini graph
-                QaLibrary.PlotMiniTimeGraph(graphTime, result.Item2.TimeInput, 1000);                                      // Plot time data in mini graph
+                QaLibrary.PlotMiniTimeGraph(graphTime, result.Item2.TimeInput, testFrequency);                                      // Plot time data in mini graph
                 if (Data.Settings.GeneratorAmplitude == -150)
                 {
                     await Program.MainForm.ShowMessage($"Could not determine a valid generator amplitude. The amplitude would be {Data.Settings.GeneratorAmplitude:0.00#} dBV.");
@@ -246,10 +250,12 @@ namespace QA40x_AUDIO_ANALYSER
                     await Program.MainForm.ShowMessage($"Found an input amplitude of {Data.Settings.GeneratorAmplitude:0.00#} dBV. Doing second pass.");
 
                     // 2nd time for extra accuracy
-                    result = await QaLibrary.DetermineGenAmplitudeByOutputAmplitude(Data.Settings.GeneratorAmplitude, amplifierOutputVoltagedBV);
+                    result = await QaLibrary.DetermineGenAmplitudeByOutputAmplitude(testFrequency, Data.Settings.GeneratorAmplitude, amplifierOutputVoltagedBV, ct);
+                    if (ct.IsCancellationRequested)
+                        return false;
                     Data.Settings.GeneratorAmplitude = result.Item1;
                     QaLibrary.PlotMiniFftGraph(graphFft, result.Item2.FreqInput);                                             // Plot fft data in mini graph
-                    QaLibrary.PlotMiniTimeGraph(graphTime, result.Item2.TimeInput, 1000);                                      // Plot time data in mini graph
+                    QaLibrary.PlotMiniTimeGraph(graphTime, result.Item2.TimeInput, testFrequency);                                      // Plot time data in mini graph
                     if (Data.Settings.GeneratorAmplitude == -150)
                     {
                         await Program.MainForm.ShowMessage($"Could not determine a valid generator amplitude. The amplitude would be {Data.Settings.GeneratorAmplitude:0.00#} dBV.");
@@ -263,14 +269,16 @@ namespace QA40x_AUDIO_ANALYSER
             }
             else if (cmbGeneratorType.SelectedIndex == 0)                         // Based on input voltage
             {
-                double amplifierOutputVoltagedBV = QaLibrary.ConvertVoltage(Data.Settings.AmpOutputAmplitude, Data.Settings.AmpOutputAmplitudeUnit, E_VoltageUnit.dBV);
-                await Program.MainForm.ShowMessage($"Determining the best input attenuation for a generator voltage of {amplifierOutputVoltagedBV:0.00#} dBV.");
+                double genVoltagedBV = QaLibrary.ConvertVoltage(Data.Settings.GeneratorAmplitude, Data.Settings.GeneratorAmplitudeUnit, E_VoltageUnit.dBV);
+                await Program.MainForm.ShowMessage($"Determining the best input attenuation for a generator voltage of {genVoltagedBV:0.00#} dBV.");
 
                 // Determine correct input attenuation
-                var result = await QaLibrary.DetermineAttenuationForGeneratorVoltage(amplifierOutputVoltagedBV, 1000, 42);
+                var result = await QaLibrary.DetermineAttenuationForGeneratorVoltage(genVoltagedBV, testFrequency, 42, ct);
+                if (ct.IsCancellationRequested)
+                    return false;
                 Data.Settings.InputRange = result.Item1;
                 QaLibrary.PlotMiniFftGraph(graphFft, result.Item3.FreqInput);
-                QaLibrary.PlotMiniTimeGraph(graphTime, result.Item3.TimeInput, 1000);
+                QaLibrary.PlotMiniTimeGraph(graphTime, result.Item3.TimeInput, testFrequency);
 
                 await Program.MainForm.ShowMessage($"Found correct input attenuation of {Data.Settings.InputRange:0} dBV for an amplfier amplitude of {result.Item2:0.00#} dBV.", 500);
             }
@@ -296,7 +304,9 @@ namespace QA40x_AUDIO_ANALYSER
             await Program.MainForm.ShowMessage($"Determining noise floor.");
             await Qa40x.SetOutputSource(OutputSources.Off);
             await Qa40x.DoAcquisition();
-            LeftRightSeries noiseFloor = await QaLibrary.DoAcquisitions(Data.Settings.Averages);
+            LeftRightSeries noiseFloor = await QaLibrary.DoAcquisitions(Data.Settings.Averages, ct);
+            if (ct.IsCancellationRequested)
+                return false;
             Data.NoiseFloor = noiseFloor;
 
             Program.MainForm.SetupProgressBar(0, stepBins.Length);
@@ -315,7 +325,9 @@ namespace QA40x_AUDIO_ANALYSER
                 if (f == 0)
                     await Qa40x.SetOutputSource(OutputSources.Sine);            // We need to call this to make the averages reset
                                                                                
-                LeftRightSeries lrfs = await QaLibrary.DoAcquisitions(Data.Settings.Averages);
+                LeftRightSeries lrfs = await QaLibrary.DoAcquisitions(Data.Settings.Averages, ct);
+                if (ct.IsCancellationRequested)
+                    return false;
 
                 FrequencyThdStep step = new()
                 {
@@ -323,7 +335,6 @@ namespace QA40x_AUDIO_ANALYSER
                     GeneratorVoltage = QaLibrary.ConvertVoltage(amplitudeSetpointdBV, E_VoltageUnit.dBV, E_VoltageUnit.Volt),
                     fftData = lrfs.FreqInput,
                     timeData = lrfs.TimeInput,
-                    DcComponent = lrfs.TimeInput.Left.Average()
                 };
 
                 uint fundamentalBin = QaLibrary.GetBinOfFrequency(step.FundamentalFrequency, binSize);
@@ -452,7 +463,6 @@ namespace QA40x_AUDIO_ANALYSER
                     , (step.Harmonics.Count > 3 ? step.Harmonics[2].AmplitudeDbV - step.AmplitudeDbV : 0)
                     , (step.Harmonics.Count > 4 ? step.Harmonics[3].AmplitudeDbV - step.AmplitudeDbV : 0)
                     , (step.Harmonics.Count > 5 ? step.D6PlusDbV - step.AmplitudeDbV : 0)                   // 6+ harmonics
-                    , step.DcComponent
                     , step.PowerWatt
                     , step.NoiseFloorDbV - step.AmplitudeDbV
                     , Data.Settings.Load
@@ -471,7 +481,6 @@ namespace QA40x_AUDIO_ANALYSER
                     , (step.Harmonics.Count > 3 ? step.Harmonics[2].ThdPercent : 0)
                     , (step.Harmonics.Count > 4 ? step.Harmonics[3].ThdPercent : 0)
                     , (step.Harmonics.Count > 5 ? step.ThdPercentD6plus : 0)                                // 6+ harmonics
-                    , step.DcComponent
                     , step.PowerWatt
                     , (step.NoiseFloorV / step.AmplitudeVolts) % 100
                     , Data.Settings.Load
@@ -495,10 +504,10 @@ namespace QA40x_AUDIO_ANALYSER
         /// <param name="power">Amount of power in Watt</param>
         /// <param name="noiseFloor">The noise floor in dB</param>
         /// <param name="load">The amplifier load</param>
-        void WriteCursorTextsD(double f, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double dc, double power, double noiseFloor, double load)
+        void WriteCursorTextsD(double f, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double power, double noiseFloor, double load)
         {
             lblCuror_Frequency.Text = $"Frequency: {f:0.## Hz}";
-            lblCuror_Magnitude.Text = $"Magn: {magnitude:0.## dB}";
+            lblCursor_Magnitude.Text = $"Magn: {magnitude:0.## dB}";
             lblCuror_THD.Text = $"THD: {thd:0.0000# \\%}";
 
             lblCuror_D2.Text = $"D2: {D2:0.0000# \\%}";
@@ -506,7 +515,6 @@ namespace QA40x_AUDIO_ANALYSER
             lblCuror_D4.Text = $"D4: {D4:0.0000# \\%}";
             lblCuror_D5.Text = $"D5: {D5:0.0000# \\%}";
             lblCuror_D6.Text = $"D6+: {D6:0.0000# \\%}";
-            lblCuror_DC.Text = $"DC: {dc * 1000:0.0# mV}";
 
             if (power < 1)
                 lblCuror_Power.Text = $"Power: {power * 1000:0.0# mW} ({load:0.##} Ω)";
@@ -514,7 +522,7 @@ namespace QA40x_AUDIO_ANALYSER
                 lblCuror_Power.Text = $"Power: {power:0.00# W} ({load:0.##} Ω)";
 
             lblCuror_NoiseFloor.Text = $"Noise floor: {noiseFloor:##0.0# dB}";
-
+            scGraphCursors.Panel2.Refresh();
         }
 
         /// <summary>
@@ -532,10 +540,10 @@ namespace QA40x_AUDIO_ANALYSER
         /// <param name="power">Amount of power in Watt</param>
         /// <param name="noiseFloor">The noise floor in dB</param>
         /// <param name="load">The amplifier load</param>
-        void WriteCursorTextsdB(double f, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double dc, double power, double noiseFloor, double load)
+        void WriteCursorTextsdB(double f, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double power, double noiseFloor, double load)
         {
             lblCuror_Frequency.Text = $"Frequency: {f:0.## Hz}";
-            lblCuror_Magnitude.Text = $"Magn: {magnitude:0.## dB}";
+            lblCursor_Magnitude.Text = $"Magn: {magnitude:0.## dB}";
             lblCuror_THD.Text = $"THD: {thd:0.0# dB}";
 
             lblCuror_D2.Text = $"D2: {D2:##0.0# dB}";
@@ -543,7 +551,6 @@ namespace QA40x_AUDIO_ANALYSER
             lblCuror_D4.Text = $"D4: {D4:##0.0# dB}";
             lblCuror_D5.Text = $"D5: {D5:##0.0# dB}";
             lblCuror_D6.Text = $"D6+: {D6:##0.0# dB}";
-            lblCuror_DC.Text = $"DC: {dc * 1000:0.0# mV}";
 
             if (power < 1)
                 lblCuror_Power.Text = $"Power: {power * 1000:0.0# mW} ({load:0.##} Ω)";
@@ -551,6 +558,12 @@ namespace QA40x_AUDIO_ANALYSER
                 lblCuror_Power.Text = $"Power: {power:0.00# W} ({load:0.##} Ω)";
 
             lblCuror_NoiseFloor.Text = $"Noise floor: {noiseFloor:##0.0# dB}";
+            scGraphCursors.Panel2.Refresh();
+        }
+
+        void ClearCursorTexts()
+        {
+            WriteCursorTextsdB(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
 
              
@@ -1148,7 +1161,6 @@ namespace QA40x_AUDIO_ANALYSER
                         , (step.Harmonics.Count > 2 ? step.Harmonics[2].AmplitudeDbV - step.AmplitudeDbV : 0)
                         , (step.Harmonics.Count > 3 ? step.Harmonics[3].AmplitudeDbV - step.AmplitudeDbV : 0)
                         , (step.Harmonics.Count > 4 ? step.D6PlusDbV - step.AmplitudeDbV : 0)                   // 6+ harmonics
-                        , step.DcComponent
                         , step.PowerWatt
                         , step.NoiseFloorDbV - step.AmplitudeDbV
                         , Data.Settings.Load
@@ -1161,10 +1173,9 @@ namespace QA40x_AUDIO_ANALYSER
                         , step.ThdPercent
                         , (step.Harmonics.Count > 0 ? step.Harmonics[0].ThdPercent : 0)     // 2nd harmonic
                         , (step.Harmonics.Count > 1 ? step.Harmonics[1].ThdPercent : 0)
-                        , (step.Harmonics.Count > 3 ? step.Harmonics[2].ThdPercent : 0)
-                        , (step.Harmonics.Count > 4 ? step.Harmonics[3].ThdPercent : 0)
-                        , (step.Harmonics.Count > 5 ? step.ThdPercentD6plus : 0)                   // 6+ harmonics
-                        , step.DcComponent
+                        , (step.Harmonics.Count > 2 ? step.Harmonics[2].ThdPercent : 0)
+                        , (step.Harmonics.Count > 3 ? step.Harmonics[3].ThdPercent : 0)
+                        , (step.Harmonics.Count > 4 ? step.ThdPercentD6plus : 0)                   // 6+ harmonics
                         , step.PowerWatt
                         , (step.NoiseFloorV / step.AmplitudeVolts) % 100
                         , Data.Settings.Load
@@ -1519,7 +1530,9 @@ namespace QA40x_AUDIO_ANALYSER
             gbD_Range.Visible = false;
             btnGraph_D_Percent.BackColor = System.Drawing.Color.WhiteSmoke;
             chkShowMagnitude.Enabled = true;
+            lblCursor_Magnitude.Visible = true;
 
+            ClearCursorTexts();
             InitializeMagnitudePlot();
             PlotMagnitude(Data);
         }
@@ -1536,7 +1549,9 @@ namespace QA40x_AUDIO_ANALYSER
             gbD_Range.Visible = true;
             btnGraph_D_Percent.BackColor = System.Drawing.Color.Cornsilk;
             chkShowMagnitude.Enabled = false;
+            lblCursor_Magnitude.Visible = false;
 
+            ClearCursorTexts();
             initThdPlot();
             PlotThd(Data);
         }
@@ -1574,20 +1589,30 @@ namespace QA40x_AUDIO_ANALYSER
 
 
             // Determine bottom Y
-            double minThd = (Data.StepData.Min(d => (d.NoiseFloorV / d.AmplitudeVolts) * 100));
-            if (minThd > 0.1)
+            double minThd = Data.StepData.Min(d => (d.NoiseFloorV / d.AmplitudeVolts) * 100);
+            double minD2 = Data.StepData.Where(d => d.Harmonics.Count >= 1).Min(d => (d.Harmonics[0].AmplitudeVolts / d.AmplitudeVolts) * 100);
+            double minD3 = Data.StepData.Where(d => d.Harmonics.Count >= 2).Min(d => (d.Harmonics[1].AmplitudeVolts / d.AmplitudeVolts) * 100);
+            double minD4 = Data.StepData.Where(d => d.Harmonics.Count >= 3).Min(d => (d.Harmonics[2].AmplitudeVolts / d.AmplitudeVolts) * 100);
+            double minD5 = Data.StepData.Where(d => d.Harmonics.Count >= 4).Min(d => (d.Harmonics[3].AmplitudeVolts / d.AmplitudeVolts) * 100);
+            double minD6 = Data.StepData.Min(d => d.ThdPercentD6plus);
+
+            double min = Math.Min(minThd, minD2);
+            min = Math.Min(min, minD3);
+            min = Math.Min(min, minD4);
+            min = Math.Min(min, minD5);
+            
+            if (min > 0.1)
                 cmbD_Graph_Bottom.SelectedIndex = 0;
-            else if (minThd > 0.01)
+            else if (min > 0.01)
                 cmbD_Graph_Bottom.SelectedIndex = 1;
-            else if (minThd > 0.001)
+            else if (min > 0.001)
                 cmbD_Graph_Bottom.SelectedIndex = 2;
-            else if (minThd > 0.0001)
+            else if (min > 0.0001)
                 cmbD_Graph_Bottom.SelectedIndex = 3;
-            else if (minThd > 0.00001)
+            else if (min > 0.00001)
                 cmbD_Graph_Bottom.SelectedIndex = 4;
             else
                 cmbD_Graph_Bottom.SelectedIndex = 5;
-
         }
 
         /// <summary>
@@ -1612,9 +1637,18 @@ namespace QA40x_AUDIO_ANALYSER
                 cmbdB_Graph_Top.Value = Math.Ceiling((decimal)((int)(maxDb * 10) + 1) / 10);
 
             // Determine bottom Y
-            double minDb = Data.StepData.Min(d => d.NoiseFloorDbV) + Data.StepData[0].MagnitudeDb;
+            double minDb = Data.StepData.Min(d => d.NoiseFloorDbV) - Data.StepData.Average(d => d.AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
+            double minD2 = Data.StepData.Where(d => d.Harmonics.Count >= 1).Min(d => d.Harmonics[0].AmplitudeDbV) - Data.StepData.Average(d => d.AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
+            double minD3 = Data.StepData.Where(d => d.Harmonics.Count >= 2).Min(d => d.Harmonics[1].AmplitudeDbV) - Data.StepData.Average(d => d.AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
+            double minD4 = Data.StepData.Where(d => d.Harmonics.Count >= 3).Min(d => d.Harmonics[2].AmplitudeDbV) - Data.StepData.Average(d => d.AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
+            double minD5 = Data.StepData.Where(d => d.Harmonics.Count >= 4).Min(d => d.Harmonics[3].AmplitudeDbV) - Data.StepData.Average(d => d.AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
+            double minD6 = Data.StepData.Where(d => d.Harmonics.Count >= 5).Min(d => d.Harmonics[4].AmplitudeDbV) - Data.StepData.Average(d => d.AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
 
-            cmbdB_Graph_Bottom.Value = Math.Ceiling((decimal)((int)(minDb / 10) - 2) * 10);
+            double min = Math.Min(minDb, minD2);
+            min = Math.Min(min, minD3);
+            min = Math.Min(min, minD4);
+            min = Math.Min(min, minD5);
+            cmbdB_Graph_Bottom.Value = Math.Ceiling((decimal)((int)(min / 10) - 1) * 10);        // Round to 10, subtract 10
         }
 
         /// <summary>
@@ -1625,6 +1659,11 @@ namespace QA40x_AUDIO_ANALYSER
         private void btnStopMeasurement_Click(object sender, EventArgs e)
         {
             ct.Cancel();
+        }
+
+        private void lblCuror_Power_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

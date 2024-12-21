@@ -19,7 +19,6 @@ namespace QaControl
         public LeftRightFrequencySeries fftData { get; set; }
         [JsonIgnore]
         public LeftRightTimeSeries timeData { get; set; }
-        public double DcComponent { get; set; }
         public double D6PlusDbV { get; set; }
         public double ThdPercentD6plus { get; set; }
         public double ThdDbD6plus { get; set; }

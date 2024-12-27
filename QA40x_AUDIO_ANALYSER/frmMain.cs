@@ -17,7 +17,7 @@ namespace QA40x_AUDIO_ANALYSER
     {
         public static Panel MeasurementPanel;
 
-        private static ThdFrequencyMeasurementData ThdFrequencyData = new();
+        private static ThdFrequencyData ThdFrequencyData = new();
 
         private static ThdAmplitudeMeasurementData ThdAmplitudeData = new();
 

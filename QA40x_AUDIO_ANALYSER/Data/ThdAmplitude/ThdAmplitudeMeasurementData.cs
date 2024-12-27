@@ -9,14 +9,15 @@ namespace QaControl
     public class ThdAmplitudeMeasurementData
     {
         public ThdAmplitudeMeasurementSettings Settings { get; set; }
-        public List<FrequencyThdStep> StepData { get; set; }
+        public List<ThdFrequencyStep> StepData { get; set; }
+
         [JsonIgnore]
         public LeftRightSeries NoiseFloor { get; set; }
 
 
         public ThdAmplitudeMeasurementData()
         {
-            StepData = new List<FrequencyThdStep>();
+            StepData = new List<ThdFrequencyStep>();
             Settings = new ThdAmplitudeMeasurementSettings();
         }
     }

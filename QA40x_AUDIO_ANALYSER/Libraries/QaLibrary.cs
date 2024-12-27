@@ -40,6 +40,11 @@ namespace QaControl
         public static double MINIMUM_DEVICE_INPUT_VOLTAGE_MV = 1E-3;
         public static double MAXIMUM_DEVICE_INPUT_VOLTAGE_MV = 40000;
 
+        public static int MINIMUM_DEVICE_ATTENUATION = 0;
+        public static int MAXIMUM_DEVICE_ATTENUATION = 42;
+
+   
+
         /// <summary>
         /// Calculates fft bin size in Hz
         /// </summary>
@@ -203,7 +208,7 @@ namespace QaControl
             return binnedFrequencies;
         }
 
-        static public async Task<LeftRightSeries> DoAcquisitions(int averages, CancellationToken ct)
+        static public async Task<LeftRightSeries> DoAcquisitions(uint averages, CancellationToken ct)
         {
             LeftRightSeries leftRightSeries = new LeftRightSeries();
 
@@ -328,17 +333,27 @@ namespace QaControl
         /// <param name="testFrequency">The generator frequency</param>
         /// <param name="testAttenuation">The test attenuation</param>
         /// <returns>The attanuation determined by the test</returns>
-        public static async Task<(int, double, LeftRightSeries)> DetermineAttenuationForGeneratorVoltage(double voltageDbv, double testFrequency, int testAttenuation, CancellationToken ct)
+        public static async Task<(int, double, LeftRightSeries)> DetermineAttenuationForGeneratorVoltage(double voltageDbv, double testFrequency, int testAttenuation, bool leftChannelEnable, bool rightChannelEnabled, CancellationToken ct)
         {
             await Qa40x.SetInputRange(testAttenuation);                         // Set input range to initial range
             await Qa40x.SetGen1(testFrequency, voltageDbv, true);               // Enable generator at set voltage
             await Qa40x.SetOutputSource(OutputSources.Sine);
             LeftRightSeries acqData = await DoAcquisitions(1, ct);        // Do acquisition
             LeftRightPair plrp = await Qa40x.GetPeakDbv(testFrequency - 5, testFrequency + 5);        // Get peak value at 1 kHz
-            var attenuation = DetermineAttenuation(plrp.Left);         // Determine attenuation and set input range
+            
+            // Determine highest channel value
+            double peak_dBV = 0;
+            if (leftChannelEnable && rightChannelEnabled)
+                peak_dBV = (plrp.Left > plrp.Right) ? plrp.Left : plrp.Right;
+            else if (leftChannelEnable)
+                peak_dBV = plrp.Left;
+            else
+                peak_dBV = plrp.Right;
+
+            var attenuation = DetermineAttenuation(peak_dBV);         // Determine attenuation and set input range
             await Qa40x.SetOutputSource(OutputSources.Off);                     // Disable generator
 
-            return (attenuation, plrp.Left, acqData);       // Return attenuation, measured amplitude and acquisition data
+            return (attenuation, peak_dBV, acqData);       // Return attenuation, measured amplitude in dBV and acquisition data
         }
 
 
@@ -348,15 +363,23 @@ namespace QaControl
         /// <param name="startGeneratorAmplitude">The amplitude to start with. Should be small but the output should be detectable</param>
         /// <param name="desiredOutputAmplitude">The desired output amplitude</param>
         /// <returns>Generator amplitude in dBV</returns>
-        public static async Task<(double, LeftRightSeries)> DetermineGenAmplitudeByOutputAmplitude(double testFrequency, double startGeneratorAmplitude, double desiredOutputAmplitude, CancellationToken ct)
+        public static async Task<(double, LeftRightSeries)> DetermineGenAmplitudeByOutputAmplitude(double testFrequency, double startGeneratorAmplitude, double desiredOutputAmplitude, bool leftChannelEnable, bool rightChannelEnabled, CancellationToken ct)
         {
             await Qa40x.SetGen1(testFrequency, startGeneratorAmplitude, true);           // Enable generator with start amplitude at 1 kHz
             await Qa40x.SetOutputSource(OutputSources.Sine);                    // Set sine wave
             LeftRightSeries acqData = await DoAcquisitions(1, ct);            // Do a single aqcuisition
             LeftRightPair plrp = await Qa40x.GetPeakDbv(testFrequency - 5, testFrequency + 5);             // Get peak amplitude around 1 kHz
-            double leftPeakDbV = plrp.Left;
-            //double rightPeak = plrp.Right;
-            double amplitude = startGeneratorAmplitude + (desiredOutputAmplitude - leftPeakDbV);    // Determine amplitude for desired output amplitude based on measurement
+
+            // Determine highest channel value
+            double peak_dBV = 0;
+            if (leftChannelEnable && rightChannelEnabled)
+                peak_dBV = (plrp.Left > plrp.Right) ? plrp.Left : plrp.Right;
+            else if (leftChannelEnable)
+                peak_dBV = plrp.Left;
+            else
+                peak_dBV = plrp.Right;
+
+            double amplitude = startGeneratorAmplitude + (desiredOutputAmplitude - peak_dBV);    // Determine amplitude for desired output amplitude based on measurement
             // Check if amplitude not too high or too low.
             if (amplitude >= 18)
             {
@@ -530,6 +553,21 @@ namespace QaControl
         }
 
         /// <summary>
+        /// Parse text to unsigned int. Return fallback texts if failed
+        /// </summary>
+        /// <param name="text">Text to parse</param>
+        /// <param name="fallback">Fallback text</param>
+        /// <returns></returns>
+        public static uint ParseTextToUint(string text, uint fallback)
+        {
+
+            if (uint.TryParse(text, NumberStyles.Any, CultureInfo.CurrentCulture, out uint value))
+                return value;     // return parsed value
+
+            return fallback;
+        }
+
+        /// <summary>
         /// Plots a vertical cursor marker line 
         /// </summary>
         /// <param name="lineWidth">Line width of the marker</param>
@@ -576,26 +614,13 @@ namespace QaControl
                 MinorTickGenerator = minorTickGen
             };
 
-            // create a custom tick formatter to set the label text for each tick
-            //static string LogTickLabelFormatter(double y) => $"{Math.Pow(10, y):G}";
-
-            // tell our major tick generator to only show major ticks that are whole integers
-            //tickGen.IntegerTicksOnly = true;
-
-            // tell our custom tick generator to use our new label formatter
-            // tickGen.LabelFormatter = LogTickLabelFormatter;
-
+          
             // tell the left axis to use our custom tick generator
             plot.Plot.Axes.Left.TickGenerator = tickGen;
 
 
-
             // create a minor tick generator that places log-distributed minor ticks
             ScottPlot.TickGenerators.LogMinorTickGenerator minorTickGenX = new();
-
-            // create a numeric tick generator that uses our custom minor tick generator
-            //ScottPlot.TickGenerators.NumericAutomatic tickGenX = new();
-            //tickGenX.MinorTickGenerator = minorTickGenX;
 
             // create a manual tick generator and add ticks
             ScottPlot.TickGenerators.NumericManual tickGenX = new();
@@ -631,36 +656,63 @@ namespace QaControl
 
             plot.Plot.Legend.IsVisible = false;
 
-            plot.Refresh();
+            PixelPadding padding = new(40, 20, 50, 20);
+            plot.Plot.Layout.Fixed(padding);
 
+            plot.Refresh();
         }
 
-        public static void PlotMiniFftGraph(FormsPlot plot, LeftRightFrequencySeries fftData)
+
+        public static void PlotMiniFftGraph(FormsPlot plot, LeftRightFrequencySeries fftData, bool leftChannelEnabled, bool rightChannelEnabled)
         {
             plot.Plot.Clear();
 
             List<double> freqX = [];
-            List<double> dbVY = [];
+            List<double> dBV_Left_Y = [];
+            List<double> dBV_Right_Y = [];
             double frequency = 0;
 
             for (int f = 0; f < fftData.Left.Length; f++)
             {
                 frequency += fftData.Df;
                 freqX.Add(frequency);
-                dbVY.Add(20 * Math.Log10(fftData.Left[f]));
+                if (leftChannelEnabled)
+                    dBV_Left_Y.Add(20 * Math.Log10(fftData.Left[f]));
+                if (rightChannelEnabled)
+                    dBV_Right_Y.Add(20 * Math.Log10(fftData.Right[f]));
             }
 
             // add a scatter plot to the plot
             double[] logFreqX = freqX.Select(Math.Log10).ToArray();
+            double[] logHTot_Left_Y = dBV_Left_Y.ToArray();
+            double[] logHTot_Right_Y = dBV_Right_Y.ToArray();
 
-            double[] logHTotY = dbVY.ToArray();
-            var plotTot = plot.Plot.Add.Scatter(logFreqX, logHTotY);
-            plotTot.LineWidth = 1;
-            plotTot.Color = ScottPlot.Color.FromColor(System.Drawing.Color.FromArgb(1, 97, 170));
-            plotTot.MarkerSize = 1;
+            Scatter plotTot_Left = null;
+            if (leftChannelEnabled)
+            {
+                plotTot_Left = plot.Plot.Add.Scatter(logFreqX, logHTot_Left_Y);
+                plotTot_Left.LineWidth = 1;
+                plotTot_Left.Color = new ScottPlot.Color(1, 97, 170, 255);  // Blue
+                plotTot_Left.MarkerSize = 1;
+            }
+
+            Scatter plotTot_Right = null;
+            if (rightChannelEnabled)
+            {
+                plotTot_Right = plot.Plot.Add.Scatter(logFreqX, logHTot_Right_Y);
+                plotTot_Right.LineWidth = 1;
+                if (leftChannelEnabled)
+                    plotTot_Right.Color = new ScottPlot.Color(220, 5, 46, 120); // Red transparant
+                else
+                    plotTot_Right.Color = new ScottPlot.Color(220, 5, 46, 255); // Red
+                plotTot_Right.MarkerSize = 1;
+            }
 
             var limitY = plot.Plot.Axes.GetLimits().YRange.Max;
-            if (dbVY.Max(f => f) + 10 > limitY)
+            var max_dBV_left = leftChannelEnabled ? dBV_Left_Y.Max(f => f) : -150;
+            var max_dBV_right = rightChannelEnabled ? dBV_Right_Y.Max(f => f): -150;
+            var max_dBV = (max_dBV_left > max_dBV_right) ? max_dBV_left : max_dBV_right;
+            if (max_dBV + 10 > limitY)
             {
                 limitY += 10;
                 plot.Plot.Axes.SetLimits(Math.Log10(10), Math.Log10(100000), -150, limitY);
@@ -668,7 +720,6 @@ namespace QaControl
 
             plot.Refresh();
         }
-
 
 
 
@@ -712,20 +763,24 @@ namespace QaControl
 
             plot.Plot.Legend.IsVisible = false;
 
+            PixelPadding padding = new(40, 20, 50, 20);
+            plot.Plot.Layout.Fixed(padding);
+
             plot.Refresh();
 
         }
 
 
-        public static void PlotMiniTimeGraph(FormsPlot plot, LeftRightTimeSeries timeData, double frequency)
+        public static void PlotMiniTimeGraph(FormsPlot plot, LeftRightTimeSeries timeData, double fundamantalFrequency, bool leftChannelEnabled, bool rightChannelEnabled)
         {
             plot.Plot.Clear();
 
             List<double> timeX = [];
-            List<double> voltY = [];
+            List<double> voltY_left = [];
+            List<double> voltY_right = [];
             double time = 0;
 
-            double period = 1 / frequency;
+            double period = 1 / fundamantalFrequency;
             double displayTime = period * 1;
             if (period < 0.00005)
                 displayTime = period * 4;
@@ -736,28 +791,45 @@ namespace QaControl
 
             // Get first zero-crossing
             int startStep = 0;
-            for (int f = 1; f < timeData.Left.Length; f++)
+            if (leftChannelEnabled)
             {
-                if (timeData.Left[f - 1] < 0 && timeData.Left[f] >= 0)
+                for (int f = 1; f < timeData.Left.Length; f++)
                 {
-                    startStep = f;
-                    break;
+                    if (timeData.Left[f - 1] < 0 && timeData.Left[f] >= 0)
+                    {
+                        startStep = f;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for (int f = 1; f < timeData.Right.Length; f++)
+                {
+                    if (timeData.Right[f - 1] < 0 && timeData.Right[f] >= 0)
+                    {
+                        startStep = f;
+                        break;
+                    }
                 }
             }
 
             // Determine start index of array at zero-crossing
-            double displaySteps = (displayTime / timeData.dt) + startStep;
+            double displaySteps = (displayTime / timeData.dt);
             if (displaySteps > timeData.Left.Length)
                 displaySteps = timeData.Left.Length;
 
             double maxVolt = 0;
-            for (int f = startStep; f < displaySteps; f++)
+            for (int f = startStep; f < startStep + displaySteps; f++)
             {
                 timeX.Add(time);
-                voltY.Add(timeData.Left[f]);
+                voltY_left.Add(timeData.Left[f]);
+                voltY_right.Add(timeData.Right[f]);
                 if (maxVolt < Math.Abs(timeData.Left[f]))
                     maxVolt = Math.Abs(timeData.Left[f]);
-                time += timeData.dt * 1000;
+                if (maxVolt < Math.Abs(timeData.Right[f]))
+                    maxVolt = Math.Abs(timeData.Right[f]);
+                time += period * 1000;
             }
 
             maxVolt *= 1.1;
@@ -774,11 +846,26 @@ namespace QaControl
             else if (maxVolt > 0.00001)
                 maxVolt = Math.Ceiling(maxVolt * 100000) / 100000;
 
-            // add a scatter plot to the plot
-            var plotTot = plot.Plot.Add.Scatter(timeX, voltY);
-            plotTot.LineWidth = 1;
-            plotTot.Color = ScottPlot.Color.FromColor(System.Drawing.Color.FromArgb(1, 97, 170));
-            plotTot.MarkerSize = 1;
+            Scatter plot_left = null;
+            if (leftChannelEnabled)
+            {
+                plot_left = plot.Plot.Add.Scatter(timeX, voltY_left);
+                plot_left.LineWidth = 1;
+                plot_left.Color = new ScottPlot.Color(1, 97, 170, 255);  // Blue
+                plot_left.MarkerSize = 1;
+            }
+
+            Scatter plot_right = null;
+            if (rightChannelEnabled)
+            {
+                plot_right = plot.Plot.Add.Scatter(timeX, voltY_right);
+                plot_right.LineWidth = 1;
+                if (leftChannelEnabled)
+                    plot_right.Color = new ScottPlot.Color(220, 5, 46, 120); // Red transparant if left channel behind it
+                else
+                    plot_right.Color = new ScottPlot.Color(220, 5, 46, 255); // Red
+                plot_right.MarkerSize = 1;
+            }
 
             plot.Plot.Axes.SetLimits(0, time, -maxVolt, maxVolt);
 

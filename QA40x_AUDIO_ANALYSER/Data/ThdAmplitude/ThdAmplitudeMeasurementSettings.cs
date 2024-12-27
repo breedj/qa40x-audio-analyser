@@ -13,8 +13,10 @@ namespace QaControl
         public E_VoltageUnit StartAmplitudeUnit { get; set;}
         public double EndAmplitude { get; set; }
         public E_VoltageUnit EndAmplitudeUnit { get; set; }
-        public int Averages { get; set; } = 1;
+        public uint Averages { get; set; } = 1;
         public double Load { get; set; } = 8;                // 8 Ohm
+        public bool EnableLeftChannel { get; set; } = true;
+        public bool EnableRightChannel { get; set; } = true;
     }
 }           
     

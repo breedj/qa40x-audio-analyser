@@ -82,7 +82,8 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(1185, 41);
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Location = new System.Drawing.Point(1180, 41);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(112, 17);
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
@@ -91,9 +92,10 @@
             // 
             // lbl_Message
             // 
+            this.lbl_Message.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lbl_Message.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbl_Message.ForeColor = System.Drawing.Color.IndianRed;
-            this.lbl_Message.Location = new System.Drawing.Point(692, 19);
+            this.lbl_Message.Location = new System.Drawing.Point(687, 19);
             this.lbl_Message.Name = "lbl_Message";
             this.lbl_Message.Size = new System.Drawing.Size(606, 22);
             this.lbl_Message.TabIndex = 8;

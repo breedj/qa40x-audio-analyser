@@ -131,7 +131,7 @@ namespace QA40x_AUDIO_ANALYSER
             await Qa40x.SetBufferSize(Data.Settings.FftSize);
             await Qa40x.SetWindowing(Data.Settings.WindowingFunction);
             await Qa40x.SetRoundFrequencies(true);
-           
+
 
             // ********************************************************************
             // Determine attenuation level
@@ -141,11 +141,12 @@ namespace QA40x_AUDIO_ANALYSER
 
             double testFrequency = QaLibrary.GetNearestBinFrequency(Data.Settings.Frequency, Data.Settings.SampleRate, Data.Settings.FftSize);
             // Determine correct input attenuation
-            var result = await QaLibrary.DetermineAttenuationForGeneratorVoltage(generatorAmplitudedBV, testFrequency, 42, ct);
+            var result = await QaLibrary.DetermineAttenuationForGeneratorVoltage(generatorAmplitudedBV, testFrequency, 42, Data.Settings.EnableLeftChannel, Data.Settings.EnableRightChannel, ct);
             if (ct.IsCancellationRequested)
                 return false;
-            QaLibrary.PlotMiniFftGraph(graphFft, result.Item3.FreqInput);
-            QaLibrary.PlotMiniTimeGraph(graphTime, result.Item3.TimeInput, testFrequency);
+
+            QaLibrary.PlotMiniFftGraph(graphFft, result.Item3.FreqInput, Data.Settings.EnableLeftChannel, Data.Settings.EnableRightChannel);
+            QaLibrary.PlotMiniTimeGraph(graphTime, result.Item3.TimeInput, testFrequency, Data.Settings.EnableLeftChannel, Data.Settings.EnableRightChannel);
             //var startAttenuationdBV = data.Settings.InputRange;
             var prevInputAmplitudedBV = result.Item2;
 
@@ -259,36 +260,36 @@ namespace QA40x_AUDIO_ANALYSER
                     }
                 } while (lrfs == null);     // Loop until we have an acquisition result
 
+                if (fundamentalBin >= lrfs.FreqInput.Left.Length)                   // Check if bin within array bounds
+                    break;
 
-                FrequencyThdStep step = new()
+                ThdFrequencyStep step = new()
                 {
                     FundamentalFrequency = testFrequency,
                     GeneratorVoltage = generatorVoltageV,
                     fftData = lrfs.FreqInput,
-                    timeData = lrfs.TimeInput,
+                    timeData = lrfs.TimeInput
                 };
-              
-                if (fundamentalBin >= lrfs.FreqInput.Left.Length)               // Check if bin within array bounds
-                    break;
+             
 
                 prevInputAmplitudedBV = 20 * Math.Log10(lrfs.FreqInput.Left.Max());    // Get maximum signal for attenuation prediction of next step
 
                 // Get and store step data
-                step.AmplitudeVolts = lrfs.FreqInput.Left[fundamentalBin];
-                step.AmplitudeDbV = 20 * Math.Log10(lrfs.FreqInput.Left[fundamentalBin]);
-                step.MagnitudeDb = 20 * Math.Log10(step.AmplitudeVolts / generatorVoltageV);
+                step.Left.Fundamental_V = lrfs.FreqInput.Left[fundamentalBin];
+                step.Left.Fundamental_dBV = 20 * Math.Log10(lrfs.FreqInput.Left[fundamentalBin]);
+                step.Left.Gain_dB = 20 * Math.Log10(step.Left.Fundamental_V / generatorVoltageV);
                 // Calculate average noise floor 
-                step.NoiseFloorV = Data.NoiseFloor.FreqInput.Left               // Store noise floor in V
+                step.Left.Average_NoiseFloor_V = Data.NoiseFloor.FreqInput.Left               // Store noise floor in V
                     .Select((v, i) => new { Index = i, Value = v })
                     .Where(p => p.Index > fundamentalBin)                       // Only higher frequencies. We do not have fundamentals in lower frequencies
                     .Select(v => v.Value)
                     .Average();
-                step.NoiseFloorDbV = 20 * Math.Log10(step.NoiseFloorV);         // Store noise floor in dBV
+                step.Left.Average_NoiseFloor_dBV = 20 * Math.Log10(step.Left.Average_NoiseFloor_V);         // Store noise floor in dBV
 
                 // Plot the mini graphs           
-                QaLibrary.PlotMiniFftGraph(graphFft, lrfs.FreqInput);
-                QaLibrary.PlotMiniTimeGraph(graphTime, lrfs.TimeInput, step.FundamentalFrequency);
-
+                QaLibrary.PlotMiniFftGraph(graphFft, lrfs.FreqInput, Data.Settings.EnableLeftChannel, Data.Settings.EnableRightChannel);
+                QaLibrary.PlotMiniTimeGraph(graphTime, lrfs.TimeInput, step.FundamentalFrequency, Data.Settings.EnableLeftChannel, Data.Settings.EnableRightChannel);
+                
                 // Reset harmonic distortion variables
                 double distortionSqrtTotal = 0;
                 double distiortionD6plus = 0;
@@ -307,51 +308,44 @@ namespace QA40x_AUDIO_ANALYSER
                     // Check if bin exists
                     if (bin < lrfs.FreqInput.Left.Length)
                     {
-                        harmonic.NoiseAmplitudeVolt = noiseFloor.FreqInput.Left[bin];
-                        harmonic.AmplitudeVolts = lrfs.FreqInput.Left[bin];
-                        harmonic.AmplitudeDbV = 20 * Math.Log10(lrfs.FreqInput.Left[bin]);
-                        harmonic.ThdPercent = (harmonic.AmplitudeVolts / step.AmplitudeVolts) * 100;
-                        harmonic.ThdDb = 20 * Math.Log10(harmonic.ThdPercent / 100.0);
+                        harmonic.NoiseAmplitude_V = noiseFloor.FreqInput.Left[bin];
+                        harmonic.Amplitude_V = lrfs.FreqInput.Left[bin];
+                        harmonic.Amplitude_dBV = 20 * Math.Log10(lrfs.FreqInput.Left[bin]);
+                        harmonic.Thd_Percent = (harmonic.Amplitude_V / step.Left.Fundamental_V) * 100;
+                        harmonic.Thd_dB = 20 * Math.Log10(harmonic.Thd_Percent / 100.0);
 
                         // The harmonics 6-12 will be added together and displayed as D6+
                         if (h >= 6)
-                            distiortionD6plus += Math.Pow(harmonic.AmplitudeVolts, 2);          // Add to total distortion
+                            distiortionD6plus += Math.Pow(harmonic.Amplitude_V, 2);          // Add to total distortion
 
                         // All harmonics together for THD
-                        distortionSqrtTotal += Math.Pow(harmonic.AmplitudeVolts, 2);            // Add to total distortion
+                        distortionSqrtTotal += Math.Pow(harmonic.Amplitude_V, 2);            // Add to total distortion
                     }
                     else
                         break;                                                                  // Invalid bin, skip harmonic
 
-                    step.Harmonics.Add(harmonic);           
+                    step.Left.Harmonics.Add(harmonic);           
                 }
 
                 // Calculate THD of current step
                 if (distortionSqrtTotal != 0)
                 {
-                    step.ThdPercent = (Math.Sqrt(distortionSqrtTotal) / step.AmplitudeVolts) * 100;
-                    step.ThdDb = 20 * Math.Log10(step.ThdPercent / 100.0);
+                    step.Left.Thd_Percent = (Math.Sqrt(distortionSqrtTotal) / step.Left.Fundamental_V) * 100;
+                    step.Left.Thd_dB = 20 * Math.Log10(step.Left.Thd_Percent / 100.0);
                 }
 
                 // Calculate D6+ (D6 - D12)
                 if (distiortionD6plus != 0)
                 {
-                    step.D6PlusDbV = 20 * Math.Log10(Math.Sqrt(distiortionD6plus));
-                    step.ThdPercentD6plus = Math.Sqrt(distiortionD6plus / Math.Pow(step.AmplitudeVolts, 2)) * 100;
-                    step.ThdDbD6plus = 20 * Math.Log10(step.ThdPercentD6plus / 100.0);
+                    step.Left.D6Plus_dBV = 20 * Math.Log10(Math.Sqrt(distiortionD6plus));
+                    step.Left.ThdPercent_D6plus = Math.Sqrt(distiortionD6plus / Math.Pow(step.Left.Fundamental_V, 2)) * 100;
+                    step.Left.ThdDbD6plus = 20 * Math.Log10(step.Left.ThdPercent_D6plus / 100.0);
                 }
 
                 // If load not zero then calculate load power
                 if (Data.Settings.Load != 0)
-                    step.PowerWatt = Math.Pow(step.AmplitudeVolts, 2) / Data.Settings.Load;
+                    step.Left.Power_Watt = Math.Pow(step.Left.Fundamental_V, 2) / Data.Settings.Load;
 
-                // Calculate THD+N      TODO: Check, I don't think this is correct.
-                step.ThdDbN = lrfs.FreqInput.Left
-                    .Select((v, i) => new { Index = i, Value = v })
-                    .Where(p => p.Index != fundamentalBin && p.Index != fundamentalBin - 1 && p.Index != fundamentalBin + 1)
-                    .Sum(v => Math.Pow(v.Value, 2));
-
-                step.ThdDbN = (Math.Sqrt(step.ThdDbN) / lrfs.FreqInput.Left[fundamentalBin]) * 100;
 
                 // Add step data to list
                 Data.StepData.Add(step);
@@ -379,7 +373,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// Plot the measurement step in the graph and the cursor text.
         /// </summary>
         /// <param name="step"></param>
-        private void PlotMeasurementData(FrequencyThdStep step)
+        private void PlotMeasurementData(ThdFrequencyStep step)
         {
             // Plot the data depending on selected graph
             if (gbDbv_Range.Visible)
@@ -388,16 +382,16 @@ namespace QA40x_AUDIO_ANALYSER
                 PlotMagnitude(Data);
                 // Plot current measurement texts
                 WriteCursorTextsdB(step.GeneratorVoltage
-                    , step.AmplitudeVolts
-                    , step.MagnitudeDb
-                    , step.ThdDb - step.AmplitudeDbV
-                    , (step.Harmonics.Count > 0 ? step.Harmonics[0].AmplitudeDbV - step.AmplitudeDbV : 0)   // 2nd harmonic
-                    , (step.Harmonics.Count > 1 ? step.Harmonics[1].AmplitudeDbV - step.AmplitudeDbV : 0)
-                    , (step.Harmonics.Count > 3 ? step.Harmonics[2].AmplitudeDbV - step.AmplitudeDbV : 0)
-                    , (step.Harmonics.Count > 4 ? step.Harmonics[3].AmplitudeDbV - step.AmplitudeDbV : 0)
-                    , (step.Harmonics.Count > 5 ? step.D6PlusDbV - step.AmplitudeDbV : 0)                   // 6+ harmonics
-                    , step.PowerWatt
-                    , step.NoiseFloorDbV - step.AmplitudeDbV
+                    , step.Left.Fundamental_V
+                    , step.Left.Gain_dB
+                    , step.Left.Thd_dB - step.Left.Fundamental_dBV
+                    , (step.Left.Harmonics.Count > 0 ? step.Left.Harmonics[0].Amplitude_dBV - step.Left.Fundamental_dBV : 0)   // 2nd harmonic
+                    , (step.Left.Harmonics.Count > 1 ? step.Left.Harmonics[1].Amplitude_dBV - step.Left.Fundamental_dBV : 0)
+                    , (step.Left.Harmonics.Count > 3 ? step.Left.Harmonics[2].Amplitude_dBV - step.Left.Fundamental_dBV : 0)
+                    , (step.Left.Harmonics.Count > 4 ? step.Left.Harmonics[3].Amplitude_dBV - step.Left.Fundamental_dBV : 0)
+                    , (step.Left.Harmonics.Count > 5 ? step.Left.D6Plus_dBV - step.Left.Fundamental_dBV : 0)                   // 6+ harmonics
+                    , step.Left.Power_Watt
+                    , step.Left.Average_NoiseFloor_dBV - step.Left.Fundamental_dBV
                     , Data.Settings.Load
                     );
             }
@@ -407,16 +401,16 @@ namespace QA40x_AUDIO_ANALYSER
                 PlotThd(Data);
                 // Plot current measurement texts
                 WriteCursorTextsD(step.GeneratorVoltage
-                    , step.AmplitudeVolts
-                    , step.MagnitudeDb
-                    , step.ThdPercent
-                    , (step.Harmonics.Count > 0 ? step.Harmonics[0].ThdPercent : 0)                         // 2nd harmonic
-                    , (step.Harmonics.Count > 1 ? step.Harmonics[1].ThdPercent : 0)
-                    , (step.Harmonics.Count > 3 ? step.Harmonics[2].ThdPercent : 0)
-                    , (step.Harmonics.Count > 4 ? step.Harmonics[3].ThdPercent : 0)
-                    , (step.Harmonics.Count > 5 ? step.ThdPercentD6plus : 0)                                // 6+ harmonics
-                    , step.PowerWatt
-                    , (step.NoiseFloorV / step.AmplitudeVolts) * 100
+                    , step.Left.Fundamental_V
+                    , step.Left.Gain_dB
+                    , step.Left.Thd_Percent
+                    , (step.Left.Harmonics.Count > 0 ? step.Left.Harmonics[0].Thd_Percent : 0)                         // 2nd harmonic
+                    , (step.Left.Harmonics.Count > 1 ? step.Left.Harmonics[1].Thd_Percent : 0)
+                    , (step.Left.Harmonics.Count > 3 ? step.Left.Harmonics[2].Thd_Percent : 0)
+                    , (step.Left.Harmonics.Count > 4 ? step.Left.Harmonics[3].Thd_Percent : 0)
+                    , (step.Left.Harmonics.Count > 5 ? step.Left.ThdPercent_D6plus : 0)                                // 6+ harmonics
+                    , step.Left.Power_Watt
+                    , (step.Left.Average_NoiseFloor_V / step.Left.Fundamental_V) * 100
                     , Data.Settings.Load
                     );
             }
@@ -616,26 +610,26 @@ namespace QA40x_AUDIO_ANALYSER
             for (int i = 0; i < data.StepData.Count; i++)
             {
                 if (cmbXAxis.SelectedIndex == 0)
-                    freqX.Add(data.StepData[i].AmplitudeVolts);
+                    freqX.Add(data.StepData[i].Left.Fundamental_V);
                 else if (cmbXAxis.SelectedIndex == 1)
-                    freqX.Add(data.StepData[i].PowerWatt);
+                    freqX.Add(data.StepData[i].Left.Power_Watt);
                 else if (cmbXAxis.SelectedIndex == 2)
                     freqX.Add(data.StepData[i].GeneratorVoltage);
 
-                if (data.StepData[i].Harmonics.Count > 0 && chkShowThd.Checked)
-                    hTotY.Add(data.StepData[i].ThdPercent);
-                if (data.StepData[i].Harmonics.Count > 0 && chkShowD2.Checked)
-                    h2Y.Add(data.StepData[i].Harmonics[0].ThdPercent);
-                if (data.StepData[i].Harmonics.Count > 1 && chkShowD3.Checked)
-                    h3Y.Add(data.StepData[i].Harmonics[1].ThdPercent);
-                if (data.StepData[i].Harmonics.Count > 2 && chkShowD4.Checked)
-                    h4Y.Add(data.StepData[i].Harmonics[2].ThdPercent);
-                if (data.StepData[i].Harmonics.Count > 3 && chkShowD5.Checked)
-                    h5Y.Add(data.StepData[i].Harmonics[3].ThdPercent);
-                if (data.StepData[i].Harmonics.Count > 4 && data.StepData[i].ThdPercentD6plus != 0 && chkShowD6.Checked)
-                    h6Y.Add(data.StepData[i].ThdPercentD6plus);        // D6+
+                if (data.StepData[i].Left.Harmonics.Count > 0 && chkShowThd.Checked)
+                    hTotY.Add(data.StepData[i].Left.Thd_Percent);
+                if (data.StepData[i].Left.Harmonics.Count > 0 && chkShowD2.Checked)
+                    h2Y.Add(data.StepData[i].Left.Harmonics[0].Thd_Percent);
+                if (data.StepData[i].Left.Harmonics.Count > 1 && chkShowD3.Checked)
+                    h3Y.Add(data.StepData[i].Left.Harmonics[1].Thd_Percent);
+                if (data.StepData[i].Left.Harmonics.Count > 2 && chkShowD4.Checked)
+                    h4Y.Add(data.StepData[i].Left.Harmonics[2].Thd_Percent);
+                if (data.StepData[i].Left.Harmonics.Count > 3 && chkShowD5.Checked)
+                    h5Y.Add(data.StepData[i].Left.Harmonics[3].Thd_Percent);
+                if (data.StepData[i].Left.Harmonics.Count > 4 && data.StepData[i].Left.ThdPercent_D6plus != 0 && chkShowD6.Checked)
+                    h6Y.Add(data.StepData[i].Left.ThdPercent_D6plus);        // D6+
                 if (chkShowNoiseFloor.Checked)
-                    noiseY.Add((data.StepData[i].NoiseFloorV / data.StepData[i].AmplitudeVolts) * 100);
+                    noiseY.Add((data.StepData[i].Left.Average_NoiseFloor_V / data.StepData[i].Left.Fundamental_V) * 100);
             }
 
             IPalette palette = new ScottPlot.Palettes.Category10();
@@ -819,30 +813,30 @@ namespace QA40x_AUDIO_ANALYSER
             for (int i = 0; i < data.StepData.Count; i++)
             {
                 if (cmbXAxis.SelectedIndex == 0)
-                    freqX.Add(data.StepData[i].AmplitudeVolts);
+                    freqX.Add(data.StepData[i].Left.Fundamental_V);
                 else if (cmbXAxis.SelectedIndex == 1)
-                    freqX.Add(data.StepData[i].PowerWatt);
+                    freqX.Add(data.StepData[i].Left.Power_Watt);
                 else if (cmbXAxis.SelectedIndex == 2)
                     freqX.Add(data.StepData[i].GeneratorVoltage);
 
                 if (chkShowMagnitude.Checked)
-                    magnY.Add(data.StepData[i].MagnitudeDb);
+                    magnY.Add(data.StepData[i].Left.Gain_dB);
 
-                if (data.StepData[i].Harmonics.Count > 0)
+                if (data.StepData[i].Left.Harmonics.Count > 0)
                 {
-                    hTotY.Add(data.StepData[i].ThdDb + data.StepData[i].MagnitudeDb);
-                    h2Y.Add(data.StepData[i].Harmonics[0].AmplitudeDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
+                    hTotY.Add(data.StepData[i].Left.Thd_dB + data.StepData[i].Left.Gain_dB);
+                    h2Y.Add(data.StepData[i].Left.Harmonics[0].Amplitude_dBV - data.StepData[i].Left.Fundamental_dBV + data.StepData[i].Left.Gain_dB);
                 }
-                if (data.StepData[i].Harmonics.Count > 1)
-                    h3Y.Add(data.StepData[i].Harmonics[1].AmplitudeDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
-                if (data.StepData[i].Harmonics.Count > 2)
-                    h4Y.Add(data.StepData[i].Harmonics[2].AmplitudeDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
-                if (data.StepData[i].Harmonics.Count > 3)
-                    h5Y.Add(data.StepData[i].Harmonics[3].AmplitudeDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
-                if (data.StepData[i].D6PlusDbV != 0 && data.StepData[i].Harmonics.Count > 4 && chkShowD6.Checked)
-                    h6Y.Add(data.StepData[i].D6PlusDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
+                if (data.StepData[i].Left.Harmonics.Count > 1)
+                    h3Y.Add(data.StepData[i].Left.Harmonics[1].Amplitude_dBV - data.StepData[i].Left.Fundamental_dBV + data.StepData[i].Left.Gain_dB);
+                if (data.StepData[i].Left.Harmonics.Count > 2)
+                    h4Y.Add(data.StepData[i].Left.Harmonics[2].Amplitude_dBV - data.StepData[i].Left.Fundamental_dBV + data.StepData[i].Left.Gain_dB);
+                if (data.StepData[i].Left.Harmonics.Count > 3)
+                    h5Y.Add(data.StepData[i].Left.Harmonics[3].Amplitude_dBV - data.StepData[i].Left.Fundamental_dBV + data.StepData[i].Left.Gain_dB);
+                if (data.StepData[i].Left.D6Plus_dBV != 0 && data.StepData[i].Left.Harmonics.Count > 4 && chkShowD6.Checked)
+                    h6Y.Add(data.StepData[i].Left.D6Plus_dBV - data.StepData[i].Left.Fundamental_dBV + data.StepData[i].Left.Gain_dB);
                 if (chkShowNoiseFloor.Checked)
-                    noiseY.Add(data.StepData[i].NoiseFloorDbV - data.StepData[i].AmplitudeDbV + data.StepData[i].MagnitudeDb);
+                    noiseY.Add(data.StepData[i].Left.Average_NoiseFloor_dBV - data.StepData[i].Left.Fundamental_dBV + data.StepData[i].Left.Gain_dB);
             }
 
             // add a scatter plot to the plot
@@ -966,8 +960,8 @@ namespace QA40x_AUDIO_ANALYSER
                 // If persistent marker set then show mini plots of that marker
                 if (markerIndex >= 0)
                 {
-                    QaLibrary.PlotMiniFftGraph(graphFft, Data.StepData[markerIndex].fftData);
-                    QaLibrary.PlotMiniTimeGraph(graphTime, Data.StepData[markerIndex].timeData, Data.StepData[markerIndex].FundamentalFrequency);
+                    QaLibrary.PlotMiniFftGraph(graphFft, Data.StepData[markerIndex].fftData, Data.Settings.EnableLeftChannel, Data.Settings.EnableRightChannel);
+                    QaLibrary.PlotMiniTimeGraph(graphTime, Data.StepData[markerIndex].timeData, Data.StepData[markerIndex].FundamentalFrequency, Data.Settings.EnableLeftChannel, Data.Settings.EnableRightChannel);
                 }
             };
 
@@ -993,8 +987,8 @@ namespace QA40x_AUDIO_ANALYSER
             // place the crosshair over the highlighted point
             if (nearest1.IsReal)
             {
-                QaLibrary.PlotMiniFftGraph(graphFft, Data.StepData[nearest1.Index].fftData);
-                QaLibrary.PlotMiniTimeGraph(graphTime, Data.StepData[nearest1.Index].timeData, Data.StepData[nearest1.Index].FundamentalFrequency);
+                QaLibrary.PlotMiniFftGraph(graphFft, Data.StepData[nearest1.Index].fftData, Data.Settings.EnableLeftChannel, Data.Settings.EnableRightChannel);
+                QaLibrary.PlotMiniTimeGraph(graphTime, Data.StepData[nearest1.Index].timeData, Data.StepData[nearest1.Index].FundamentalFrequency, Data.Settings.EnableLeftChannel, Data.Settings.EnableRightChannel);
             }
         }
 
@@ -1058,38 +1052,38 @@ namespace QA40x_AUDIO_ANALYSER
                 // Check if index in StepData array
                 if (Data.StepData.Count > nearest1.Index)
                 {
-                    FrequencyThdStep step = Data.StepData[nearest1.Index];
+                    ThdFrequencyStep step = Data.StepData[nearest1.Index];
 
                     // Write cursor texts based in plot type
                     if (gbDbv_Range.Visible)
                     {
                         WriteCursorTextsdB(step.GeneratorVoltage
-                        , step.AmplitudeVolts
-                        , step.MagnitudeDb
-                        , step.ThdDb - step.AmplitudeDbV
-                        , (step.Harmonics.Count > 0 ? step.Harmonics[0].AmplitudeDbV - step.AmplitudeDbV : 0)   // 2nd harmonic
-                        , (step.Harmonics.Count > 1 ? step.Harmonics[1].AmplitudeDbV - step.AmplitudeDbV : 0)
-                        , (step.Harmonics.Count > 2 ? step.Harmonics[2].AmplitudeDbV - step.AmplitudeDbV : 0)
-                        , (step.Harmonics.Count > 3 ? step.Harmonics[3].AmplitudeDbV - step.AmplitudeDbV : 0)
-                        , (step.Harmonics.Count > 4 ? step.D6PlusDbV - step.AmplitudeDbV : 0)                   // 6+ harmonics
-                        , step.PowerWatt
-                        , step.NoiseFloorDbV - step.AmplitudeDbV
+                        , step.Left.Fundamental_V
+                        , step.Left.Gain_dB
+                        , step.Left.Thd_dB - step.Left.Fundamental_dBV
+                        , (step.Left.Harmonics.Count > 0 ? step.Left.Harmonics[0].Amplitude_dBV - step.Left.Fundamental_dBV : 0)   // 2nd harmonic
+                        , (step.Left.Harmonics.Count > 1 ? step.Left.Harmonics[1].Amplitude_dBV - step.Left.Fundamental_dBV : 0)
+                        , (step.Left.Harmonics.Count > 2 ? step.Left.Harmonics[2].Amplitude_dBV - step.Left.Fundamental_dBV : 0)
+                        , (step.Left.Harmonics.Count > 3 ? step.Left.Harmonics[3].Amplitude_dBV - step.Left.Fundamental_dBV : 0)
+                        , (step.Left.Harmonics.Count > 4 ? step.Left.D6Plus_dBV - step.Left.Fundamental_dBV : 0)                   // 6+ harmonics
+                        , step.Left.Power_Watt
+                        , step.Left.Average_NoiseFloor_dBV - step.Left.Fundamental_dBV
                         , Data.Settings.Load
                         );
                     }
                     else
                     {
                         WriteCursorTextsD(step.GeneratorVoltage
-                        , step.AmplitudeVolts
-                        , step.MagnitudeDb
-                        , step.ThdPercent
-                        , (step.Harmonics.Count > 0 ? step.Harmonics[0].ThdPercent : 0)     // 2nd harmonic
-                        , (step.Harmonics.Count > 1 ? step.Harmonics[1].ThdPercent : 0)
-                        , (step.Harmonics.Count > 2 ? step.Harmonics[2].ThdPercent : 0)
-                        , (step.Harmonics.Count > 3 ? step.Harmonics[3].ThdPercent : 0)
-                        , (step.Harmonics.Count > 4 ? step.ThdPercentD6plus : 0)                   // 6+ harmonics
-                        , step.PowerWatt
-                        , (step.NoiseFloorV / step.AmplitudeVolts) * 100
+                        , step.Left.Fundamental_V
+                        , step.Left.Gain_dB
+                        , step.Left.Thd_Percent
+                        , (step.Left.Harmonics.Count > 0 ? step.Left.Harmonics[0].Thd_Percent : 0)     // 2nd harmonic
+                        , (step.Left.Harmonics.Count > 1 ? step.Left.Harmonics[1].Thd_Percent : 0)
+                        , (step.Left.Harmonics.Count > 2 ? step.Left.Harmonics[2].Thd_Percent : 0)
+                        , (step.Left.Harmonics.Count > 3 ? step.Left.Harmonics[3].Thd_Percent : 0)
+                        , (step.Left.Harmonics.Count > 4 ? step.Left.ThdPercent_D6plus : 0)                   // 6+ harmonics
+                        , step.Left.Power_Watt
+                        , (step.Left.Average_NoiseFloor_V / step.Left.Fundamental_V) * 100
                         , Data.Settings.Load
                         );
                     }
@@ -1322,7 +1316,7 @@ namespace QA40x_AUDIO_ANALYSER
                 return;
 
             // Determine top Y
-            double maxThd = Data.StepData.Max(d => d.ThdPercent);
+            double maxThd = Data.StepData.Max(d => d.Left.Thd_Percent);
 
             if (maxThd <= 1)
                 cmbD_Graph_Top.SelectedIndex = 2;
@@ -1333,12 +1327,12 @@ namespace QA40x_AUDIO_ANALYSER
 
 
             // Determine bottom Y
-            double minThd = Data.StepData.Min(d => (d.NoiseFloorV / d.AmplitudeVolts) * 100);
-            double minD2 = Data.StepData.Where(d => d.Harmonics.Count >= 1).Min(d => (d.Harmonics[0].AmplitudeVolts / d.AmplitudeVolts) * 100);
-            double minD3 = Data.StepData.Where(d => d.Harmonics.Count >= 2).Min(d => (d.Harmonics[1].AmplitudeVolts / d.AmplitudeVolts) * 100);
-            double minD4 = Data.StepData.Where(d => d.Harmonics.Count >= 3).Min(d => (d.Harmonics[2].AmplitudeVolts / d.AmplitudeVolts) * 100);
-            double minD5 = Data.StepData.Where(d => d.Harmonics.Count >= 4).Min(d => (d.Harmonics[3].AmplitudeVolts / d.AmplitudeVolts) * 100);
-            double minD6 = Data.StepData.Min(d => d.ThdPercentD6plus);
+            double minThd = Data.StepData.Min(d => (d.Left.Average_NoiseFloor_V / d.Left.Fundamental_V) * 100);
+            double minD2 = Data.StepData.Where(d => d.Left.Harmonics.Count >= 1).Min(d => (d.Left.Harmonics[0].Amplitude_V / d.Left.Fundamental_V) * 100);
+            double minD3 = Data.StepData.Where(d => d.Left.Harmonics.Count >= 2).Min(d => (d.Left.Harmonics[1].Amplitude_V / d.Left.Fundamental_V) * 100);
+            double minD4 = Data.StepData.Where(d => d.Left.Harmonics.Count >= 3).Min(d => (d.Left.Harmonics[2].Amplitude_V / d.Left.Fundamental_V) * 100);
+            double minD5 = Data.StepData.Where(d => d.Left.Harmonics.Count >= 4).Min(d => (d.Left.Harmonics[3].Amplitude_V / d.Left.Fundamental_V) * 100);
+            double minD6 = Data.StepData.Min(d => d.Left.ThdPercent_D6plus);
 
             double min = Math.Min(minThd, minD2);
             min = Math.Min(min, minD3); 
@@ -1368,7 +1362,7 @@ namespace QA40x_AUDIO_ANALYSER
 
             // Determine top Y
 
-            double maxDb = Data.StepData.Max(d => d.MagnitudeDb);
+            double maxDb = Data.StepData.Max(d => d.Left.Gain_dB);
             if (maxDb >= 100)
                 cmbDbV_Graph_Top.Value = Math.Ceiling((decimal)((int)(maxDb / 10) + 1) * 10);
             else if (maxDb >= 10)
@@ -1377,12 +1371,12 @@ namespace QA40x_AUDIO_ANALYSER
                 cmbDbV_Graph_Top.Value = Math.Ceiling((decimal)((int)(maxDb * 10) + 1) / 10);
 
             // Determine bottom Y
-            double minDb = Data.StepData.Min(d => d.NoiseFloorDbV) + Data.StepData[0].MagnitudeDb;
-            double minD2 = Data.StepData.Where(d => d.Harmonics.Count >= 1).Min(d => d.Harmonics[0].AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
-            double minD3 = Data.StepData.Where(d => d.Harmonics.Count >= 2).Min(d => d.Harmonics[1].AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
-            double minD4 = Data.StepData.Where(d => d.Harmonics.Count >= 3).Min(d => d.Harmonics[2].AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
-            double minD5 = Data.StepData.Where(d => d.Harmonics.Count >= 4).Min(d => d.Harmonics[3].AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
-            double minD6 = Data.StepData.Where(d => d.Harmonics.Count >= 5).Min(d => d.Harmonics[4].AmplitudeDbV) + Data.StepData[0].MagnitudeDb;
+            double minDb = Data.StepData.Min(d => d.Left.Average_NoiseFloor_dBV) + Data.StepData[0].Left.Gain_dB;
+            double minD2 = Data.StepData.Where(d => d.Left.Harmonics.Count >= 1).Min(d => d.Left.Harmonics[0].Amplitude_dBV) + Data.StepData[0].Left.Gain_dB;
+            double minD3 = Data.StepData.Where(d => d.Left.Harmonics.Count >= 2).Min(d => d.Left.Harmonics[1].Amplitude_dBV) + Data.StepData[0].Left.Gain_dB;
+            double minD4 = Data.StepData.Where(d => d.Left.Harmonics.Count >= 3).Min(d => d.Left.Harmonics[2].Amplitude_dBV) + Data.StepData[0].Left.Gain_dB;
+            double minD5 = Data.StepData.Where(d => d.Left.Harmonics.Count >= 4).Min(d => d.Left.Harmonics[3].Amplitude_dBV) + Data.StepData[0].Left.Gain_dB;
+            double minD6 = Data.StepData.Where(d => d.Left.Harmonics.Count >= 5).Min(d => d.Left.Harmonics[4].Amplitude_dBV) + Data.StepData[0].Left.Gain_dB;
 
             double min = Math.Min(minDb, minD2);
             min = Math.Min(min, minD3);
@@ -1413,12 +1407,12 @@ namespace QA40x_AUDIO_ANALYSER
             switch (cmbXAxis.SelectedIndex)
             {
                 case 0:
-                    min = Data.StepData.Min(v => v.AmplitudeVolts);
-                    max = Data.StepData.Max(v => v.AmplitudeVolts);
+                    min = Data.StepData.Min(v => v.Left.Fundamental_V);
+                    max = Data.StepData.Max(v => v.Left.Fundamental_V);
                     break;
                 case 1:
-                    min = Data.StepData.Min(v => v.PowerWatt);
-                    max = Data.StepData.Max(v => v.PowerWatt);
+                    min = Data.StepData.Min(v => v.Left.Power_Watt);
+                    max = Data.StepData.Max(v => v.Left.Power_Watt);
                     break;
                 case 2:
                     min = Data.StepData.Min(v => v.GeneratorVoltage);

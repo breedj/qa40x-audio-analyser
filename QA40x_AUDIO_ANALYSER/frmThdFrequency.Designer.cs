@@ -99,25 +99,25 @@
             this.pnlCursorsRight = new System.Windows.Forms.Panel();
             this.label28 = new System.Windows.Forms.Label();
             this.lblCursor_Magnitude_R = new System.Windows.Forms.Label();
-            this.lblCuror_NoiseFloor_R = new System.Windows.Forms.Label();
-            this.lblCuror_THD_R = new System.Windows.Forms.Label();
-            this.lblCuror_Power_R = new System.Windows.Forms.Label();
-            this.lblCuror_D2_R = new System.Windows.Forms.Label();
-            this.lblCuror_D6_R = new System.Windows.Forms.Label();
-            this.lblCuror_D3_R = new System.Windows.Forms.Label();
-            this.lblCuror_D5_R = new System.Windows.Forms.Label();
-            this.lblCuror_D4_R = new System.Windows.Forms.Label();
+            this.lblCursor_NoiseFloor_R = new System.Windows.Forms.Label();
+            this.lblCursor_THD_R = new System.Windows.Forms.Label();
+            this.lblCursor_Power_R = new System.Windows.Forms.Label();
+            this.lblCursor_D2_R = new System.Windows.Forms.Label();
+            this.lblCursor_D6_R = new System.Windows.Forms.Label();
+            this.lblCursor_D3_R = new System.Windows.Forms.Label();
+            this.lblCursor_D5_R = new System.Windows.Forms.Label();
+            this.lblCursor_D4_R = new System.Windows.Forms.Label();
             this.pnlCursorsLeft = new System.Windows.Forms.Panel();
-            this.lblCuror_D5_L = new System.Windows.Forms.Label();
+            this.lblCursor_D5_L = new System.Windows.Forms.Label();
             this.lblCursor_Magnitude_L = new System.Windows.Forms.Label();
             this.label27 = new System.Windows.Forms.Label();
-            this.lblCuror_THD_L = new System.Windows.Forms.Label();
-            this.lblCuror_D2_L = new System.Windows.Forms.Label();
-            this.lblCuror_D3_L = new System.Windows.Forms.Label();
-            this.lblCuror_D4_L = new System.Windows.Forms.Label();
-            this.lblCuror_D6_L = new System.Windows.Forms.Label();
-            this.lblCuror_Power_L = new System.Windows.Forms.Label();
-            this.lblCuror_NoiseFloor_L = new System.Windows.Forms.Label();
+            this.lblCursor_THD_L = new System.Windows.Forms.Label();
+            this.lblCursor_D2_L = new System.Windows.Forms.Label();
+            this.lblCursor_D3_L = new System.Windows.Forms.Label();
+            this.lblCursor_D4_L = new System.Windows.Forms.Label();
+            this.lblCursor_D6_L = new System.Windows.Forms.Label();
+            this.lblCursor_Power_L = new System.Windows.Forms.Label();
+            this.lblCursor_NoiseFloor_L = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.label15 = new System.Windows.Forms.Label();
@@ -127,7 +127,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.lblCursorMagnitude = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.lblCuror_Frequency = new System.Windows.Forms.Label();
+            this.lblCursor_Frequency = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.scThdVsFreq)).BeginInit();
             this.scThdVsFreq.Panel1.SuspendLayout();
             this.scThdVsFreq.Panel2.SuspendLayout();
@@ -611,7 +611,7 @@
             this.scGraphCursors.Panel2.Controls.Add(this.label5);
             this.scGraphCursors.Panel2.Controls.Add(this.lblCursorMagnitude);
             this.scGraphCursors.Panel2.Controls.Add(this.label1);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCuror_Frequency);
+            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_Frequency);
             this.scGraphCursors.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.scGraphCursors_Panel2_Paint);
             this.scGraphCursors.Size = new System.Drawing.Size(836, 765);
             this.scGraphCursors.SplitterDistance = 710;
@@ -1099,14 +1099,14 @@
             // 
             this.pnlCursorsRight.Controls.Add(this.label28);
             this.pnlCursorsRight.Controls.Add(this.lblCursor_Magnitude_R);
-            this.pnlCursorsRight.Controls.Add(this.lblCuror_NoiseFloor_R);
-            this.pnlCursorsRight.Controls.Add(this.lblCuror_THD_R);
-            this.pnlCursorsRight.Controls.Add(this.lblCuror_Power_R);
-            this.pnlCursorsRight.Controls.Add(this.lblCuror_D2_R);
-            this.pnlCursorsRight.Controls.Add(this.lblCuror_D6_R);
-            this.pnlCursorsRight.Controls.Add(this.lblCuror_D3_R);
-            this.pnlCursorsRight.Controls.Add(this.lblCuror_D5_R);
-            this.pnlCursorsRight.Controls.Add(this.lblCuror_D4_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_NoiseFloor_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_THD_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_Power_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_D2_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_D6_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_D3_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_D5_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_D4_R);
             this.pnlCursorsRight.Location = new System.Drawing.Point(46, 35);
             this.pnlCursorsRight.Name = "pnlCursorsRight";
             this.pnlCursorsRight.Size = new System.Drawing.Size(790, 16);
@@ -1133,121 +1133,121 @@
             this.lblCursor_Magnitude_R.TabIndex = 30;
             this.lblCursor_Magnitude_R.Text = "0.00 dB";
             // 
-            // lblCuror_NoiseFloor_R
+            // lblCursor_NoiseFloor_R
             // 
-            this.lblCuror_NoiseFloor_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_NoiseFloor_R.Location = new System.Drawing.Point(716, 0);
-            this.lblCuror_NoiseFloor_R.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_NoiseFloor_R.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_NoiseFloor_R.Name = "lblCuror_NoiseFloor_R";
-            this.lblCuror_NoiseFloor_R.Size = new System.Drawing.Size(71, 13);
-            this.lblCuror_NoiseFloor_R.TabIndex = 38;
-            this.lblCuror_NoiseFloor_R.Text = "00.00 dB";
+            this.lblCursor_NoiseFloor_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_NoiseFloor_R.Location = new System.Drawing.Point(716, 0);
+            this.lblCursor_NoiseFloor_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_NoiseFloor_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_NoiseFloor_R.Name = "lblCursor_NoiseFloor_R";
+            this.lblCursor_NoiseFloor_R.Size = new System.Drawing.Size(71, 13);
+            this.lblCursor_NoiseFloor_R.TabIndex = 38;
+            this.lblCursor_NoiseFloor_R.Text = "00.00 dB";
             // 
-            // lblCuror_THD_R
+            // lblCursor_THD_R
             // 
-            this.lblCuror_THD_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_THD_R.Location = new System.Drawing.Point(108, 0);
-            this.lblCuror_THD_R.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_THD_R.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_THD_R.Name = "lblCuror_THD_R";
-            this.lblCuror_THD_R.Size = new System.Drawing.Size(60, 15);
-            this.lblCuror_THD_R.TabIndex = 31;
-            this.lblCuror_THD_R.Text = "0.00 %";
+            this.lblCursor_THD_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_THD_R.Location = new System.Drawing.Point(108, 0);
+            this.lblCursor_THD_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_THD_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_THD_R.Name = "lblCursor_THD_R";
+            this.lblCursor_THD_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_THD_R.TabIndex = 31;
+            this.lblCursor_THD_R.Text = "0.00 %";
             // 
-            // lblCuror_Power_R
+            // lblCursor_Power_R
             // 
-            this.lblCuror_Power_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_Power_R.Location = new System.Drawing.Point(630, 0);
-            this.lblCuror_Power_R.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_Power_R.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_Power_R.Name = "lblCuror_Power_R";
-            this.lblCuror_Power_R.Size = new System.Drawing.Size(82, 13);
-            this.lblCuror_Power_R.TabIndex = 37;
-            this.lblCuror_Power_R.Text = "0 mW";
+            this.lblCursor_Power_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_Power_R.Location = new System.Drawing.Point(630, 0);
+            this.lblCursor_Power_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_Power_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_Power_R.Name = "lblCursor_Power_R";
+            this.lblCursor_Power_R.Size = new System.Drawing.Size(82, 13);
+            this.lblCursor_Power_R.TabIndex = 37;
+            this.lblCursor_Power_R.Text = "0 mW";
             // 
-            // lblCuror_D2_R
+            // lblCursor_D2_R
             // 
-            this.lblCuror_D2_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_D2_R.Location = new System.Drawing.Point(250, 0);
-            this.lblCuror_D2_R.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_D2_R.MinimumSize = new System.Drawing.Size(50, 13);
-            this.lblCuror_D2_R.Name = "lblCuror_D2_R";
-            this.lblCuror_D2_R.Size = new System.Drawing.Size(60, 14);
-            this.lblCuror_D2_R.TabIndex = 32;
-            this.lblCuror_D2_R.Text = "00.00 %";
+            this.lblCursor_D2_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D2_R.Location = new System.Drawing.Point(250, 0);
+            this.lblCursor_D2_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D2_R.MinimumSize = new System.Drawing.Size(50, 13);
+            this.lblCursor_D2_R.Name = "lblCursor_D2_R";
+            this.lblCursor_D2_R.Size = new System.Drawing.Size(60, 14);
+            this.lblCursor_D2_R.TabIndex = 32;
+            this.lblCursor_D2_R.Text = "00.00 %";
             // 
-            // lblCuror_D6_R
+            // lblCursor_D6_R
             // 
-            this.lblCuror_D6_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_D6_R.Location = new System.Drawing.Point(554, 0);
-            this.lblCuror_D6_R.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_D6_R.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_D6_R.Name = "lblCuror_D6_R";
-            this.lblCuror_D6_R.Size = new System.Drawing.Size(60, 15);
-            this.lblCuror_D6_R.TabIndex = 36;
-            this.lblCuror_D6_R.Text = "00.00 %";
+            this.lblCursor_D6_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D6_R.Location = new System.Drawing.Point(554, 0);
+            this.lblCursor_D6_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D6_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D6_R.Name = "lblCursor_D6_R";
+            this.lblCursor_D6_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D6_R.TabIndex = 36;
+            this.lblCursor_D6_R.Text = "00.00 %";
             // 
-            // lblCuror_D3_R
+            // lblCursor_D3_R
             // 
-            this.lblCuror_D3_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_D3_R.Location = new System.Drawing.Point(326, 0);
-            this.lblCuror_D3_R.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_D3_R.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_D3_R.Name = "lblCuror_D3_R";
-            this.lblCuror_D3_R.Size = new System.Drawing.Size(60, 15);
-            this.lblCuror_D3_R.TabIndex = 33;
-            this.lblCuror_D3_R.Text = "00.00 %";
+            this.lblCursor_D3_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D3_R.Location = new System.Drawing.Point(326, 0);
+            this.lblCursor_D3_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D3_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D3_R.Name = "lblCursor_D3_R";
+            this.lblCursor_D3_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D3_R.TabIndex = 33;
+            this.lblCursor_D3_R.Text = "00.00 %";
             // 
-            // lblCuror_D5_R
+            // lblCursor_D5_R
             // 
-            this.lblCuror_D5_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_D5_R.Location = new System.Drawing.Point(478, 0);
-            this.lblCuror_D5_R.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_D5_R.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_D5_R.Name = "lblCuror_D5_R";
-            this.lblCuror_D5_R.Size = new System.Drawing.Size(60, 15);
-            this.lblCuror_D5_R.TabIndex = 35;
-            this.lblCuror_D5_R.Text = "00.00 %";
+            this.lblCursor_D5_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D5_R.Location = new System.Drawing.Point(478, 0);
+            this.lblCursor_D5_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D5_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D5_R.Name = "lblCursor_D5_R";
+            this.lblCursor_D5_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D5_R.TabIndex = 35;
+            this.lblCursor_D5_R.Text = "00.00 %";
             // 
-            // lblCuror_D4_R
+            // lblCursor_D4_R
             // 
-            this.lblCuror_D4_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_D4_R.Location = new System.Drawing.Point(402, 0);
-            this.lblCuror_D4_R.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_D4_R.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_D4_R.Name = "lblCuror_D4_R";
-            this.lblCuror_D4_R.Size = new System.Drawing.Size(60, 15);
-            this.lblCuror_D4_R.TabIndex = 34;
-            this.lblCuror_D4_R.Text = "00.00 %";
+            this.lblCursor_D4_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D4_R.Location = new System.Drawing.Point(402, 0);
+            this.lblCursor_D4_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D4_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D4_R.Name = "lblCursor_D4_R";
+            this.lblCursor_D4_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D4_R.TabIndex = 34;
+            this.lblCursor_D4_R.Text = "00.00 %";
             // 
             // pnlCursorsLeft
             // 
-            this.pnlCursorsLeft.Controls.Add(this.lblCuror_D5_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_D5_L);
             this.pnlCursorsLeft.Controls.Add(this.lblCursor_Magnitude_L);
             this.pnlCursorsLeft.Controls.Add(this.label27);
-            this.pnlCursorsLeft.Controls.Add(this.lblCuror_THD_L);
-            this.pnlCursorsLeft.Controls.Add(this.lblCuror_D2_L);
-            this.pnlCursorsLeft.Controls.Add(this.lblCuror_D3_L);
-            this.pnlCursorsLeft.Controls.Add(this.lblCuror_D4_L);
-            this.pnlCursorsLeft.Controls.Add(this.lblCuror_D6_L);
-            this.pnlCursorsLeft.Controls.Add(this.lblCuror_Power_L);
-            this.pnlCursorsLeft.Controls.Add(this.lblCuror_NoiseFloor_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_THD_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_D2_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_D3_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_D4_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_D6_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_Power_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_NoiseFloor_L);
             this.pnlCursorsLeft.Location = new System.Drawing.Point(44, 14);
             this.pnlCursorsLeft.Name = "pnlCursorsLeft";
             this.pnlCursorsLeft.Size = new System.Drawing.Size(790, 20);
             this.pnlCursorsLeft.TabIndex = 41;
             // 
-            // lblCuror_D5_L
+            // lblCursor_D5_L
             // 
-            this.lblCuror_D5_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_D5_L.Location = new System.Drawing.Point(480, 2);
-            this.lblCuror_D5_L.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_D5_L.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_D5_L.Name = "lblCuror_D5_L";
-            this.lblCuror_D5_L.Size = new System.Drawing.Size(60, 15);
-            this.lblCuror_D5_L.TabIndex = 16;
-            this.lblCuror_D5_L.Text = "00.00 %";
+            this.lblCursor_D5_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D5_L.Location = new System.Drawing.Point(480, 2);
+            this.lblCursor_D5_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D5_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D5_L.Name = "lblCursor_D5_L";
+            this.lblCursor_D5_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D5_L.TabIndex = 16;
+            this.lblCursor_D5_L.Text = "00.00 %";
             // 
             // lblCursor_Magnitude_L
             // 
@@ -1270,83 +1270,83 @@
             this.label27.TabIndex = 39;
             this.label27.Text = "Left channel";
             // 
-            // lblCuror_THD_L
+            // lblCursor_THD_L
             // 
-            this.lblCuror_THD_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_THD_L.Location = new System.Drawing.Point(110, 2);
-            this.lblCuror_THD_L.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_THD_L.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_THD_L.Name = "lblCuror_THD_L";
-            this.lblCuror_THD_L.Size = new System.Drawing.Size(60, 15);
-            this.lblCuror_THD_L.TabIndex = 12;
-            this.lblCuror_THD_L.Text = "0.00 %";
+            this.lblCursor_THD_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_THD_L.Location = new System.Drawing.Point(110, 2);
+            this.lblCursor_THD_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_THD_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_THD_L.Name = "lblCursor_THD_L";
+            this.lblCursor_THD_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_THD_L.TabIndex = 12;
+            this.lblCursor_THD_L.Text = "0.00 %";
             // 
-            // lblCuror_D2_L
+            // lblCursor_D2_L
             // 
-            this.lblCuror_D2_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_D2_L.Location = new System.Drawing.Point(252, 2);
-            this.lblCuror_D2_L.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_D2_L.MinimumSize = new System.Drawing.Size(50, 13);
-            this.lblCuror_D2_L.Name = "lblCuror_D2_L";
-            this.lblCuror_D2_L.Size = new System.Drawing.Size(60, 14);
-            this.lblCuror_D2_L.TabIndex = 13;
-            this.lblCuror_D2_L.Text = "00.00 %";
+            this.lblCursor_D2_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D2_L.Location = new System.Drawing.Point(252, 2);
+            this.lblCursor_D2_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D2_L.MinimumSize = new System.Drawing.Size(50, 13);
+            this.lblCursor_D2_L.Name = "lblCursor_D2_L";
+            this.lblCursor_D2_L.Size = new System.Drawing.Size(60, 14);
+            this.lblCursor_D2_L.TabIndex = 13;
+            this.lblCursor_D2_L.Text = "00.00 %";
             // 
-            // lblCuror_D3_L
+            // lblCursor_D3_L
             // 
-            this.lblCuror_D3_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_D3_L.Location = new System.Drawing.Point(328, 2);
-            this.lblCuror_D3_L.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_D3_L.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_D3_L.Name = "lblCuror_D3_L";
-            this.lblCuror_D3_L.Size = new System.Drawing.Size(60, 15);
-            this.lblCuror_D3_L.TabIndex = 14;
-            this.lblCuror_D3_L.Text = "00.00 %";
+            this.lblCursor_D3_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D3_L.Location = new System.Drawing.Point(328, 2);
+            this.lblCursor_D3_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D3_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D3_L.Name = "lblCursor_D3_L";
+            this.lblCursor_D3_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D3_L.TabIndex = 14;
+            this.lblCursor_D3_L.Text = "00.00 %";
             // 
-            // lblCuror_D4_L
+            // lblCursor_D4_L
             // 
-            this.lblCuror_D4_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_D4_L.Location = new System.Drawing.Point(404, 2);
-            this.lblCuror_D4_L.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_D4_L.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_D4_L.Name = "lblCuror_D4_L";
-            this.lblCuror_D4_L.Size = new System.Drawing.Size(60, 15);
-            this.lblCuror_D4_L.TabIndex = 15;
-            this.lblCuror_D4_L.Text = "00.00 %";
+            this.lblCursor_D4_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D4_L.Location = new System.Drawing.Point(404, 2);
+            this.lblCursor_D4_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D4_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D4_L.Name = "lblCursor_D4_L";
+            this.lblCursor_D4_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D4_L.TabIndex = 15;
+            this.lblCursor_D4_L.Text = "00.00 %";
             // 
-            // lblCuror_D6_L
+            // lblCursor_D6_L
             // 
-            this.lblCuror_D6_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_D6_L.Location = new System.Drawing.Point(556, 2);
-            this.lblCuror_D6_L.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_D6_L.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_D6_L.Name = "lblCuror_D6_L";
-            this.lblCuror_D6_L.Size = new System.Drawing.Size(60, 15);
-            this.lblCuror_D6_L.TabIndex = 17;
-            this.lblCuror_D6_L.Text = "00.00 %";
+            this.lblCursor_D6_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D6_L.Location = new System.Drawing.Point(556, 2);
+            this.lblCursor_D6_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D6_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D6_L.Name = "lblCursor_D6_L";
+            this.lblCursor_D6_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D6_L.TabIndex = 17;
+            this.lblCursor_D6_L.Text = "00.00 %";
             // 
-            // lblCuror_Power_L
+            // lblCursor_Power_L
             // 
-            this.lblCuror_Power_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_Power_L.Location = new System.Drawing.Point(632, 2);
-            this.lblCuror_Power_L.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_Power_L.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_Power_L.Name = "lblCuror_Power_L";
-            this.lblCuror_Power_L.Size = new System.Drawing.Size(80, 13);
-            this.lblCuror_Power_L.TabIndex = 19;
-            this.lblCuror_Power_L.Text = "0 mW";
-            this.lblCuror_Power_L.Click += new System.EventHandler(this.lblCuror_Power_Click);
+            this.lblCursor_Power_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_Power_L.Location = new System.Drawing.Point(632, 2);
+            this.lblCursor_Power_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_Power_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_Power_L.Name = "lblCursor_Power_L";
+            this.lblCursor_Power_L.Size = new System.Drawing.Size(80, 13);
+            this.lblCursor_Power_L.TabIndex = 19;
+            this.lblCursor_Power_L.Text = "0 mW";
+            this.lblCursor_Power_L.Click += new System.EventHandler(this.lblCursor_Power_Click);
             // 
-            // lblCuror_NoiseFloor_L
+            // lblCursor_NoiseFloor_L
             // 
-            this.lblCuror_NoiseFloor_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_NoiseFloor_L.Location = new System.Drawing.Point(718, 2);
-            this.lblCuror_NoiseFloor_L.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_NoiseFloor_L.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblCuror_NoiseFloor_L.Name = "lblCuror_NoiseFloor_L";
-            this.lblCuror_NoiseFloor_L.Size = new System.Drawing.Size(71, 13);
-            this.lblCuror_NoiseFloor_L.TabIndex = 20;
-            this.lblCuror_NoiseFloor_L.Text = "00.00 dB";
+            this.lblCursor_NoiseFloor_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_NoiseFloor_L.Location = new System.Drawing.Point(718, 2);
+            this.lblCursor_NoiseFloor_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_NoiseFloor_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_NoiseFloor_L.Name = "lblCursor_NoiseFloor_L";
+            this.lblCursor_NoiseFloor_L.Size = new System.Drawing.Size(71, 13);
+            this.lblCursor_NoiseFloor_L.TabIndex = 20;
+            this.lblCursor_NoiseFloor_L.Text = "00.00 dB";
             // 
             // label17
             // 
@@ -1439,16 +1439,16 @@
             this.label1.TabIndex = 21;
             this.label1.Text = "THD";
             // 
-            // lblCuror_Frequency
+            // lblCursor_Frequency
             // 
-            this.lblCuror_Frequency.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCuror_Frequency.Location = new System.Drawing.Point(44, 0);
-            this.lblCuror_Frequency.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCuror_Frequency.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCuror_Frequency.Name = "lblCuror_Frequency";
-            this.lblCuror_Frequency.Size = new System.Drawing.Size(116, 15);
-            this.lblCuror_Frequency.TabIndex = 10;
-            this.lblCuror_Frequency.Text = "F: 00.00 Hz";
+            this.lblCursor_Frequency.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_Frequency.Location = new System.Drawing.Point(44, 0);
+            this.lblCursor_Frequency.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_Frequency.MinimumSize = new System.Drawing.Size(100, 13);
+            this.lblCursor_Frequency.Name = "lblCursor_Frequency";
+            this.lblCursor_Frequency.Size = new System.Drawing.Size(116, 15);
+            this.lblCursor_Frequency.TabIndex = 10;
+            this.lblCursor_Frequency.Text = "F: 00.00 Hz";
             // 
             // frmThdFrequency
             // 
@@ -1561,16 +1561,16 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ComboBox cmbD_Graph_Top;
         private System.Windows.Forms.Button btnD_FitGraphY;
-        private System.Windows.Forms.Label lblCuror_NoiseFloor_L;
-        private System.Windows.Forms.Label lblCuror_Power_L;
-        private System.Windows.Forms.Label lblCuror_D6_L;
-        private System.Windows.Forms.Label lblCuror_D5_L;
-        private System.Windows.Forms.Label lblCuror_D4_L;
-        private System.Windows.Forms.Label lblCuror_D3_L;
-        private System.Windows.Forms.Label lblCuror_D2_L;
-        private System.Windows.Forms.Label lblCuror_THD_L;
+        private System.Windows.Forms.Label lblCursor_NoiseFloor_L;
+        private System.Windows.Forms.Label lblCursor_Power_L;
+        private System.Windows.Forms.Label lblCursor_D6_L;
+        private System.Windows.Forms.Label lblCursor_D5_L;
+        private System.Windows.Forms.Label lblCursor_D4_L;
+        private System.Windows.Forms.Label lblCursor_D3_L;
+        private System.Windows.Forms.Label lblCursor_D2_L;
+        private System.Windows.Forms.Label lblCursor_THD_L;
         private System.Windows.Forms.Label lblCursor_Magnitude_L;
-        private System.Windows.Forms.Label lblCuror_Frequency;
+        private System.Windows.Forms.Label lblCursor_Frequency;
         private System.Windows.Forms.CheckBox chkEnableRightChannel;
         private System.Windows.Forms.CheckBox chkEnableLeftChannel;
         private System.Windows.Forms.CheckBox chkGraphShowRightChannel;
@@ -1586,14 +1586,14 @@
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Label label28;
         private System.Windows.Forms.Label label27;
-        private System.Windows.Forms.Label lblCuror_NoiseFloor_R;
-        private System.Windows.Forms.Label lblCuror_Power_R;
-        private System.Windows.Forms.Label lblCuror_D6_R;
-        private System.Windows.Forms.Label lblCuror_D5_R;
-        private System.Windows.Forms.Label lblCuror_D4_R;
-        private System.Windows.Forms.Label lblCuror_D3_R;
-        private System.Windows.Forms.Label lblCuror_D2_R;
-        private System.Windows.Forms.Label lblCuror_THD_R;
+        private System.Windows.Forms.Label lblCursor_NoiseFloor_R;
+        private System.Windows.Forms.Label lblCursor_Power_R;
+        private System.Windows.Forms.Label lblCursor_D6_R;
+        private System.Windows.Forms.Label lblCursor_D5_R;
+        private System.Windows.Forms.Label lblCursor_D4_R;
+        private System.Windows.Forms.Label lblCursor_D3_R;
+        private System.Windows.Forms.Label lblCursor_D2_R;
+        private System.Windows.Forms.Label lblCursor_THD_R;
         private System.Windows.Forms.Label lblCursor_Magnitude_R;
         private System.Windows.Forms.Panel pnlCursorsRight;
         private System.Windows.Forms.Panel pnlCursorsLeft;

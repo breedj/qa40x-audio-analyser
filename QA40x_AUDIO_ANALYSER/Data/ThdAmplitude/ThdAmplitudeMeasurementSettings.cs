@@ -17,6 +17,11 @@ namespace QaControl
         public double Load { get; set; } = 8;                // 8 Ohm
         public bool EnableLeftChannel { get; set; } = true;
         public bool EnableRightChannel { get; set; } = true;
+
+        public ThdAmplitudeMeasurementSettings Copy()
+        {
+            return (ThdAmplitudeMeasurementSettings)MemberwiseClone();
+        }
     }
 }           
     

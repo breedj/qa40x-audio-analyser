@@ -64,7 +64,7 @@ namespace QA40x_AUDIO_ANALYSER
 
             Program.MainForm.ClearMessage();
             Program.MainForm.HideProgressBar();
-            AttachThdFreqMouseEvent();
+            AttachPlotMouseEvent();
         }
 
 
@@ -144,7 +144,6 @@ namespace QA40x_AUDIO_ANALYSER
             settings.SampleRate = 192000;
             settings.FftSize = 65536 * 2;
             settings.WindowingFunction = Windowing.Hann;
-            settings.StepsPerOctave = 2;
             settings.InputRange = 18;
             settings.GeneratorType = E_GeneratorType.INPUT_VOLTAGE;         
             settings.GeneratorAmplitude = -25;
@@ -764,47 +763,47 @@ namespace QA40x_AUDIO_ANALYSER
         /// <param name="load">The amplifier load</param>
         void WriteCursorTexts_Dpercent_L(double f, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double power, double noiseFloor, double load)
         {
-            lblCuror_Frequency.Text = $"F: {f:0.0 Hz}";
+            lblCursor_Frequency.Text = $"F: {f:0.0 Hz}";
             lblCursor_Magnitude_L.Text = $"{magnitude:0.0# dB}";
-            lblCuror_THD_L.Text = $"{thd:0.0000 \\%}";
+            lblCursor_THD_L.Text = $"{thd:0.0000 \\%}";
 
-            lblCuror_D2_L.Text = $"{D2:0.0000 \\%}";
-            lblCuror_D3_L.Text = $"{D3:0.0000 \\%}";
-            lblCuror_D4_L.Text = $"{D4:0.0000 \\%}";
-            lblCuror_D5_L.Text = $"{D5:0.0000 \\%}";
-            lblCuror_D6_L.Text = $"{D6:0.0000 \\%}";
+            lblCursor_D2_L.Text = $"{D2:0.0000 \\%}";
+            lblCursor_D3_L.Text = $"{D3:0.0000 \\%}";
+            lblCursor_D4_L.Text = $"{D4:0.0000 \\%}";
+            lblCursor_D5_L.Text = $"{D5:0.0000 \\%}";
+            lblCursor_D6_L.Text = $"{D6:0.0000 \\%}";
 
             if (power < 1)
-                lblCuror_Power_L.Text = $"{power * 1000:0.0# mW} ({load:0.##} Ω)";
+                lblCursor_Power_L.Text = $"{power * 1000:0 mW} ({load:0.##} Ω)";
             else
-                lblCuror_Power_L.Text = $"{power:0.00# W} ({load:0.##} Ω)";
+                lblCursor_Power_L.Text = $"{power:0.00# W} ({load:0.##} Ω)";
 
-            lblCuror_NoiseFloor_L.Text = $"{noiseFloor:0.00000 \\%}";
+            lblCursor_NoiseFloor_L.Text = $"{noiseFloor:0.00000 \\%}";
 
-            lblCuror_Frequency.Refresh();
+            lblCursor_Frequency.Refresh();
             pnlCursorsLeft.Refresh();
         }
 
         void WriteCursorTexts_Dpercent_R(double f, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double power, double noiseFloor, double load)
         {
-            lblCuror_Frequency.Text = $"F: {f:0.0 Hz}";
+            lblCursor_Frequency.Text = $"F: {f:0.0 Hz}";
             lblCursor_Magnitude_R.Text = $"{magnitude:0.0# dB}";
-            lblCuror_THD_R.Text = $"{thd:0.0000 \\%}";
+            lblCursor_THD_R.Text = $"{thd:0.0000 \\%}";
 
-            lblCuror_D2_R.Text = $"{D2:0.0000 \\%}";
-            lblCuror_D3_R.Text = $"{D3:0.0000 \\%}";
-            lblCuror_D4_R.Text = $"{D4:0.0000 \\%}";
-            lblCuror_D5_R.Text = $"{D5:0.0000 \\%}";
-            lblCuror_D6_R.Text = $"{D6:0.0000 \\%}";
+            lblCursor_D2_R.Text = $"{D2:0.0000 \\%}";
+            lblCursor_D3_R.Text = $"{D3:0.0000 \\%}";
+            lblCursor_D4_R.Text = $"{D4:0.0000 \\%}";
+            lblCursor_D5_R.Text = $"{D5:0.0000 \\%}";
+            lblCursor_D6_R.Text = $"{D6:0.0000 \\%}";
 
             if (power < 1)
-                lblCuror_Power_R.Text = $"{power * 1000:0.0# mW} ({load:0.##} Ω)";
+                lblCursor_Power_R.Text = $"{power * 1000:0 mW} ({load:0.##} Ω)";
             else
-                lblCuror_Power_R.Text = $"{power:0.00# W} ({load:0.##} Ω)";
+                lblCursor_Power_R.Text = $"{power:0.00# W} ({load:0.##} Ω)";
 
-            lblCuror_NoiseFloor_R.Text = $"{noiseFloor:0.00000 \\%}";
+            lblCursor_NoiseFloor_R.Text = $"{noiseFloor:0.00000 \\%}";
 
-            lblCuror_Frequency.Refresh();
+            lblCursor_Frequency.Refresh();
             pnlCursorsRight.Refresh();
         }
 
@@ -825,47 +824,47 @@ namespace QA40x_AUDIO_ANALYSER
         /// <param name="load">The amplifier load</param>
         void WriteCursorTexts_dB_L(double f, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double power, double noiseFloor, double load)
         {
-            lblCuror_Frequency.Text = $"F: {f:0.0 Hz}";
+            lblCursor_Frequency.Text = $"F: {f:0.0 Hz}";
             lblCursor_Magnitude_L.Text = $"{magnitude:0.0# dB}";
-            lblCuror_THD_L.Text = $"{thd:0.0# dB}";
+            lblCursor_THD_L.Text = $"{thd:0.0# dB}";
 
-            lblCuror_D2_L.Text = $"{D2:0.0# dB}";
-            lblCuror_D3_L.Text = $"{D3:0.0# dB}";
-            lblCuror_D4_L.Text = $"{D4:0.0# dB}";
-            lblCuror_D5_L.Text = $"{D5:0.0# dB}";
-            lblCuror_D6_L.Text = $"{D6:0.0# dB}";
+            lblCursor_D2_L.Text = $"{D2:0.0# dB}";
+            lblCursor_D3_L.Text = $"{D3:0.0# dB}";
+            lblCursor_D4_L.Text = $"{D4:0.0# dB}";
+            lblCursor_D5_L.Text = $"{D5:0.0# dB}";
+            lblCursor_D6_L.Text = $"{D6:0.0# dB}";
 
             if (power < 1)
-                lblCuror_Power_L.Text = $"{power * 1000:0.0# mW} ({load:0.##} Ω)";
+                lblCursor_Power_L.Text = $"{power * 1000:0 mW} ({load:0.##} Ω)";
             else
-                lblCuror_Power_L.Text = $"{power:0.00# W} ({load:0.##} Ω)";
+                lblCursor_Power_L.Text = $"{power:0.00# W} ({load:0.##} Ω)";
 
-            lblCuror_NoiseFloor_L.Text = $"{noiseFloor:##0.0# dB}";
+            lblCursor_NoiseFloor_L.Text = $"{noiseFloor:0.0# dB}";
 
-            lblCuror_Frequency.Refresh();
+            lblCursor_Frequency.Refresh();
             pnlCursorsLeft.Refresh();
         }
 
         void WriteCursorTexts_dB_R(double f, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double power, double noiseFloor, double load)
         {
-            lblCuror_Frequency.Text = $"F: {f:0.0 Hz}";
+            lblCursor_Frequency.Text = $"F: {f:0.0 Hz}";
             lblCursor_Magnitude_R.Text = $"{magnitude:0.0# dB}";
-            lblCuror_THD_R.Text = $"{thd:0.0# dB}";
+            lblCursor_THD_R.Text = $"{thd:0.0# dB}";
 
-            lblCuror_D2_R.Text = $"{D2:0.0# dB}";
-            lblCuror_D3_R.Text = $"{D3:0.0# dB}";
-            lblCuror_D4_R.Text = $"{D4:0.0# dB}";
-            lblCuror_D5_R.Text = $"{D5:0.0# dB}";
-            lblCuror_D6_R.Text = $"{D6:0.0# dB}";
+            lblCursor_D2_R.Text = $"{D2:0.0# dB}";
+            lblCursor_D3_R.Text = $"{D3:0.0# dB}";
+            lblCursor_D4_R.Text = $"{D4:0.0# dB}";
+            lblCursor_D5_R.Text = $"{D5:0.0# dB}";
+            lblCursor_D6_R.Text = $"{D6:0.0# dB}";
 
             if (power < 1)
-                lblCuror_Power_R.Text = $"{power * 1000:0.0# mW} ({load:0.##} Ω)";
+                lblCursor_Power_R.Text = $"{power * 1000:0 mW} ({load:0.##} Ω)";
             else
-                lblCuror_Power_R.Text = $"{power:0.00# W} ({load:0.##} Ω)";
+                lblCursor_Power_R.Text = $"{power:0.00# W} ({load:0.##} Ω)";
 
-            lblCuror_NoiseFloor_R.Text = $"{noiseFloor:##0.0# dB}";
+            lblCursor_NoiseFloor_R.Text = $"{noiseFloor:0.0# dB}";
 
-            lblCuror_Frequency.Refresh();
+            lblCursor_Frequency.Refresh();
             pnlCursorsRight.Refresh();
         }
 
@@ -994,26 +993,24 @@ namespace QA40x_AUDIO_ANALYSER
         /// </summary>
         /// <param name="data"></param>
         void PlotThd(ThdFrequencyMeasurementResult measurementResult, int measurementNr, bool showLeftChannel, bool showRightChannel)
-        {
-            //thdPlot.Plot.Remove<Scatter>();
+        { 
+            List<double> freqX = [];
 
-            List<double> freqX = new List<double>();
+            List<double> hTotY_left = [];
+            List<double> h2Y_left = [];
+            List<double> h3Y_left = [];
+            List<double> h4Y_left = [];
+            List<double> h5Y_left = [];
+            List<double> h6Y_left = [];
+            List<double> noiseY_left = [];
 
-            List<double> hTotY_left = new List<double>();
-            List<double> h2Y_left = new List<double>();
-            List<double> h3Y_left = new List<double>();
-            List<double> h4Y_left = new List<double>();
-            List<double> h5Y_left = new List<double>();
-            List<double> h6Y_left = new List<double>();
-            List<double> noiseY_left = new List<double>();
-
-            List<double> hTotY_right = new List<double>();
-            List<double> h2Y_right = new List<double>();
-            List<double> h3Y_right = new List<double>();
-            List<double> h4Y_right = new List<double>();
-            List<double> h5Y_right = new List<double>();
-            List<double> h6Y_right = new List<double>();
-            List<double> noiseY_right = new List<double>();
+            List<double> hTotY_right = [];
+            List<double> h2Y_right = [];
+            List<double> h3Y_right = [];
+            List<double> h4Y_right = [];
+            List<double> h5Y_right = [];
+            List<double> h6Y_right = [];
+            List<double> noiseY_right = [];
 
             for (int f = 0; f < measurementResult.FrequencySteps.Count; f++)
             {
@@ -1021,37 +1018,37 @@ namespace QA40x_AUDIO_ANALYSER
 
                 if (showLeftChannel && measurementResult.MeasurementSettings.EnableLeftChannel)
                 {
-                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 0 && chkShowThd.Checked)
+                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 0 && GraphSettings.ShowTHD)
                         hTotY_left.Add(measurementResult.FrequencySteps[f].Left.Thd_Percent);
-                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 0 && chkShowD2.Checked)
+                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 0 && GraphSettings.ShowD2)
                         h2Y_left.Add(measurementResult.FrequencySteps[f].Left.Harmonics[0].Thd_Percent);
-                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 1 && chkShowD3.Checked)
+                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 1 && GraphSettings.ShowD3)
                         h3Y_left.Add(measurementResult.FrequencySteps[f].Left.Harmonics[1].Thd_Percent);
-                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 2 && chkShowD4.Checked)
+                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 2 && GraphSettings.ShowD4)
                         h4Y_left.Add(measurementResult.FrequencySteps[f].Left.Harmonics[2].Thd_Percent);
-                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 3 && chkShowD5.Checked)
+                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 3 && GraphSettings.ShowD5)
                         h5Y_left.Add(measurementResult.FrequencySteps[f].Left.Harmonics[3].Thd_Percent);
-                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 4 && measurementResult.FrequencySteps[f].Left.Thd_Percent != 0 && chkShowD6.Checked)
+                    if (measurementResult.FrequencySteps[f].Left.Harmonics.Count > 4 && measurementResult.FrequencySteps[f].Left.Thd_Percent != 0 && GraphSettings.ShowD6)
                         h6Y_left.Add(measurementResult.FrequencySteps[f].Left.ThdPercent_D6plus);        // D6+
-                    if (chkShowNoiseFloor.Checked)
+                    if (GraphSettings.ShowNoiseFloor)
                         noiseY_left.Add((measurementResult.FrequencySteps[f].Left.Average_NoiseFloor_V / measurementResult.FrequencySteps[f].Left.Fundamental_V) * 100);
                 }
 
                 if (showRightChannel && measurementResult.MeasurementSettings.EnableRightChannel)
                 {
-                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 0 && chkShowThd.Checked)
+                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 0 && GraphSettings.ShowTHD)
                         hTotY_right.Add(measurementResult.FrequencySteps[f].Right.Thd_Percent);
-                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 0 && chkShowD2.Checked)
+                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 0 && GraphSettings.ShowD2)
                         h2Y_right.Add(measurementResult.FrequencySteps[f].Right.Harmonics[0].Thd_Percent);
-                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 1 && chkShowD3.Checked)
+                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 1 && GraphSettings.ShowD3)
                         h3Y_right.Add(measurementResult.FrequencySteps[f].Right.Harmonics[1].Thd_Percent);
-                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 2 && chkShowD4.Checked)
+                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 2 && GraphSettings.ShowD4)
                         h4Y_right.Add(measurementResult.FrequencySteps[f].Right.Harmonics[2].Thd_Percent);
-                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 3 && chkShowD5.Checked)
+                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 3 && GraphSettings.ShowD5)
                         h5Y_right.Add(measurementResult.FrequencySteps[f].Right.Harmonics[3].Thd_Percent);
-                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 4 && measurementResult.FrequencySteps[f].Right.ThdPercent_D6plus != 0 && chkShowD6.Checked)
+                    if (measurementResult.FrequencySteps[f].Right.Harmonics.Count > 4 && measurementResult.FrequencySteps[f].Right.ThdPercent_D6plus != 0 && GraphSettings.ShowD6)
                         h6Y_right.Add(measurementResult.FrequencySteps[f].Right.ThdPercent_D6plus);        // D6+
-                    if (chkShowNoiseFloor.Checked)
+                    if (GraphSettings.ShowNoiseFloor)
                         noiseY_right.Add((measurementResult.FrequencySteps[f].Right.Average_NoiseFloor_V / measurementResult.FrequencySteps[f].Right.Fundamental_V) * 100);
                 }
             }
@@ -1066,11 +1063,11 @@ namespace QA40x_AUDIO_ANALYSER
 
             // add a scatter plot to the plot
             double[] logFreqX = freqX.Select(Math.Log10).ToArray();
-            int color = measurementNr * 2;
-            
+            int color = measurementNr * 2;              // Skip color each measurement for better visibility
+
             if (showLeftChannel)
             {
-                if (chkShowThd.Checked)
+                if (GraphSettings.ShowTHD)
                 {
                     double[] logHTotY = hTotY_left.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logHTotY);
@@ -1080,7 +1077,7 @@ namespace QA40x_AUDIO_ANALYSER
                     plot.LegendText = showRightChannel ? "THD-L" : "THD";
                 }
 
-                if (chkShowD2.Checked)
+                if (GraphSettings.ShowD2)
                 {
                     double[] logH2Y = h2Y_left.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH2Y);
@@ -1090,7 +1087,7 @@ namespace QA40x_AUDIO_ANALYSER
                     plot.LegendText = showRightChannel ? "D2-L" : "D2";
                 }
 
-                if (chkShowD3.Checked)
+                if (GraphSettings.ShowD3)
                 {
                     double[] logH3Y = h3Y_left.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH3Y);
@@ -1100,7 +1097,7 @@ namespace QA40x_AUDIO_ANALYSER
                     plot.LegendText = showRightChannel ? "D3-L" : "D3";
                 }
 
-                if (chkShowD4.Checked)
+                if (GraphSettings.ShowD4)
                 {
                     double[] logH4Y = h4Y_left.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH4Y);
@@ -1110,7 +1107,7 @@ namespace QA40x_AUDIO_ANALYSER
                     plot.LegendText = showRightChannel ? "D4-L" : "D4";
                 }
 
-                if (chkShowD5.Checked)
+                if (GraphSettings.ShowD5)
                 {
                     double[] logH5Y = h5Y_left.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH5Y);
@@ -1120,7 +1117,7 @@ namespace QA40x_AUDIO_ANALYSER
                     plot.LegendText = showRightChannel ? "D5-L" : "D5";
                 }
 
-                if (chkShowD6.Checked)
+                if (GraphSettings.ShowD6)
                 {
                     double[] logH6Y = h6Y_left.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH6Y);
@@ -1131,7 +1128,7 @@ namespace QA40x_AUDIO_ANALYSER
                 }
 
 
-                if (chkShowNoiseFloor.Checked)
+                if (GraphSettings.ShowNoiseFloor)
                 {
                     double[] logNoiseY = noiseY_left.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logNoiseY);
@@ -1145,74 +1142,74 @@ namespace QA40x_AUDIO_ANALYSER
 
             if (showRightChannel)
             {
-                if (chkShowThd.Checked)
+                if (GraphSettings.ShowTHD)
                 {
                     double[] logHTotY = hTotY_right.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logHTotY);
                     plot.LineWidth = lineWidth;
                     plot.Color = colors.GetColor(8, color);
                     plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "THD-R" : "THD";
+                    plot.LegendText = showLeftChannel ? "THD-R" : "THD";
                     plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
                 }
 
-                if (chkShowD2.Checked)
+                if (GraphSettings.ShowD2)
                 {
                     double[] logH2Y = h2Y_right.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH2Y);
                     plot.LineWidth = lineWidth;
                     plot.Color = colors.GetColor(0, color);
                     plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "D2-R" : "D2";
+                    plot.LegendText = showLeftChannel ? "D2-R" : "D2";
                     plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
                 }
 
-                if (chkShowD3.Checked)
+                if (GraphSettings.ShowD3)
                 {
                     double[] logH3Y = h3Y_right.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH3Y);
                     plot.LineWidth = lineWidth;
                     plot.Color = colors.GetColor(1, color);
                     plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "D3-R" : "D3";
+                    plot.LegendText = showLeftChannel ? "D3-R" : "D3";
                     plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
                 }
 
-                if (chkShowD4.Checked)
+                if (GraphSettings.ShowD4)
                 {
                     double[] logH4Y = h4Y_right.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH4Y);
                     plot.Color = colors.GetColor(2, color);
                     plot.LineWidth = lineWidth;
                     plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "D4-R" : "D4";
+                    plot.LegendText = showLeftChannel ? "D4-R" : "D4";
                     plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
                 }
 
-                if (chkShowD5.Checked)
+                if (GraphSettings.ShowD5)
                 {
                     double[] logH5Y = h5Y_right.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH5Y);
                     plot.LineWidth = lineWidth;
                     plot.Color = colors.GetColor(3, color);
                     plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "D5-R" : "D5";
+                    plot.LegendText = showLeftChannel ? "D5-R" : "D5";
                     plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
                 }
 
-                if (chkShowD6.Checked)
+                if (GraphSettings.ShowD5)
                 {
                     double[] logH6Y = h6Y_right.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH6Y);
                     plot.LineWidth = lineWidth;
                     plot.Color = colors.GetColor(4, color);
                     plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "D6+-R" : "D6+";
+                    plot.LegendText = showLeftChannel ? "D6+-R" : "D6+";
                     plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
                 }
 
 
-                if (chkShowNoiseFloor.Checked)
+                if (GraphSettings.ShowNoiseFloor)
                 {
                     double[] logNoiseY = noiseY_right.Select(Math.Log10).ToArray();
                     var plot = thdPlot.Plot.Add.Scatter(logFreqX, logNoiseY);
@@ -1317,27 +1314,25 @@ namespace QA40x_AUDIO_ANALYSER
         /// <param name="measurementResult">Data to plot</param>
         void PlotMagnitude(ThdFrequencyMeasurementResult measurementResult, int measurementNr, bool showLeftChannel, bool showRightChannel)
         {
-            //thdPlot.Plot.Remove<Scatter>();
+            List<double> freqX = [];
 
-            List<double> freqX = new List<double>();
+            List<double> magnY_left = [];
+            List<double> hTotY_left = [];
+            List<double> h2Y_left = [];
+            List<double> h3Y_left = [];
+            List<double> h4Y_left = [];
+            List<double> h5Y_left = [];
+            List<double> h6Y_left = [];
+            List<double> noiseY_left = [];
 
-            List<double> magnY_left = new List<double>();
-            List<double> hTotY_left = new List<double>();
-            List<double> h2Y_left = new List<double>();
-            List<double> h3Y_left = new List<double>();
-            List<double> h4Y_left = new List<double>();
-            List<double> h5Y_left = new List<double>();
-            List<double> h6Y_left = new List<double>();
-            List<double> noiseY_left = new List<double>();
-
-            List<double> magnY_right = new List<double>();
-            List<double> hTotY_right = new List<double>();
-            List<double> h2Y_right = new List<double>();
-            List<double> h3Y_right = new List<double>();
-            List<double> h4Y_right = new List<double>();
-            List<double> h5Y_right = new List<double>();
-            List<double> h6Y_right = new List<double>();
-            List<double> noiseY_right = new List<double>();
+            List<double> magnY_right = [];
+            List<double> hTotY_right = [];
+            List<double> h2Y_right = [];
+            List<double> h3Y_right = [];
+            List<double> h4Y_right = [];
+            List<double> h5Y_right = [];
+            List<double> h6Y_right = [];
+            List<double> noiseY_right = [];
 
             for (int f = 0; f < measurementResult.FrequencySteps.Count; f++)
             {
@@ -1607,7 +1602,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// <summary>
         /// Attach mouse events to the main graph
         /// </summary>
-        void AttachThdFreqMouseEvent()
+        void AttachPlotMouseEvent()
         {
             // Attach the mouse move event
             thdPlot.MouseMove += (s, e) =>
@@ -1720,7 +1715,7 @@ namespace QA40x_AUDIO_ANALYSER
                 {
                     ThdFrequencyStep step = MeasurementResult.FrequencySteps[nearest1.Index];
 
-                    if (gbdB_Range.Visible)
+                    if (GraphSettings.GraphType == E_ThdFreq_GraphType.DB)
                     {
                         WriteCursorTexts_dB_L(step.FundamentalFrequency
                         , step.Left.Gain_dB
@@ -1875,8 +1870,9 @@ namespace QA40x_AUDIO_ANALYSER
         /// <param name="e"></param>
         private void txtOutputLoad_TextChanged(object sender, EventArgs e)
         {
+            MeasurementSettings.Load = QaLibrary.ParseTextToDouble(txtOutputLoad.Text, MeasurementSettings.Load);
             UpdateGeneratorParameters();
-            QaLibrary.ValidateRangeAdorner(sender, 0, 100000);
+            QaLibrary.ValidateRangeAdorner(sender, QaLibrary.MINIMUM_LOAD, QaLibrary.MAXIMUM_LOAD);
         }
 
         /// <summary>
@@ -2263,7 +2259,7 @@ namespace QA40x_AUDIO_ANALYSER
             ct.Cancel();
         }
 
-        private void lblCuror_Power_Click(object sender, EventArgs e)
+        private void lblCursor_Power_Click(object sender, EventArgs e)
         {
 
         }

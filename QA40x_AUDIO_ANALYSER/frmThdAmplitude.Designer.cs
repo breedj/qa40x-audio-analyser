@@ -34,6 +34,8 @@
             this.btnStartThdMeasurement = new System.Windows.Forms.Button();
             this.graphTime = new ScottPlot.WinForms.FormsPlot();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.chkEnableRightChannel = new System.Windows.Forms.CheckBox();
+            this.chkEnableLeftChannel = new System.Windows.Forms.CheckBox();
             this.cmbEndVoltageUnit = new System.Windows.Forms.ComboBox();
             this.label12 = new System.Windows.Forms.Label();
             this.txtEndVoltage = new System.Windows.Forms.TextBox();
@@ -54,11 +56,15 @@
             this.scGraphCursors = new System.Windows.Forms.SplitContainer();
             this.scGraphSettings = new System.Windows.Forms.SplitContainer();
             this.thdPlot = new ScottPlot.WinForms.FormsPlot();
+            this.chkGraphShowRightChannel = new System.Windows.Forms.CheckBox();
+            this.chkGraphShowLeftChannel = new System.Windows.Forms.CheckBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.chkShowDataPoints = new System.Windows.Forms.CheckBox();
             this.chkThickLines = new System.Windows.Forms.CheckBox();
-            this.gbDbv_Range = new System.Windows.Forms.GroupBox();
-            this.cmbDbV_Graph_Bottom = new System.Windows.Forms.NumericUpDown();
-            this.cmbDbV_Graph_Top = new System.Windows.Forms.NumericUpDown();
+            this.cmbXAxis = new System.Windows.Forms.ComboBox();
+            this.gbdB_Range = new System.Windows.Forms.GroupBox();
+            this.ud_dB_Graph_Bottom = new System.Windows.Forms.NumericUpDown();
+            this.ud_dB_Graph_Top = new System.Windows.Forms.NumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.btnDbv_FitGraphY = new System.Windows.Forms.Button();
@@ -71,33 +77,52 @@
             this.chkShowD3 = new System.Windows.Forms.CheckBox();
             this.chkShowD2 = new System.Windows.Forms.CheckBox();
             this.chkShowThd = new System.Windows.Forms.CheckBox();
-            this.btnGraph_dBV = new System.Windows.Forms.Button();
-            this.btnGraph_D = new System.Windows.Forms.Button();
+            this.btnGraph_dB = new System.Windows.Forms.Button();
+            this.btnGraph_D_Percent = new System.Windows.Forms.Button();
             this.gbXAxisRange = new System.Windows.Forms.GroupBox();
             this.btnAutoFitX = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
-            this.cmbVoltageGraph_To = new System.Windows.Forms.ComboBox();
+            this.cmbGraph_VoltageEnd = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.cmbVoltageGraph_From = new System.Windows.Forms.ComboBox();
+            this.cmbGraph_VoltageStart = new System.Windows.Forms.ComboBox();
             this.gbD_Range = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
             this.cmbD_Graph_Bottom = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.cmbD_Graph_Top = new System.Windows.Forms.ComboBox();
             this.btnD_FitGraphY = new System.Windows.Forms.Button();
-            this.lblCursor_NoiseFloor = new System.Windows.Forms.Label();
-            this.lblCursor_Power = new System.Windows.Forms.Label();
-            this.lblCursor_D6 = new System.Windows.Forms.Label();
-            this.lblCursor_D5 = new System.Windows.Forms.Label();
-            this.lblCursor_D4 = new System.Windows.Forms.Label();
-            this.lblCursor_D3 = new System.Windows.Forms.Label();
-            this.lblCursor_D2 = new System.Windows.Forms.Label();
-            this.lblCursor_THD = new System.Windows.Forms.Label();
-            this.lblCursor_Magnitude = new System.Windows.Forms.Label();
-            this.lblCursor_VoltageOut = new System.Windows.Forms.Label();
-            this.cmbXAxis = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.lblCursor_VoltageIn = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.lblCursorMagnitude = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.lblCursor_X_Axis = new System.Windows.Forms.Label();
+            this.pnlCursorsRight = new System.Windows.Forms.Panel();
+            this.label28 = new System.Windows.Forms.Label();
+            this.lblCursor_Magnitude_R = new System.Windows.Forms.Label();
+            this.lblCursor_NoiseFloor_R = new System.Windows.Forms.Label();
+            this.lblCursor_THD_R = new System.Windows.Forms.Label();
+            this.lblCursor_Power_R = new System.Windows.Forms.Label();
+            this.lblCursor_D2_R = new System.Windows.Forms.Label();
+            this.lblCursor_D6_R = new System.Windows.Forms.Label();
+            this.lblCursor_D3_R = new System.Windows.Forms.Label();
+            this.lblCursor_D5_R = new System.Windows.Forms.Label();
+            this.lblCursor_D4_R = new System.Windows.Forms.Label();
+            this.pnlCursorsLeft = new System.Windows.Forms.Panel();
+            this.lblCursor_D5_L = new System.Windows.Forms.Label();
+            this.lblCursor_Magnitude_L = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
+            this.lblCursor_THD_L = new System.Windows.Forms.Label();
+            this.lblCursor_D2_L = new System.Windows.Forms.Label();
+            this.lblCursor_D3_L = new System.Windows.Forms.Label();
+            this.lblCursor_D4_L = new System.Windows.Forms.Label();
+            this.lblCursor_D6_L = new System.Windows.Forms.Label();
+            this.lblCursor_Power_L = new System.Windows.Forms.Label();
+            this.lblCursor_NoiseFloor_L = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.scThdVsFreq)).BeginInit();
             this.scThdVsFreq.Panel1.SuspendLayout();
             this.scThdVsFreq.Panel2.SuspendLayout();
@@ -113,12 +138,14 @@
             this.scGraphSettings.Panel1.SuspendLayout();
             this.scGraphSettings.Panel2.SuspendLayout();
             this.scGraphSettings.SuspendLayout();
-            this.gbDbv_Range.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.cmbDbV_Graph_Bottom)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cmbDbV_Graph_Top)).BeginInit();
+            this.gbdB_Range.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ud_dB_Graph_Bottom)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ud_dB_Graph_Top)).BeginInit();
             this.gbThdFreq_Harmonics.SuspendLayout();
             this.gbXAxisRange.SuspendLayout();
             this.gbD_Range.SuspendLayout();
+            this.pnlCursorsRight.SuspendLayout();
+            this.pnlCursorsLeft.SuspendLayout();
             this.SuspendLayout();
             // 
             // scThdVsFreq
@@ -166,9 +193,9 @@
             // graphFft
             // 
             this.graphFft.DisplayScale = 0F;
-            this.graphFft.Location = new System.Drawing.Point(3, 288);
+            this.graphFft.Location = new System.Drawing.Point(3, 311);
             this.graphFft.Name = "graphFft";
-            this.graphFft.Size = new System.Drawing.Size(254, 188);
+            this.graphFft.Size = new System.Drawing.Size(254, 160);
             this.graphFft.TabIndex = 6;
             // 
             // btnStartThdMeasurement
@@ -189,13 +216,15 @@
             // graphTime
             // 
             this.graphTime.DisplayScale = 0F;
-            this.graphTime.Location = new System.Drawing.Point(3, 482);
+            this.graphTime.Location = new System.Drawing.Point(3, 473);
             this.graphTime.Name = "graphTime";
-            this.graphTime.Size = new System.Drawing.Size(254, 183);
+            this.graphTime.Size = new System.Drawing.Size(254, 160);
             this.graphTime.TabIndex = 3;
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.chkEnableRightChannel);
+            this.groupBox1.Controls.Add(this.chkEnableLeftChannel);
             this.groupBox1.Controls.Add(this.cmbEndVoltageUnit);
             this.groupBox1.Controls.Add(this.label12);
             this.groupBox1.Controls.Add(this.txtEndVoltage);
@@ -216,10 +245,36 @@
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox1.Location = new System.Drawing.Point(3, 46);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(254, 236);
+            this.groupBox1.Size = new System.Drawing.Size(254, 259);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Measurement Settings";
+            // 
+            // chkEnableRightChannel
+            // 
+            this.chkEnableRightChannel.AutoSize = true;
+            this.chkEnableRightChannel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkEnableRightChannel.Location = new System.Drawing.Point(144, 237);
+            this.chkEnableRightChannel.Name = "chkEnableRightChannel";
+            this.chkEnableRightChannel.Size = new System.Drawing.Size(92, 17);
+            this.chkEnableRightChannel.TabIndex = 47;
+            this.chkEnableRightChannel.Text = "Right channel";
+            this.chkEnableRightChannel.UseVisualStyleBackColor = true;
+            this.chkEnableRightChannel.CheckedChanged += new System.EventHandler(this.chkEnableRightChannel_CheckedChanged);
+            // 
+            // chkEnableLeftChannel
+            // 
+            this.chkEnableLeftChannel.AutoSize = true;
+            this.chkEnableLeftChannel.Checked = true;
+            this.chkEnableLeftChannel.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkEnableLeftChannel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkEnableLeftChannel.Location = new System.Drawing.Point(19, 237);
+            this.chkEnableLeftChannel.Name = "chkEnableLeftChannel";
+            this.chkEnableLeftChannel.Size = new System.Drawing.Size(85, 17);
+            this.chkEnableLeftChannel.TabIndex = 46;
+            this.chkEnableLeftChannel.Text = "Left channel";
+            this.chkEnableLeftChannel.UseVisualStyleBackColor = true;
+            this.chkEnableLeftChannel.CheckedChanged += new System.EventHandler(this.chkEnableLeftChannel_CheckedChanged);
             // 
             // cmbEndVoltageUnit
             // 
@@ -459,17 +514,18 @@
             // scGraphCursors.Panel2
             // 
             this.scGraphCursors.Panel2.BackColor = System.Drawing.SystemColors.Control;
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_VoltageIn);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_NoiseFloor);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_Power);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_D6);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_D5);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_D4);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_D3);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_D2);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_THD);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_Magnitude);
-            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_VoltageOut);
+            this.scGraphCursors.Panel2.Controls.Add(this.label17);
+            this.scGraphCursors.Panel2.Controls.Add(this.label16);
+            this.scGraphCursors.Panel2.Controls.Add(this.label15);
+            this.scGraphCursors.Panel2.Controls.Add(this.label14);
+            this.scGraphCursors.Panel2.Controls.Add(this.label13);
+            this.scGraphCursors.Panel2.Controls.Add(this.label5);
+            this.scGraphCursors.Panel2.Controls.Add(this.label18);
+            this.scGraphCursors.Panel2.Controls.Add(this.lblCursorMagnitude);
+            this.scGraphCursors.Panel2.Controls.Add(this.label19);
+            this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_X_Axis);
+            this.scGraphCursors.Panel2.Controls.Add(this.pnlCursorsRight);
+            this.scGraphCursors.Panel2.Controls.Add(this.pnlCursorsLeft);
             this.scGraphCursors.Size = new System.Drawing.Size(836, 765);
             this.scGraphCursors.SplitterDistance = 710;
             this.scGraphCursors.TabIndex = 0;
@@ -489,14 +545,16 @@
             // scGraphSettings.Panel2
             // 
             this.scGraphSettings.Panel2.BackColor = System.Drawing.SystemColors.Control;
+            this.scGraphSettings.Panel2.Controls.Add(this.chkGraphShowRightChannel);
+            this.scGraphSettings.Panel2.Controls.Add(this.chkGraphShowLeftChannel);
             this.scGraphSettings.Panel2.Controls.Add(this.label3);
             this.scGraphSettings.Panel2.Controls.Add(this.chkShowDataPoints);
             this.scGraphSettings.Panel2.Controls.Add(this.chkThickLines);
             this.scGraphSettings.Panel2.Controls.Add(this.cmbXAxis);
-            this.scGraphSettings.Panel2.Controls.Add(this.gbDbv_Range);
+            this.scGraphSettings.Panel2.Controls.Add(this.gbdB_Range);
             this.scGraphSettings.Panel2.Controls.Add(this.gbThdFreq_Harmonics);
-            this.scGraphSettings.Panel2.Controls.Add(this.btnGraph_dBV);
-            this.scGraphSettings.Panel2.Controls.Add(this.btnGraph_D);
+            this.scGraphSettings.Panel2.Controls.Add(this.btnGraph_dB);
+            this.scGraphSettings.Panel2.Controls.Add(this.btnGraph_D_Percent);
             this.scGraphSettings.Panel2.Controls.Add(this.gbXAxisRange);
             this.scGraphSettings.Panel2.Controls.Add(this.gbD_Range);
             this.scGraphSettings.Size = new System.Drawing.Size(836, 710);
@@ -513,101 +571,157 @@
             this.thdPlot.Size = new System.Drawing.Size(709, 710);
             this.thdPlot.TabIndex = 2;
             // 
+            // chkGraphShowRightChannel
+            // 
+            this.chkGraphShowRightChannel.AutoSize = true;
+            this.chkGraphShowRightChannel.Checked = true;
+            this.chkGraphShowRightChannel.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkGraphShowRightChannel.Location = new System.Drawing.Point(14, 687);
+            this.chkGraphShowRightChannel.Name = "chkGraphShowRightChannel";
+            this.chkGraphShowRightChannel.Size = new System.Drawing.Size(92, 17);
+            this.chkGraphShowRightChannel.TabIndex = 47;
+            this.chkGraphShowRightChannel.Text = "Right channel";
+            this.chkGraphShowRightChannel.UseVisualStyleBackColor = true;
+            this.chkGraphShowRightChannel.CheckedChanged += new System.EventHandler(this.chkGraphShowRightChannel_CheckedChanged);
+            // 
+            // chkGraphShowLeftChannel
+            // 
+            this.chkGraphShowLeftChannel.AutoSize = true;
+            this.chkGraphShowLeftChannel.Checked = true;
+            this.chkGraphShowLeftChannel.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkGraphShowLeftChannel.Location = new System.Drawing.Point(14, 666);
+            this.chkGraphShowLeftChannel.Name = "chkGraphShowLeftChannel";
+            this.chkGraphShowLeftChannel.Size = new System.Drawing.Size(85, 17);
+            this.chkGraphShowLeftChannel.TabIndex = 48;
+            this.chkGraphShowLeftChannel.Text = "Left channel";
+            this.chkGraphShowLeftChannel.UseVisualStyleBackColor = true;
+            this.chkGraphShowLeftChannel.CheckedChanged += new System.EventHandler(this.chkGraphShowLeftChannel_CheckedChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label3.Location = new System.Drawing.Point(11, 190);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(35, 13);
+            this.label3.TabIndex = 36;
+            this.label3.Text = "X-axis";
+            // 
             // chkShowDataPoints
             // 
             this.chkShowDataPoints.AutoSize = true;
-            this.chkShowDataPoints.Location = new System.Drawing.Point(12, 632);
+            this.chkShowDataPoints.Location = new System.Drawing.Point(12, 598);
             this.chkShowDataPoints.Name = "chkShowDataPoints";
             this.chkShowDataPoints.Size = new System.Drawing.Size(108, 17);
             this.chkShowDataPoints.TabIndex = 45;
             this.chkShowDataPoints.Text = "Show data points";
             this.chkShowDataPoints.UseVisualStyleBackColor = true;
-            this.chkShowDataPoints.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
+            this.chkShowDataPoints.CheckedChanged += new System.EventHandler(this.chkShowDataPoints_CheckedChanged);
             // 
             // chkThickLines
             // 
             this.chkThickLines.AutoSize = true;
             this.chkThickLines.Checked = true;
             this.chkThickLines.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkThickLines.Location = new System.Drawing.Point(12, 611);
+            this.chkThickLines.Location = new System.Drawing.Point(12, 577);
             this.chkThickLines.Name = "chkThickLines";
             this.chkThickLines.Size = new System.Drawing.Size(77, 17);
             this.chkThickLines.TabIndex = 44;
             this.chkThickLines.Text = "Thick lines";
             this.chkThickLines.UseVisualStyleBackColor = true;
-            this.chkThickLines.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
+            this.chkThickLines.CheckedChanged += new System.EventHandler(this.chkThickLines_CheckedChanged);
             // 
-            // gbDbv_Range
+            // cmbXAxis
             // 
-            this.gbDbv_Range.Controls.Add(this.cmbDbV_Graph_Bottom);
-            this.gbDbv_Range.Controls.Add(this.cmbDbV_Graph_Top);
-            this.gbDbv_Range.Controls.Add(this.label10);
-            this.gbDbv_Range.Controls.Add(this.label11);
-            this.gbDbv_Range.Controls.Add(this.btnDbv_FitGraphY);
-            this.gbDbv_Range.Location = new System.Drawing.Point(43, 20);
-            this.gbDbv_Range.Name = "gbDbv_Range";
-            this.gbDbv_Range.Size = new System.Drawing.Size(113, 143);
-            this.gbDbv_Range.TabIndex = 30;
-            this.gbDbv_Range.TabStop = false;
-            this.gbDbv_Range.Text = "dB range";
+            this.cmbXAxis.AutoCompleteCustomSource.AddRange(new string[] {
+            "Output voltage",
+            "Output power",
+            "Inpur voltage"});
+            this.cmbXAxis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbXAxis.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cmbXAxis.FormattingEnabled = true;
+            this.cmbXAxis.Items.AddRange(new object[] {
+            "Output voltage",
+            "Output power",
+            "Input voltage"});
+            this.cmbXAxis.Location = new System.Drawing.Point(8, 208);
+            this.cmbXAxis.Name = "cmbXAxis";
+            this.cmbXAxis.Size = new System.Drawing.Size(103, 21);
+            this.cmbXAxis.TabIndex = 46;
+            this.cmbXAxis.SelectedIndexChanged += new System.EventHandler(this.cmbXAxis_SelectedIndexChanged);
             // 
-            // cmbDbV_Graph_Bottom
+            // gbdB_Range
             // 
-            this.cmbDbV_Graph_Bottom.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmbDbV_Graph_Bottom.Increment = new decimal(new int[] {
+            this.gbdB_Range.Controls.Add(this.ud_dB_Graph_Bottom);
+            this.gbdB_Range.Controls.Add(this.ud_dB_Graph_Top);
+            this.gbdB_Range.Controls.Add(this.label10);
+            this.gbdB_Range.Controls.Add(this.label11);
+            this.gbdB_Range.Controls.Add(this.btnDbv_FitGraphY);
+            this.gbdB_Range.Location = new System.Drawing.Point(43, 20);
+            this.gbdB_Range.Name = "gbdB_Range";
+            this.gbdB_Range.Size = new System.Drawing.Size(113, 143);
+            this.gbdB_Range.TabIndex = 30;
+            this.gbdB_Range.TabStop = false;
+            this.gbdB_Range.Text = "dB range";
+            // 
+            // ud_dB_Graph_Bottom
+            // 
+            this.ud_dB_Graph_Bottom.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ud_dB_Graph_Bottom.Increment = new decimal(new int[] {
             10,
             0,
             0,
             0});
-            this.cmbDbV_Graph_Bottom.Location = new System.Drawing.Point(8, 77);
-            this.cmbDbV_Graph_Bottom.Maximum = new decimal(new int[] {
+            this.ud_dB_Graph_Bottom.Location = new System.Drawing.Point(8, 77);
+            this.ud_dB_Graph_Bottom.Maximum = new decimal(new int[] {
             200,
             0,
             0,
             0});
-            this.cmbDbV_Graph_Bottom.Minimum = new decimal(new int[] {
+            this.ud_dB_Graph_Bottom.Minimum = new decimal(new int[] {
             200,
             0,
             0,
             -2147483648});
-            this.cmbDbV_Graph_Bottom.Name = "cmbDbV_Graph_Bottom";
-            this.cmbDbV_Graph_Bottom.Size = new System.Drawing.Size(94, 20);
-            this.cmbDbV_Graph_Bottom.TabIndex = 31;
-            this.cmbDbV_Graph_Bottom.Value = new decimal(new int[] {
+            this.ud_dB_Graph_Bottom.Name = "ud_dB_Graph_Bottom";
+            this.ud_dB_Graph_Bottom.Size = new System.Drawing.Size(94, 20);
+            this.ud_dB_Graph_Bottom.TabIndex = 31;
+            this.ud_dB_Graph_Bottom.Value = new decimal(new int[] {
             20,
             0,
             0,
             0});
-            this.cmbDbV_Graph_Bottom.ValueChanged += new System.EventHandler(this.cmbDbv_Graph_Top_ValueChanged);
+            this.ud_dB_Graph_Bottom.ValueChanged += new System.EventHandler(this.ud_dB_Graph_Bottom_ValueChanged);
             // 
-            // cmbDbV_Graph_Top
+            // ud_dB_Graph_Top
             // 
-            this.cmbDbV_Graph_Top.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmbDbV_Graph_Top.Increment = new decimal(new int[] {
+            this.ud_dB_Graph_Top.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ud_dB_Graph_Top.Increment = new decimal(new int[] {
             10,
             0,
             0,
             0});
-            this.cmbDbV_Graph_Top.Location = new System.Drawing.Point(8, 36);
-            this.cmbDbV_Graph_Top.Maximum = new decimal(new int[] {
+            this.ud_dB_Graph_Top.Location = new System.Drawing.Point(8, 36);
+            this.ud_dB_Graph_Top.Maximum = new decimal(new int[] {
             200,
             0,
             0,
             0});
-            this.cmbDbV_Graph_Top.Minimum = new decimal(new int[] {
+            this.ud_dB_Graph_Top.Minimum = new decimal(new int[] {
             200,
             0,
             0,
             -2147483648});
-            this.cmbDbV_Graph_Top.Name = "cmbDbV_Graph_Top";
-            this.cmbDbV_Graph_Top.Size = new System.Drawing.Size(94, 20);
-            this.cmbDbV_Graph_Top.TabIndex = 30;
-            this.cmbDbV_Graph_Top.Value = new decimal(new int[] {
+            this.ud_dB_Graph_Top.Name = "ud_dB_Graph_Top";
+            this.ud_dB_Graph_Top.Size = new System.Drawing.Size(94, 20);
+            this.ud_dB_Graph_Top.TabIndex = 30;
+            this.ud_dB_Graph_Top.Value = new decimal(new int[] {
             20,
             0,
             0,
             0});
-            this.cmbDbV_Graph_Top.ValueChanged += new System.EventHandler(this.cmbDbv_Graph_Top_ValueChanged);
+            this.ud_dB_Graph_Top.ValueChanged += new System.EventHandler(this.ud_dB_Graph_Top_ValueChanged);
             // 
             // label10
             // 
@@ -651,9 +765,9 @@
             this.gbThdFreq_Harmonics.Controls.Add(this.chkShowD3);
             this.gbThdFreq_Harmonics.Controls.Add(this.chkShowD2);
             this.gbThdFreq_Harmonics.Controls.Add(this.chkShowThd);
-            this.gbThdFreq_Harmonics.Location = new System.Drawing.Point(4, 397);
+            this.gbThdFreq_Harmonics.Location = new System.Drawing.Point(4, 370);
             this.gbThdFreq_Harmonics.Name = "gbThdFreq_Harmonics";
-            this.gbThdFreq_Harmonics.Size = new System.Drawing.Size(111, 208);
+            this.gbThdFreq_Harmonics.Size = new System.Drawing.Size(111, 203);
             this.gbThdFreq_Harmonics.TabIndex = 29;
             this.gbThdFreq_Harmonics.TabStop = false;
             this.gbThdFreq_Harmonics.Text = "Graph data";
@@ -669,7 +783,7 @@
             this.chkShowMagnitude.TabIndex = 43;
             this.chkShowMagnitude.Text = "Magnitude";
             this.chkShowMagnitude.UseVisualStyleBackColor = true;
-            this.chkShowMagnitude.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
+            this.chkShowMagnitude.CheckedChanged += new System.EventHandler(this.chkShowMagnitude_CheckedChanged);
             // 
             // chkShowNoiseFloor
             // 
@@ -682,7 +796,7 @@
             this.chkShowNoiseFloor.TabIndex = 42;
             this.chkShowNoiseFloor.Text = "Noise floor";
             this.chkShowNoiseFloor.UseVisualStyleBackColor = true;
-            this.chkShowNoiseFloor.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
+            this.chkShowNoiseFloor.CheckedChanged += new System.EventHandler(this.chkShowNoiseFloor_CheckedChanged);
             // 
             // chkShowD6
             // 
@@ -695,7 +809,7 @@
             this.chkShowD6.TabIndex = 41;
             this.chkShowD6.Text = "D6+";
             this.chkShowD6.UseVisualStyleBackColor = true;
-            this.chkShowD6.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
+            this.chkShowD6.CheckedChanged += new System.EventHandler(this.chkShowD6_CheckedChanged);
             // 
             // chkShowD5
             // 
@@ -708,7 +822,7 @@
             this.chkShowD5.TabIndex = 40;
             this.chkShowD5.Text = "D5";
             this.chkShowD5.UseVisualStyleBackColor = true;
-            this.chkShowD5.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
+            this.chkShowD5.CheckedChanged += new System.EventHandler(this.chkShowD5_CheckedChanged);
             // 
             // chkShowD4
             // 
@@ -721,7 +835,7 @@
             this.chkShowD4.TabIndex = 39;
             this.chkShowD4.Text = "D4";
             this.chkShowD4.UseVisualStyleBackColor = true;
-            this.chkShowD4.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
+            this.chkShowD4.CheckedChanged += new System.EventHandler(this.chkShowD4_CheckedChanged);
             // 
             // chkShowD3
             // 
@@ -734,7 +848,7 @@
             this.chkShowD3.TabIndex = 38;
             this.chkShowD3.Text = "D3";
             this.chkShowD3.UseVisualStyleBackColor = true;
-            this.chkShowD3.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
+            this.chkShowD3.CheckedChanged += new System.EventHandler(this.chkShowD3_CheckedChanged);
             // 
             // chkShowD2
             // 
@@ -747,7 +861,7 @@
             this.chkShowD2.TabIndex = 37;
             this.chkShowD2.Text = "D2";
             this.chkShowD2.UseVisualStyleBackColor = true;
-            this.chkShowD2.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
+            this.chkShowD2.CheckedChanged += new System.EventHandler(this.chkShowD2_CheckedChanged);
             // 
             // chkShowThd
             // 
@@ -762,51 +876,51 @@
             this.chkShowThd.UseVisualStyleBackColor = true;
             this.chkShowThd.CheckedChanged += new System.EventHandler(this.chkShowThd_CheckedChanged);
             // 
-            // btnGraph_dBV
+            // btnGraph_dB
             // 
-            this.btnGraph_dBV.BackColor = System.Drawing.Color.Cornsilk;
-            this.btnGraph_dBV.FlatAppearance.BorderColor = System.Drawing.Color.CornflowerBlue;
-            this.btnGraph_dBV.FlatAppearance.BorderSize = 2;
-            this.btnGraph_dBV.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnGraph_dBV.Location = new System.Drawing.Point(9, 659);
-            this.btnGraph_dBV.Name = "btnGraph_dBV";
-            this.btnGraph_dBV.Size = new System.Drawing.Size(52, 37);
-            this.btnGraph_dBV.TabIndex = 28;
-            this.btnGraph_dBV.Text = "D (dB)";
-            this.btnGraph_dBV.UseVisualStyleBackColor = false;
-            this.btnGraph_dBV.Click += new System.EventHandler(this.btnGraph_dBV_Click);
+            this.btnGraph_dB.BackColor = System.Drawing.Color.Cornsilk;
+            this.btnGraph_dB.FlatAppearance.BorderColor = System.Drawing.Color.CornflowerBlue;
+            this.btnGraph_dB.FlatAppearance.BorderSize = 2;
+            this.btnGraph_dB.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnGraph_dB.Location = new System.Drawing.Point(9, 622);
+            this.btnGraph_dB.Name = "btnGraph_dB";
+            this.btnGraph_dB.Size = new System.Drawing.Size(52, 37);
+            this.btnGraph_dB.TabIndex = 28;
+            this.btnGraph_dB.Text = "D (dB)";
+            this.btnGraph_dB.UseVisualStyleBackColor = false;
+            this.btnGraph_dB.Click += new System.EventHandler(this.btnGraph_dB_Click);
             // 
-            // btnGraph_D
+            // btnGraph_D_Percent
             // 
-            this.btnGraph_D.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.btnGraph_D.FlatAppearance.BorderColor = System.Drawing.Color.CornflowerBlue;
-            this.btnGraph_D.FlatAppearance.BorderSize = 2;
-            this.btnGraph_D.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnGraph_D.Location = new System.Drawing.Point(67, 660);
-            this.btnGraph_D.Name = "btnGraph_D";
-            this.btnGraph_D.Size = new System.Drawing.Size(49, 37);
-            this.btnGraph_D.TabIndex = 27;
-            this.btnGraph_D.Text = "D (%)";
-            this.btnGraph_D.UseVisualStyleBackColor = false;
-            this.btnGraph_D.Click += new System.EventHandler(this.btnGraph_D_Click);
+            this.btnGraph_D_Percent.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.btnGraph_D_Percent.FlatAppearance.BorderColor = System.Drawing.Color.CornflowerBlue;
+            this.btnGraph_D_Percent.FlatAppearance.BorderSize = 2;
+            this.btnGraph_D_Percent.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnGraph_D_Percent.Location = new System.Drawing.Point(67, 623);
+            this.btnGraph_D_Percent.Name = "btnGraph_D_Percent";
+            this.btnGraph_D_Percent.Size = new System.Drawing.Size(49, 37);
+            this.btnGraph_D_Percent.TabIndex = 27;
+            this.btnGraph_D_Percent.Text = "D (%)";
+            this.btnGraph_D_Percent.UseVisualStyleBackColor = false;
+            this.btnGraph_D_Percent.Click += new System.EventHandler(this.btnGraph_D_Click);
             // 
             // gbXAxisRange
             // 
             this.gbXAxisRange.Controls.Add(this.btnAutoFitX);
             this.gbXAxisRange.Controls.Add(this.label8);
-            this.gbXAxisRange.Controls.Add(this.cmbVoltageGraph_To);
+            this.gbXAxisRange.Controls.Add(this.cmbGraph_VoltageEnd);
             this.gbXAxisRange.Controls.Add(this.label9);
-            this.gbXAxisRange.Controls.Add(this.cmbVoltageGraph_From);
-            this.gbXAxisRange.Location = new System.Drawing.Point(3, 238);
+            this.gbXAxisRange.Controls.Add(this.cmbGraph_VoltageStart);
+            this.gbXAxisRange.Location = new System.Drawing.Point(3, 235);
             this.gbXAxisRange.Name = "gbXAxisRange";
-            this.gbXAxisRange.Size = new System.Drawing.Size(112, 150);
+            this.gbXAxisRange.Size = new System.Drawing.Size(112, 135);
             this.gbXAxisRange.TabIndex = 26;
             this.gbXAxisRange.TabStop = false;
             this.gbXAxisRange.Text = "Voltage range";
             // 
             // btnAutoFitX
             // 
-            this.btnAutoFitX.Location = new System.Drawing.Point(6, 117);
+            this.btnAutoFitX.Location = new System.Drawing.Point(6, 106);
             this.btnAutoFitX.Name = "btnAutoFitX";
             this.btnAutoFitX.Size = new System.Drawing.Size(94, 23);
             this.btnAutoFitX.TabIndex = 35;
@@ -819,18 +933,18 @@
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label8.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label8.Location = new System.Drawing.Point(8, 66);
+            this.label8.Location = new System.Drawing.Point(8, 61);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(20, 13);
             this.label8.TabIndex = 34;
             this.label8.Text = "To";
             // 
-            // cmbVoltageGraph_To
+            // cmbGraph_VoltageEnd
             // 
-            this.cmbVoltageGraph_To.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbVoltageGraph_To.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmbVoltageGraph_To.FormattingEnabled = true;
-            this.cmbVoltageGraph_To.Items.AddRange(new object[] {
+            this.cmbGraph_VoltageEnd.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbGraph_VoltageEnd.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cmbGraph_VoltageEnd.FormattingEnabled = true;
+            this.cmbGraph_VoltageEnd.Items.AddRange(new object[] {
             "1",
             "2",
             "5",
@@ -839,29 +953,29 @@
             "50",
             "100",
             "200"});
-            this.cmbVoltageGraph_To.Location = new System.Drawing.Point(6, 82);
-            this.cmbVoltageGraph_To.Name = "cmbVoltageGraph_To";
-            this.cmbVoltageGraph_To.Size = new System.Drawing.Size(94, 21);
-            this.cmbVoltageGraph_To.TabIndex = 33;
-            this.cmbVoltageGraph_To.SelectedIndexChanged += new System.EventHandler(this.cmbGraph_SelectedIndexChanged);
+            this.cmbGraph_VoltageEnd.Location = new System.Drawing.Point(6, 77);
+            this.cmbGraph_VoltageEnd.Name = "cmbGraph_VoltageEnd";
+            this.cmbGraph_VoltageEnd.Size = new System.Drawing.Size(94, 21);
+            this.cmbGraph_VoltageEnd.TabIndex = 33;
+            this.cmbGraph_VoltageEnd.SelectedIndexChanged += new System.EventHandler(this.cmbGraph_VoltageEnd_SelectedIndexChanged);
             // 
             // label9
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label9.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label9.Location = new System.Drawing.Point(8, 22);
+            this.label9.Location = new System.Drawing.Point(8, 19);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(30, 13);
             this.label9.TabIndex = 32;
             this.label9.Text = "From";
             // 
-            // cmbVoltageGraph_From
+            // cmbGraph_VoltageStart
             // 
-            this.cmbVoltageGraph_From.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbVoltageGraph_From.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmbVoltageGraph_From.FormattingEnabled = true;
-            this.cmbVoltageGraph_From.Items.AddRange(new object[] {
+            this.cmbGraph_VoltageStart.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbGraph_VoltageStart.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cmbGraph_VoltageStart.FormattingEnabled = true;
+            this.cmbGraph_VoltageStart.Items.AddRange(new object[] {
             "0.0001",
             "0.0002",
             "0.0005",
@@ -874,11 +988,11 @@
             "0.1",
             "0.2",
             "0.5"});
-            this.cmbVoltageGraph_From.Location = new System.Drawing.Point(6, 38);
-            this.cmbVoltageGraph_From.Name = "cmbVoltageGraph_From";
-            this.cmbVoltageGraph_From.Size = new System.Drawing.Size(94, 21);
-            this.cmbVoltageGraph_From.TabIndex = 31;
-            this.cmbVoltageGraph_From.SelectedIndexChanged += new System.EventHandler(this.cmbGraph_SelectedIndexChanged);
+            this.cmbGraph_VoltageStart.Location = new System.Drawing.Point(6, 35);
+            this.cmbGraph_VoltageStart.Name = "cmbGraph_VoltageStart";
+            this.cmbGraph_VoltageStart.Size = new System.Drawing.Size(94, 21);
+            this.cmbGraph_VoltageStart.TabIndex = 31;
+            this.cmbGraph_VoltageStart.SelectedIndexChanged += new System.EventHandler(this.cmbGraph_VoltageStart_SelectedIndexChanged);
             // 
             // gbD_Range
             // 
@@ -921,7 +1035,7 @@
             this.cmbD_Graph_Bottom.Name = "cmbD_Graph_Bottom";
             this.cmbD_Graph_Bottom.Size = new System.Drawing.Size(94, 21);
             this.cmbD_Graph_Bottom.TabIndex = 28;
-            this.cmbD_Graph_Bottom.SelectedIndexChanged += new System.EventHandler(this.cmbGraph_SelectedIndexChanged);
+            this.cmbD_Graph_Bottom.SelectedIndexChanged += new System.EventHandler(this.cmbD_Graph_Bottom_SelectedIndexChanged);
             // 
             // label6
             // 
@@ -947,7 +1061,7 @@
             this.cmbD_Graph_Top.Name = "cmbD_Graph_Top";
             this.cmbD_Graph_Top.Size = new System.Drawing.Size(94, 21);
             this.cmbD_Graph_Top.TabIndex = 26;
-            this.cmbD_Graph_Top.SelectedIndexChanged += new System.EventHandler(this.cmbGraph_SelectedIndexChanged);
+            this.cmbD_Graph_Top.SelectedIndexChanged += new System.EventHandler(this.cmbD_Graph_Top_SelectedIndexChanged);
             // 
             // btnD_FitGraphY
             // 
@@ -959,154 +1073,358 @@
             this.btnD_FitGraphY.UseVisualStyleBackColor = true;
             this.btnD_FitGraphY.Click += new System.EventHandler(this.btnFitDGraphY_Click);
             // 
-            // lblCursor_NoiseFloor
+            // label17
             // 
-            this.lblCursor_NoiseFloor.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_NoiseFloor.Location = new System.Drawing.Point(654, 29);
-            this.lblCursor_NoiseFloor.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_NoiseFloor.Name = "lblCursor_NoiseFloor";
-            this.lblCursor_NoiseFloor.Size = new System.Drawing.Size(178, 19);
-            this.lblCursor_NoiseFloor.TabIndex = 20;
-            this.lblCursor_NoiseFloor.Text = "Noise floor: 00.00 dB";
+            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label17.Location = new System.Drawing.Point(760, -1);
+            this.label17.MinimumSize = new System.Drawing.Size(50, 13);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(70, 13);
+            this.label17.TabIndex = 53;
+            this.label17.Text = "Noise floor";
             // 
-            // lblCursor_Power
+            // label16
             // 
-            this.lblCursor_Power.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_Power.Location = new System.Drawing.Point(404, 3);
-            this.lblCursor_Power.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_Power.Name = "lblCursor_Power";
-            this.lblCursor_Power.Size = new System.Drawing.Size(170, 15);
-            this.lblCursor_Power.TabIndex = 19;
-            this.lblCursor_Power.Text = "Power: 0 mW";
+            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label16.Location = new System.Drawing.Point(674, -1);
+            this.label16.MinimumSize = new System.Drawing.Size(50, 13);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(70, 13);
+            this.label16.TabIndex = 52;
+            this.label16.Text = "Power";
             // 
-            // lblCursor_D6
+            // label15
             // 
-            this.lblCursor_D6.AutoSize = true;
-            this.lblCursor_D6.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D6.Location = new System.Drawing.Point(525, 29);
-            this.lblCursor_D6.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_D6.Name = "lblCursor_D6";
-            this.lblCursor_D6.Size = new System.Drawing.Size(100, 15);
-            this.lblCursor_D6.TabIndex = 17;
-            this.lblCursor_D6.Text = "D6+: 00.00 %";
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.Location = new System.Drawing.Point(598, -1);
+            this.label15.MinimumSize = new System.Drawing.Size(50, 13);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(70, 13);
+            this.label15.TabIndex = 51;
+            this.label15.Text = "D6+";
             // 
-            // lblCursor_D5
+            // label14
             // 
-            this.lblCursor_D5.AutoSize = true;
-            this.lblCursor_D5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D5.Location = new System.Drawing.Point(404, 29);
-            this.lblCursor_D5.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_D5.Name = "lblCursor_D5";
-            this.lblCursor_D5.Size = new System.Drawing.Size(100, 15);
-            this.lblCursor_D5.TabIndex = 16;
-            this.lblCursor_D5.Text = "D5: 00.00 %";
+            this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label14.Location = new System.Drawing.Point(522, -1);
+            this.label14.MinimumSize = new System.Drawing.Size(50, 13);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(70, 13);
+            this.label14.TabIndex = 50;
+            this.label14.Text = "D5";
             // 
-            // lblCursor_D4
+            // label13
             // 
-            this.lblCursor_D4.AutoSize = true;
-            this.lblCursor_D4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D4.Location = new System.Drawing.Point(282, 29);
-            this.lblCursor_D4.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_D4.Name = "lblCursor_D4";
-            this.lblCursor_D4.Size = new System.Drawing.Size(100, 15);
-            this.lblCursor_D4.TabIndex = 15;
-            this.lblCursor_D4.Text = "D4: 00.00 %";
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label13.Location = new System.Drawing.Point(446, -1);
+            this.label13.MinimumSize = new System.Drawing.Size(50, 13);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(70, 13);
+            this.label13.TabIndex = 49;
+            this.label13.Text = "D4";
             // 
-            // lblCursor_D3
+            // label5
             // 
-            this.lblCursor_D3.AutoSize = true;
-            this.lblCursor_D3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D3.Location = new System.Drawing.Point(161, 29);
-            this.lblCursor_D3.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_D3.Name = "lblCursor_D3";
-            this.lblCursor_D3.Size = new System.Drawing.Size(100, 15);
-            this.lblCursor_D3.TabIndex = 14;
-            this.lblCursor_D3.Text = "D3: 00.00 %";
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(370, -1);
+            this.label5.MinimumSize = new System.Drawing.Size(50, 13);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(70, 13);
+            this.label5.TabIndex = 48;
+            this.label5.Text = "D3";
             // 
-            // lblCursor_D2
+            // label18
             // 
-            this.lblCursor_D2.AutoSize = true;
-            this.lblCursor_D2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D2.Location = new System.Drawing.Point(41, 29);
-            this.lblCursor_D2.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_D2.Name = "lblCursor_D2";
-            this.lblCursor_D2.Size = new System.Drawing.Size(100, 15);
-            this.lblCursor_D2.TabIndex = 13;
-            this.lblCursor_D2.Text = "D2: 00.00 %";
+            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label18.Location = new System.Drawing.Point(294, 0);
+            this.label18.MinimumSize = new System.Drawing.Size(50, 13);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(70, 13);
+            this.label18.TabIndex = 47;
+            this.label18.Text = "D2";
             // 
-            // lblCursor_THD
+            // lblCursorMagnitude
             // 
-            this.lblCursor_THD.AutoSize = true;
-            this.lblCursor_THD.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_THD.Location = new System.Drawing.Point(282, 3);
-            this.lblCursor_THD.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_THD.Name = "lblCursor_THD";
-            this.lblCursor_THD.Size = new System.Drawing.Size(100, 15);
-            this.lblCursor_THD.TabIndex = 12;
-            this.lblCursor_THD.Text = "THD: 0.00 %";
+            this.lblCursorMagnitude.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursorMagnitude.Location = new System.Drawing.Point(218, -1);
+            this.lblCursorMagnitude.MinimumSize = new System.Drawing.Size(50, 13);
+            this.lblCursorMagnitude.Name = "lblCursorMagnitude";
+            this.lblCursorMagnitude.Size = new System.Drawing.Size(70, 13);
+            this.lblCursorMagnitude.TabIndex = 46;
+            this.lblCursorMagnitude.Text = "Magnitude";
             // 
-            // lblCursor_Magnitude
+            // label19
             // 
-            this.lblCursor_Magnitude.AutoSize = true;
-            this.lblCursor_Magnitude.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_Magnitude.Location = new System.Drawing.Point(654, 3);
-            this.lblCursor_Magnitude.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_Magnitude.Name = "lblCursor_Magnitude";
-            this.lblCursor_Magnitude.Size = new System.Drawing.Size(100, 15);
-            this.lblCursor_Magnitude.TabIndex = 11;
-            this.lblCursor_Magnitude.Text = "Magn: 0.00 dB";
+            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label19.Location = new System.Drawing.Point(152, -1);
+            this.label19.MinimumSize = new System.Drawing.Size(50, 13);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(60, 13);
+            this.label19.TabIndex = 45;
+            this.label19.Text = "THD";
             // 
-            // lblCursor_VoltageOut
+            // lblCursor_X_Axis
             // 
-            this.lblCursor_VoltageOut.AutoSize = true;
-            this.lblCursor_VoltageOut.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_VoltageOut.Location = new System.Drawing.Point(161, 3);
-            this.lblCursor_VoltageOut.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_VoltageOut.Name = "lblCursor_VoltageOut";
-            this.lblCursor_VoltageOut.Size = new System.Drawing.Size(101, 15);
-            this.lblCursor_VoltageOut.TabIndex = 10;
-            this.lblCursor_VoltageOut.Text = "V(out): 0.000 V";
+            this.lblCursor_X_Axis.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_X_Axis.Location = new System.Drawing.Point(43, 0);
+            this.lblCursor_X_Axis.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_X_Axis.MinimumSize = new System.Drawing.Size(100, 13);
+            this.lblCursor_X_Axis.Name = "lblCursor_X_Axis";
+            this.lblCursor_X_Axis.Size = new System.Drawing.Size(116, 15);
+            this.lblCursor_X_Axis.TabIndex = 44;
+            this.lblCursor_X_Axis.Text = "V(out): 0.000 V";
             // 
-            // cmbXAxis
+            // pnlCursorsRight
             // 
-            this.cmbXAxis.AutoCompleteCustomSource.AddRange(new string[] {
-            "Output voltage",
-            "Output power",
-            "Inpur voltage"});
-            this.cmbXAxis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbXAxis.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmbXAxis.FormattingEnabled = true;
-            this.cmbXAxis.Items.AddRange(new object[] {
-            "Output voltage",
-            "Output power",
-            "Input voltage"});
-            this.cmbXAxis.Location = new System.Drawing.Point(8, 208);
-            this.cmbXAxis.Name = "cmbXAxis";
-            this.cmbXAxis.Size = new System.Drawing.Size(103, 21);
-            this.cmbXAxis.TabIndex = 46;
-            this.cmbXAxis.SelectedIndexChanged += new System.EventHandler(this.cmbXAxis_SelectedIndexChanged);
+            this.pnlCursorsRight.Controls.Add(this.label28);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_Magnitude_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_NoiseFloor_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_THD_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_Power_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_D2_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_D6_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_D3_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_D5_R);
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_D4_R);
+            this.pnlCursorsRight.Location = new System.Drawing.Point(45, 36);
+            this.pnlCursorsRight.Name = "pnlCursorsRight";
+            this.pnlCursorsRight.Size = new System.Drawing.Size(790, 16);
+            this.pnlCursorsRight.TabIndex = 42;
             // 
-            // label3
+            // label28
             // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label3.Location = new System.Drawing.Point(11, 190);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(35, 13);
-            this.label3.TabIndex = 36;
-            this.label3.Text = "X-axis";
+            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label28.Location = new System.Drawing.Point(-1, 0);
+            this.label28.MinimumSize = new System.Drawing.Size(50, 13);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(86, 13);
+            this.label28.TabIndex = 40;
+            this.label28.Text = "Right channel";
             // 
-            // lblCursor_VoltageIn
+            // lblCursor_Magnitude_R
             // 
-            this.lblCursor_VoltageIn.AutoSize = true;
-            this.lblCursor_VoltageIn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_VoltageIn.Location = new System.Drawing.Point(41, 3);
-            this.lblCursor_VoltageIn.MinimumSize = new System.Drawing.Size(100, 13);
-            this.lblCursor_VoltageIn.Name = "lblCursor_VoltageIn";
-            this.lblCursor_VoltageIn.Size = new System.Drawing.Size(100, 15);
-            this.lblCursor_VoltageIn.TabIndex = 21;
-            this.lblCursor_VoltageIn.Text = "V(in): 0.000 V";
+            this.lblCursor_Magnitude_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_Magnitude_R.Location = new System.Drawing.Point(174, 0);
+            this.lblCursor_Magnitude_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_Magnitude_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_Magnitude_R.Name = "lblCursor_Magnitude_R";
+            this.lblCursor_Magnitude_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_Magnitude_R.TabIndex = 30;
+            this.lblCursor_Magnitude_R.Text = "0.00 dB";
+            // 
+            // lblCursor_NoiseFloor_R
+            // 
+            this.lblCursor_NoiseFloor_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_NoiseFloor_R.Location = new System.Drawing.Point(716, 0);
+            this.lblCursor_NoiseFloor_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_NoiseFloor_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_NoiseFloor_R.Name = "lblCursor_NoiseFloor_R";
+            this.lblCursor_NoiseFloor_R.Size = new System.Drawing.Size(71, 13);
+            this.lblCursor_NoiseFloor_R.TabIndex = 38;
+            this.lblCursor_NoiseFloor_R.Text = "00.00 dB";
+            // 
+            // lblCursor_THD_R
+            // 
+            this.lblCursor_THD_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_THD_R.Location = new System.Drawing.Point(108, 0);
+            this.lblCursor_THD_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_THD_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_THD_R.Name = "lblCursor_THD_R";
+            this.lblCursor_THD_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_THD_R.TabIndex = 31;
+            this.lblCursor_THD_R.Text = "0.00 %";
+            // 
+            // lblCursor_Power_R
+            // 
+            this.lblCursor_Power_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_Power_R.Location = new System.Drawing.Point(630, 0);
+            this.lblCursor_Power_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_Power_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_Power_R.Name = "lblCursor_Power_R";
+            this.lblCursor_Power_R.Size = new System.Drawing.Size(82, 13);
+            this.lblCursor_Power_R.TabIndex = 37;
+            this.lblCursor_Power_R.Text = "0 mW";
+            // 
+            // lblCursor_D2_R
+            // 
+            this.lblCursor_D2_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D2_R.Location = new System.Drawing.Point(250, 0);
+            this.lblCursor_D2_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D2_R.MinimumSize = new System.Drawing.Size(50, 13);
+            this.lblCursor_D2_R.Name = "lblCursor_D2_R";
+            this.lblCursor_D2_R.Size = new System.Drawing.Size(60, 14);
+            this.lblCursor_D2_R.TabIndex = 32;
+            this.lblCursor_D2_R.Text = "00.00 %";
+            // 
+            // lblCursor_D6_R
+            // 
+            this.lblCursor_D6_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D6_R.Location = new System.Drawing.Point(554, 0);
+            this.lblCursor_D6_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D6_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D6_R.Name = "lblCursor_D6_R";
+            this.lblCursor_D6_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D6_R.TabIndex = 36;
+            this.lblCursor_D6_R.Text = "00.00 %";
+            // 
+            // lblCursor_D3_R
+            // 
+            this.lblCursor_D3_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D3_R.Location = new System.Drawing.Point(326, 0);
+            this.lblCursor_D3_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D3_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D3_R.Name = "lblCursor_D3_R";
+            this.lblCursor_D3_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D3_R.TabIndex = 33;
+            this.lblCursor_D3_R.Text = "00.00 %";
+            // 
+            // lblCursor_D5_R
+            // 
+            this.lblCursor_D5_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D5_R.Location = new System.Drawing.Point(478, 0);
+            this.lblCursor_D5_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D5_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D5_R.Name = "lblCursor_D5_R";
+            this.lblCursor_D5_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D5_R.TabIndex = 35;
+            this.lblCursor_D5_R.Text = "00.00 %";
+            // 
+            // lblCursor_D4_R
+            // 
+            this.lblCursor_D4_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D4_R.Location = new System.Drawing.Point(402, 0);
+            this.lblCursor_D4_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D4_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D4_R.Name = "lblCursor_D4_R";
+            this.lblCursor_D4_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D4_R.TabIndex = 34;
+            this.lblCursor_D4_R.Text = "00.00 %";
+            // 
+            // pnlCursorsLeft
+            // 
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_D5_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_Magnitude_L);
+            this.pnlCursorsLeft.Controls.Add(this.label27);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_THD_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_D2_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_D3_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_D4_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_D6_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_Power_L);
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_NoiseFloor_L);
+            this.pnlCursorsLeft.Location = new System.Drawing.Point(43, 15);
+            this.pnlCursorsLeft.Name = "pnlCursorsLeft";
+            this.pnlCursorsLeft.Size = new System.Drawing.Size(790, 20);
+            this.pnlCursorsLeft.TabIndex = 43;
+            // 
+            // lblCursor_D5_L
+            // 
+            this.lblCursor_D5_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D5_L.Location = new System.Drawing.Point(480, 2);
+            this.lblCursor_D5_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D5_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D5_L.Name = "lblCursor_D5_L";
+            this.lblCursor_D5_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D5_L.TabIndex = 16;
+            this.lblCursor_D5_L.Text = "00.00 %";
+            // 
+            // lblCursor_Magnitude_L
+            // 
+            this.lblCursor_Magnitude_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_Magnitude_L.Location = new System.Drawing.Point(176, 2);
+            this.lblCursor_Magnitude_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_Magnitude_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_Magnitude_L.Name = "lblCursor_Magnitude_L";
+            this.lblCursor_Magnitude_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_Magnitude_L.TabIndex = 11;
+            this.lblCursor_Magnitude_L.Text = "0.00 dB";
+            // 
+            // label27
+            // 
+            this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label27.Location = new System.Drawing.Point(0, 2);
+            this.label27.MinimumSize = new System.Drawing.Size(50, 13);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(86, 13);
+            this.label27.TabIndex = 39;
+            this.label27.Text = "Left channel";
+            // 
+            // lblCursor_THD_L
+            // 
+            this.lblCursor_THD_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_THD_L.Location = new System.Drawing.Point(110, 2);
+            this.lblCursor_THD_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_THD_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_THD_L.Name = "lblCursor_THD_L";
+            this.lblCursor_THD_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_THD_L.TabIndex = 12;
+            this.lblCursor_THD_L.Text = "0.00 %";
+            // 
+            // lblCursor_D2_L
+            // 
+            this.lblCursor_D2_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D2_L.Location = new System.Drawing.Point(252, 2);
+            this.lblCursor_D2_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D2_L.MinimumSize = new System.Drawing.Size(50, 13);
+            this.lblCursor_D2_L.Name = "lblCursor_D2_L";
+            this.lblCursor_D2_L.Size = new System.Drawing.Size(60, 14);
+            this.lblCursor_D2_L.TabIndex = 13;
+            this.lblCursor_D2_L.Text = "00.00 %";
+            // 
+            // lblCursor_D3_L
+            // 
+            this.lblCursor_D3_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D3_L.Location = new System.Drawing.Point(328, 2);
+            this.lblCursor_D3_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D3_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D3_L.Name = "lblCursor_D3_L";
+            this.lblCursor_D3_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D3_L.TabIndex = 14;
+            this.lblCursor_D3_L.Text = "00.00 %";
+            // 
+            // lblCursor_D4_L
+            // 
+            this.lblCursor_D4_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D4_L.Location = new System.Drawing.Point(404, 2);
+            this.lblCursor_D4_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D4_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D4_L.Name = "lblCursor_D4_L";
+            this.lblCursor_D4_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D4_L.TabIndex = 15;
+            this.lblCursor_D4_L.Text = "00.00 %";
+            // 
+            // lblCursor_D6_L
+            // 
+            this.lblCursor_D6_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_D6_L.Location = new System.Drawing.Point(556, 2);
+            this.lblCursor_D6_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_D6_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_D6_L.Name = "lblCursor_D6_L";
+            this.lblCursor_D6_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_D6_L.TabIndex = 17;
+            this.lblCursor_D6_L.Text = "00.00 %";
+            // 
+            // lblCursor_Power_L
+            // 
+            this.lblCursor_Power_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_Power_L.Location = new System.Drawing.Point(632, 2);
+            this.lblCursor_Power_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_Power_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_Power_L.Name = "lblCursor_Power_L";
+            this.lblCursor_Power_L.Size = new System.Drawing.Size(80, 13);
+            this.lblCursor_Power_L.TabIndex = 19;
+            this.lblCursor_Power_L.Text = "0 mW";
+            // 
+            // lblCursor_NoiseFloor_L
+            // 
+            this.lblCursor_NoiseFloor_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_NoiseFloor_L.Location = new System.Drawing.Point(718, 2);
+            this.lblCursor_NoiseFloor_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_NoiseFloor_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_NoiseFloor_L.Name = "lblCursor_NoiseFloor_L";
+            this.lblCursor_NoiseFloor_L.Size = new System.Drawing.Size(71, 13);
+            this.lblCursor_NoiseFloor_L.TabIndex = 20;
+            this.lblCursor_NoiseFloor_L.Text = "00.00 dB";
             // 
             // frmThdAmplitude
             // 
@@ -1131,7 +1449,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.udStepsOctave)).EndInit();
             this.scGraphCursors.Panel1.ResumeLayout(false);
             this.scGraphCursors.Panel2.ResumeLayout(false);
-            this.scGraphCursors.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGraphCursors)).EndInit();
             this.scGraphCursors.ResumeLayout(false);
             this.scGraphSettings.Panel1.ResumeLayout(false);
@@ -1139,16 +1456,18 @@
             this.scGraphSettings.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGraphSettings)).EndInit();
             this.scGraphSettings.ResumeLayout(false);
-            this.gbDbv_Range.ResumeLayout(false);
-            this.gbDbv_Range.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.cmbDbV_Graph_Bottom)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cmbDbV_Graph_Top)).EndInit();
+            this.gbdB_Range.ResumeLayout(false);
+            this.gbdB_Range.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ud_dB_Graph_Bottom)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ud_dB_Graph_Top)).EndInit();
             this.gbThdFreq_Harmonics.ResumeLayout(false);
             this.gbThdFreq_Harmonics.PerformLayout();
             this.gbXAxisRange.ResumeLayout(false);
             this.gbXAxisRange.PerformLayout();
             this.gbD_Range.ResumeLayout(false);
             this.gbD_Range.PerformLayout();
+            this.pnlCursorsRight.ResumeLayout(false);
+            this.pnlCursorsLeft.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1180,9 +1499,9 @@
         private ScottPlot.WinForms.FormsPlot thdPlot;
         private System.Windows.Forms.CheckBox chkShowDataPoints;
         private System.Windows.Forms.CheckBox chkThickLines;
-        private System.Windows.Forms.GroupBox gbDbv_Range;
-        private System.Windows.Forms.NumericUpDown cmbDbV_Graph_Bottom;
-        private System.Windows.Forms.NumericUpDown cmbDbV_Graph_Top;
+        private System.Windows.Forms.GroupBox gbdB_Range;
+        private System.Windows.Forms.NumericUpDown ud_dB_Graph_Bottom;
+        private System.Windows.Forms.NumericUpDown ud_dB_Graph_Top;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Button btnDbv_FitGraphY;
@@ -1195,35 +1514,60 @@
         private System.Windows.Forms.CheckBox chkShowD3;
         private System.Windows.Forms.CheckBox chkShowD2;
         private System.Windows.Forms.CheckBox chkShowThd;
-        private System.Windows.Forms.Button btnGraph_dBV;
-        private System.Windows.Forms.Button btnGraph_D;
+        private System.Windows.Forms.Button btnGraph_dB;
+        private System.Windows.Forms.Button btnGraph_D_Percent;
         private System.Windows.Forms.GroupBox gbXAxisRange;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.ComboBox cmbVoltageGraph_To;
+        private System.Windows.Forms.ComboBox cmbGraph_VoltageEnd;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.ComboBox cmbVoltageGraph_From;
+        private System.Windows.Forms.ComboBox cmbGraph_VoltageStart;
         private System.Windows.Forms.GroupBox gbD_Range;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox cmbD_Graph_Bottom;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ComboBox cmbD_Graph_Top;
         private System.Windows.Forms.Button btnD_FitGraphY;
-        private System.Windows.Forms.Label lblCursor_NoiseFloor;
-        private System.Windows.Forms.Label lblCursor_Power;
-        private System.Windows.Forms.Label lblCursor_D6;
-        private System.Windows.Forms.Label lblCursor_D5;
-        private System.Windows.Forms.Label lblCursor_D4;
-        private System.Windows.Forms.Label lblCursor_D3;
-        private System.Windows.Forms.Label lblCursor_D2;
-        private System.Windows.Forms.Label lblCursor_THD;
-        private System.Windows.Forms.Label lblCursor_Magnitude;
-        private System.Windows.Forms.Label lblCursor_VoltageOut;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TextBox txtEndVoltage;
         private System.Windows.Forms.ComboBox cmbEndVoltageUnit;
         private System.Windows.Forms.Button btnAutoFitX;
         private System.Windows.Forms.ComboBox cmbXAxis;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label lblCursor_VoltageIn;
+        private System.Windows.Forms.CheckBox chkGraphShowRightChannel;
+        private System.Windows.Forms.CheckBox chkGraphShowLeftChannel;
+        private System.Windows.Forms.CheckBox chkEnableRightChannel;
+        private System.Windows.Forms.CheckBox chkEnableLeftChannel;
+        private System.Windows.Forms.Panel pnlCursorsRight;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.Label lblCursor_Magnitude_R;
+        private System.Windows.Forms.Label lblCursor_NoiseFloor_R;
+        private System.Windows.Forms.Label lblCursor_THD_R;
+        private System.Windows.Forms.Label lblCursor_Power_R;
+        private System.Windows.Forms.Label lblCursor_D2_R;
+        private System.Windows.Forms.Label lblCursor_D6_R;
+        private System.Windows.Forms.Label lblCursor_D3_R;
+        private System.Windows.Forms.Label lblCursor_D5_R;
+        private System.Windows.Forms.Label lblCursor_D4_R;
+        private System.Windows.Forms.Panel pnlCursorsLeft;
+        private System.Windows.Forms.Label lblCursor_D5_L;
+        private System.Windows.Forms.Label lblCursor_Magnitude_L;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.Label lblCursor_THD_L;
+        private System.Windows.Forms.Label lblCursor_D2_L;
+        private System.Windows.Forms.Label lblCursor_D3_L;
+        private System.Windows.Forms.Label lblCursor_D4_L;
+        private System.Windows.Forms.Label lblCursor_D6_L;
+        private System.Windows.Forms.Label lblCursor_Power_L;
+        private System.Windows.Forms.Label lblCursor_NoiseFloor_L;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label lblCursorMagnitude;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.Label lblCursor_X_Axis;
     }
 }

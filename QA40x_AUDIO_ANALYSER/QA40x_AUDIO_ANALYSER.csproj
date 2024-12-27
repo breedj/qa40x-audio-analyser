@@ -154,13 +154,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\ThdAmplitude\E_ThdAmplitude_GraphType.cs" />
+    <Compile Include="Data\ThdAmplitude\E_X_AxisType.cs" />
+    <Compile Include="Data\ThdAmplitude\ThdAmplitudeGraphSettings.cs" />
+    <Compile Include="Data\ThdAmplitude\ThdAmplitudeMeasurementResult.cs" />
     <Compile Include="Data\ThdFrequency\E_GeneratorType.cs" />
     <Compile Include="Data\ThdFrequency\E_ThdFreq_GraphType.cs" />
     <Compile Include="Data\E_VoltageUnit.cs" />
-    <Compile Include="Data\ThdFrequency\IMeasurementResult.cs" />
+    <Compile Include="Data\IMeasurementResult.cs" />
     <Compile Include="Data\ThdFrequency\ThdFrequencyStepChannel.cs" />
     <Compile Include="Data\ThdFrequency\ThdFrequencyStep.cs" />
-    <Compile Include="Data\ThdAmplitude\ThdAmplitudeMeasurementData.cs" />
+    <Compile Include="Data\ThdAmplitude\ThdAmplitudeData.cs" />
     <Compile Include="Data\ThdAmplitude\ThdAmplitudeMeasurementSettings.cs" />
     <Compile Include="Data\ThdFrequency\ThdFrequencyGraphSettings.cs" />
     <Compile Include="Data\ThdFrequency\ThdFrequencyMeasurementResult.cs" />

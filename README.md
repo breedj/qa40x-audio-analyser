@@ -1,5 +1,5 @@
 # qa40x-audio-analyser
-An audio analyser program for the Quant Asylum QA40x series
+An audio amplifier analyser program for the Quant Asylum QA40x series.
 
 Distortion vs. Ouput amplitude measurement has been added.
 

@@ -1,14 +1,9 @@
 # qa40x-audio-analyser
 An audio amplifier analyser program for the Quant Asylum QA40x series.
 
-Distortion vs. Ouput amplitude measurement has been added.
+![image](https://github.com/user-attachments/assets/51656860-b696-4bc5-8334-c33ec1f2b01f)
 
-Currently only left channel is supported. Right channel and more features will be added soon.
-
-![Github screenshot 1](https://github.com/user-attachments/assets/d5b7a46a-cb92-4634-a7d5-8b6794b2b76d)
-
-![image](https://github.com/user-attachments/assets/0e787dd2-3658-45df-ae43-7ca2205278d2)
-
+![image](https://github.com/user-attachments/assets/82691402-aceb-4ca5-866d-49693ab9a23d)
 
 **DONE:**
 - [x] THD vs frequency measurement
@@ -18,7 +13,8 @@ Currently only left channel is supported. Right channel and more features will b
 - [x] Mini plots with frequency and time domain data
 - [x] Autofitting if graph data
 - [x] Plotting of noise floor in graphs
-- [x] THD vs Output amplitude measurement 
+- [x] THD vs Output amplitude measurement
+- [x] Added right channel support to measurements 
       
 **TODO:**
 - [ ] FFT with automatic peak search

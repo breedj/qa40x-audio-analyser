@@ -29,7 +29,7 @@ An audio amplifier analyser program for the Quant Asylum QA40x series.
 
 ## INSTALLATION NOTES
 
-To install download the msi here: https://github.com/breedj/qa40x-audio-analyser/releases/download/V0.3/QA40xAudioAnalyserSetup.msi
+To install download the msi here: https://github.com/breedj/qa40x-audio-analyser/releases/download/V0.4/QA40xAudioAnalyserSetup.msi
 
 The applicaton requires .net framework 4.8.
 

@@ -21,7 +21,7 @@ An audio amplifier analyser program for the Quant Asylum QA40x series.
 - [ ] Amplifier impedance vs frequency measurement
 - [ ] Saving of data to json file
 - [ ] Importing data from json file
-- [ ] Saving measurment results to image
+- [ ] Saving measurement results to image
 - [ ] Generating pdf report of measurements
 - [ ] Measurment project management
 - [ ] Multiple measurements and results per project

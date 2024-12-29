@@ -59,7 +59,7 @@ namespace QA40x_AUDIO_ANALYSER
 
 
             // TODO: depends on graph settings which graph is shown
-            if (data.Measurements.Count > 0 && data.Measurements[0].FrequencySteps.Count > 0)
+            if (data.Measurements.Count > 0 && data.Measurements[0].AmplitudeSteps.Count > 0)
             {
                 UpdateGraph(true);
             }
@@ -360,10 +360,12 @@ namespace QA40x_AUDIO_ANALYSER
             var _measurementSettings = MeasurementSettings.Copy();             // Create snapshot so it is not changed during measuring
 
             // Clear measurement result
-            MeasurementResult = new();
-            MeasurementResult.CreateDate = DateTime.Now;
-            MeasurementResult.Show = true;                                      // Show in graph
-            MeasurementResult.MeasurementSettings = _measurementSettings;       // Copy measurment settings to measurement results
+            MeasurementResult = new()
+            {
+                CreateDate = DateTime.Now,
+                Show = true,                                      // Show in graph
+                MeasurementSettings = _measurementSettings       // Copy measurment settings to measurement results
+            };
 
             // For now clear measurements to allow only one until we have a UI to manage them.
             Data.Measurements.Clear();
@@ -522,7 +524,7 @@ namespace QA40x_AUDIO_ANALYSER
                 if (fundamentalBin >= lrfs.FreqInput.Left.Length)                   // Check if bin within array bounds
                     break;
 
-                ThdFrequencyStep step = new()
+                ThdAmplitudeStep step = new()
                 {
                     FundamentalFrequency = testFrequency,
                     GeneratorVoltage = generatorVoltageV,
@@ -538,7 +540,7 @@ namespace QA40x_AUDIO_ANALYSER
                 step.Right = ChannelCalculations(binSize, step.FundamentalFrequency, generatorVoltagedBV, lrfs.FreqInput.Right, MeasurementResult.NoiseFloor.FreqInput.Right, _measurementSettings.Load);
 
                 // Add step data to list
-                MeasurementResult.FrequencySteps.Add(step);
+                MeasurementResult.AmplitudeSteps.Add(step);
 
                 UpdateGraph(false);
                 ShowLastMeasurementCursorTexts();
@@ -571,53 +573,47 @@ namespace QA40x_AUDIO_ANALYSER
             uint fundamentalBin = QaLibrary.GetBinOfFrequency(fundamentalFrequency, binSize);
 
             // Get and store step data
-            ThdFrequencyStepChannel channelData = new();
-            channelData.Fundamental_V = fftData[fundamentalBin];
-            channelData.Fundamental_dBV = 20 * Math.Log10(fftData[fundamentalBin]);
-            channelData.Gain_dB = 20 * Math.Log10(channelData.Fundamental_V / Math.Pow(10, generatorAmplitudeDbv / 20));
+            ThdFrequencyStepChannel channelData = new()
+            {
+                Fundamental_V = fftData[fundamentalBin],
+                Fundamental_dBV = 20 * Math.Log10(fftData[fundamentalBin]),
+                Gain_dB = 20 * Math.Log10(fftData[fundamentalBin] / Math.Pow(10, generatorAmplitudeDbv / 20))
+            };
 
-            // Calculate average noise floor 
-            channelData.Average_NoiseFloor_V = noiseFloorFftData               // Store noise floor in V
-                .Select((v, i) => new { Index = i, Value = v })
-                .Where(p => p.Index > fundamentalBin)                       // Only higher frequencies. We do not have fundamentals in lower frequencies
-                .Select(v => v.Value)
+            // Calculate average noise floor
+            channelData.Average_NoiseFloor_V = noiseFloorFftData
+                .Skip((int)fundamentalBin + 1)
                 .Average();
-            channelData.Average_NoiseFloor_dBV = 20 * Math.Log10(channelData.Average_NoiseFloor_V);         // Store noise floor in dBV
+            channelData.Average_NoiseFloor_dBV = 20 * Math.Log10(channelData.Average_NoiseFloor_V);
 
             // Reset harmonic distortion variables
             double distortionSqrtTotal = 0;
             double distiortionD6plus = 0;
 
-            // Loop through harmonics up tot the 12th
-            for (int h = 2; h <= 12; h++)                                   // For now up to 12 harmonics, start at 2nd
+            // Loop through harmonics up to the 12th
+            for (int h = 2; h <= 12; h++)
             {
                 var harmonicFrequency = fundamentalFrequency * h;
+                uint bin = QaLibrary.GetBinOfFrequency(harmonicFrequency, binSize);
+
+                if (bin >= fftData.Length)
+                    break;
+
                 HarmonicData harmonic = new()
                 {
                     HarmonicNr = h,
-                    Frequency = harmonicFrequency
+                    Frequency = harmonicFrequency,
+                    NoiseAmplitude_V = noiseFloorFftData[bin],
+                    Amplitude_V = fftData[bin],
+                    Amplitude_dBV = 20 * Math.Log10(fftData[bin]),
+                    Thd_Percent = (fftData[bin] / channelData.Fundamental_V) * 100,
+                    Thd_dB = 20 * Math.Log10((fftData[bin] / channelData.Fundamental_V) * 100 / 100.0)
                 };
 
-                uint bin = QaLibrary.GetBinOfFrequency(harmonic.Frequency, binSize);        // Calculate bin of the harmonic frequency
-                                                                                            // Check if bin exists
-                if (bin < fftData.Length)
-                {
-                    harmonic.NoiseAmplitude_V = noiseFloorFftData[bin];
-                    harmonic.Amplitude_V = fftData[bin];
-                    harmonic.Amplitude_dBV = 20 * Math.Log10(fftData[bin]);
-                    harmonic.Thd_Percent = (harmonic.Amplitude_V / channelData.Fundamental_V) * 100;
-                    harmonic.Thd_dB = 20 * Math.Log10(harmonic.Thd_Percent / 100.0);
+                if (h >= 6)
+                    distiortionD6plus += Math.Pow(harmonic.Amplitude_V, 2);
 
-                    // The harmonics 6-12 will be added together and displayed as D6+
-                    if (h >= 6)
-                        distiortionD6plus += Math.Pow(harmonic.Amplitude_V, 2);          // Add to total distortion
-
-                    // All harmonics together for THD
-                    distortionSqrtTotal += Math.Pow(harmonic.Amplitude_V, 2);            // Add to total distortion
-                }
-                else
-                    break;                                                                  // Invalid bin, skip harmonic
-
+                distortionSqrtTotal += Math.Pow(harmonic.Amplitude_V, 2);
                 channelData.Harmonics.Add(harmonic);
             }
 
@@ -646,10 +642,10 @@ namespace QA40x_AUDIO_ANALYSER
 
         void ShowLastMeasurementCursorTexts()
         {
-            if (MeasurementResult == null || MeasurementResult.FrequencySteps.Count == 0)
+            if (MeasurementResult == null || MeasurementResult.AmplitudeSteps.Count == 0)
                 return;
 
-            ThdFrequencyStep step = MeasurementResult.FrequencySteps.Last();
+            ThdAmplitudeStep step = MeasurementResult.AmplitudeSteps.Last();
 
             if (GraphSettings.GraphType == E_ThdAmplitude_GraphType.DB)
             {
@@ -970,236 +966,95 @@ namespace QA40x_AUDIO_ANALYSER
         /// <param name="data"></param>
         void PlotThd(ThdAmplitudeMeasurementResult measurementResult, int measurementNr, bool showLeftChannel, bool showRightChannel)
         {
-            List<double> freqX = [];
-            List<double> hTotY_left = [];
-            List<double> h2Y_left = [];
-            List<double> h3Y_left = [];
-            List<double> h4Y_left = [];
-            List<double> h5Y_left = [];
-            List<double> h6Y_left = [];
-            List<double> noiseY_left = [];
+            var freqX = new List<double>();
+            var hTotY_left = new List<double>();
+            var h2Y_left = new List<double>();
+            var h3Y_left = new List<double>();
+            var h4Y_left = new List<double>();
+            var h5Y_left = new List<double>();
+            var h6Y_left = new List<double>();
+            var noiseY_left = new List<double>();
 
-            List<double> hTotY_right = [];
-            List<double> h2Y_right = [];
-            List<double> h3Y_right = [];
-            List<double> h4Y_right = [];
-            List<double> h5Y_right = [];
-            List<double> h6Y_right = [];
-            List<double> noiseY_right = [];
+            var hTotY_right = new List<double>();
+            var h2Y_right = new List<double>();
+            var h3Y_right = new List<double>();
+            var h4Y_right = new List<double>();
+            var h5Y_right = new List<double>();
+            var h6Y_right = new List<double>();
+            var noiseY_right = new List<double>();
 
-            for (int i = 0; i < measurementResult.FrequencySteps.Count; i++)
+            foreach (var step in measurementResult.AmplitudeSteps)
             {
-                if (cmbXAxis.SelectedIndex == (int)E_X_AxisType.OUTPUT_VOLTAGE)
-                    freqX.Add(measurementResult.FrequencySteps[i].Left.Fundamental_V);
-                else if (cmbXAxis.SelectedIndex == (int)E_X_AxisType.OUTPUT_POWER)
-                    freqX.Add(measurementResult.FrequencySteps[i].Left.Power_Watt);
-                else if (cmbXAxis.SelectedIndex == (int)E_X_AxisType.INPUT_VOLTAGE)
-                    freqX.Add(measurementResult.FrequencySteps[i].GeneratorVoltage);
+                double xValue = cmbXAxis.SelectedIndex switch
+                {
+                    (int)E_X_AxisType.OUTPUT_VOLTAGE => step.Left.Fundamental_V,
+                    (int)E_X_AxisType.OUTPUT_POWER => step.Left.Power_Watt,
+                    _ => step.GeneratorVoltage
+                };
+                freqX.Add(xValue);
 
                 if (showLeftChannel && measurementResult.MeasurementSettings.EnableLeftChannel)
                 {
-                    if (measurementResult.FrequencySteps[i].Left.Harmonics.Count > 0 && GraphSettings.ShowTHD)
-                        hTotY_left.Add(measurementResult.FrequencySteps[i].Left.Thd_Percent);
-                    if (measurementResult.FrequencySteps[i].Left.Harmonics.Count > 0 && GraphSettings.ShowD2)
-                        h2Y_left.Add(measurementResult.FrequencySteps[i].Left.Harmonics[0].Thd_Percent);
-                    if (measurementResult.FrequencySteps[i].Left.Harmonics.Count > 1 && GraphSettings.ShowD3)
-                        h3Y_left.Add(measurementResult.FrequencySteps[i].Left.Harmonics[1].Thd_Percent);
-                    if (measurementResult.FrequencySteps[i].Left.Harmonics.Count > 2 && GraphSettings.ShowD4)
-                        h4Y_left.Add(measurementResult.FrequencySteps[i].Left.Harmonics[2].Thd_Percent);
-                    if (measurementResult.FrequencySteps[i].Left.Harmonics.Count > 3 && GraphSettings.ShowD5)
-                        h5Y_left.Add(measurementResult.FrequencySteps[i].Left.Harmonics[3].Thd_Percent);
-                    if (measurementResult.FrequencySteps[i].Left.Harmonics.Count > 4 && measurementResult.FrequencySteps[i].Left.ThdPercent_D6plus != 0 && GraphSettings.ShowD6)
-                        h6Y_left.Add(measurementResult.FrequencySteps[i].Left.ThdPercent_D6plus);        // D6+
-                    if (GraphSettings.ShowNoiseFloor)
-                        noiseY_left.Add((measurementResult.FrequencySteps[i].Left.Average_NoiseFloor_V / measurementResult.FrequencySteps[i].Left.Fundamental_V) * 100);
+                    if (GraphSettings.ShowTHD) hTotY_left.Add(step.Left.Thd_Percent);
+                    if (GraphSettings.ShowD2) h2Y_left.Add(step.Left.Harmonics.ElementAtOrDefault(0)?.Thd_Percent ?? 0);
+                    if (GraphSettings.ShowD3) h3Y_left.Add(step.Left.Harmonics.ElementAtOrDefault(1)?.Thd_Percent ?? 0);
+                    if (GraphSettings.ShowD4) h4Y_left.Add(step.Left.Harmonics.ElementAtOrDefault(2)?.Thd_Percent ?? 0);
+                    if (GraphSettings.ShowD5) h5Y_left.Add(step.Left.Harmonics.ElementAtOrDefault(3)?.Thd_Percent ?? 0);
+                    if (GraphSettings.ShowD6) h6Y_left.Add(step.Left.ThdPercent_D6plus);
+                    if (GraphSettings.ShowNoiseFloor) noiseY_left.Add((step.Left.Average_NoiseFloor_V / step.Left.Fundamental_V) * 100);
                 }
 
-                if(showRightChannel && measurementResult.MeasurementSettings.EnableRightChannel)
+                if (showRightChannel && measurementResult.MeasurementSettings.EnableRightChannel)
                 {
-                    if (measurementResult.FrequencySteps[i].Right.Harmonics.Count > 0 && GraphSettings.ShowTHD)
-                        hTotY_right.Add(measurementResult.FrequencySteps[i].Right.Thd_Percent);
-                    if (measurementResult.FrequencySteps[i].Right.Harmonics.Count > 0 && GraphSettings.ShowD2)
-                        h2Y_right.Add(measurementResult.FrequencySteps[i].Right.Harmonics[0].Thd_Percent);
-                    if (measurementResult.FrequencySteps[i].Right.Harmonics.Count > 1 && GraphSettings.ShowD3)
-                        h3Y_right.Add(measurementResult.FrequencySteps[i].Right.Harmonics[1].Thd_Percent);
-                    if (measurementResult.FrequencySteps[i].Right.Harmonics.Count > 2 && GraphSettings.ShowD4)
-                        h4Y_right.Add(measurementResult.FrequencySteps[i].Right.Harmonics[2].Thd_Percent);
-                    if (measurementResult.FrequencySteps[i].Right.Harmonics.Count > 3 && GraphSettings.ShowD5)
-                        h5Y_right.Add(measurementResult.FrequencySteps[i].Right.Harmonics[3].Thd_Percent);
-                    if (measurementResult.FrequencySteps[i].Right.Harmonics.Count > 4 && measurementResult.FrequencySteps[i].Right.ThdPercent_D6plus != 0 && GraphSettings.ShowD6)
-                        h6Y_right.Add(measurementResult.FrequencySteps[i].Right.ThdPercent_D6plus);        // D6+
-                    if (GraphSettings.ShowNoiseFloor)
-                        noiseY_right.Add((measurementResult.FrequencySteps[i].Right.Average_NoiseFloor_V / measurementResult.FrequencySteps[i].Right.Fundamental_V) * 100);
+                    if (GraphSettings.ShowTHD) hTotY_right.Add(step.Right.Thd_Percent);
+                    if (GraphSettings.ShowD2) h2Y_right.Add(step.Right.Harmonics.ElementAtOrDefault(0)?.Thd_Percent ?? 0);
+                    if (GraphSettings.ShowD3) h3Y_right.Add(step.Right.Harmonics.ElementAtOrDefault(1)?.Thd_Percent ?? 0);
+                    if (GraphSettings.ShowD4) h4Y_right.Add(step.Right.Harmonics.ElementAtOrDefault(2)?.Thd_Percent ?? 0);
+                    if (GraphSettings.ShowD5) h5Y_right.Add(step.Right.Harmonics.ElementAtOrDefault(3)?.Thd_Percent ?? 0);
+                    if (GraphSettings.ShowD6) h6Y_right.Add(step.Right.ThdPercent_D6plus);
+                    if (GraphSettings.ShowNoiseFloor) noiseY_right.Add((step.Right.Average_NoiseFloor_V / step.Right.Fundamental_V) * 100);
                 }
             }
 
-            GraphColors colors = new GraphColors();
-            float lineWidth = 1;
-            float markerSize = 1;
-            if (GraphSettings.ThickLines)
-                lineWidth = 1.8f;
-            if (GraphSettings.ShowDataPoints)
-                markerSize = lineWidth + 3;
+            var colors = new GraphColors();
+            float lineWidth = GraphSettings.ThickLines ? 1.8f : 1;
+            float markerSize = GraphSettings.ShowDataPoints ? lineWidth + 3 : 1;
 
-            // add a scatter plot to the plot
             double[] logFreqX = freqX.Select(Math.Log10).ToArray();
-            int color = measurementNr * 2;          // Skip color each measurement for better visibility
+            int color = measurementNr * 2;
+
+            void AddPlot(List<double> yValues, int colorIndex, string legendText, LinePattern linePattern)
+            {
+                if (yValues.Count == 0) return;
+                double[] logYValues = yValues.Select(Math.Log10).ToArray();
+                var plot = thdPlot.Plot.Add.Scatter(logFreqX, logYValues);
+                plot.LineWidth = lineWidth;
+                plot.Color = colors.GetColor(colorIndex, color);
+                plot.MarkerSize = markerSize;
+                plot.LegendText = legendText;
+                plot.LinePattern = linePattern;
+            }
 
             if (showLeftChannel)
             {
-                if (GraphSettings.ShowTHD)
-                {
-                    double[] logHTotY = hTotY_left.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logHTotY);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(8, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "THD-L" : "THD";
-                }
-
-                if (GraphSettings.ShowD2)
-                {
-                    double[] logH2Y = h2Y_left.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH2Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(0, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "D2-L" : "D2";
-                }
-
-                if (GraphSettings.ShowD3)
-                {
-                    double[] logH3Y = h3Y_left.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH3Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(1, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "D3-L" : "D3";
-                }
-
-                if (GraphSettings.ShowD4)
-                {
-                    double[] logH4Y = h4Y_left.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH4Y);
-                    plot.Color = colors.GetColor(2, color);
-                    plot.LineWidth = lineWidth;
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "D4-L" : "D4";
-                }
-
-                if (GraphSettings.ShowD5)
-                {
-                    double[] logH5Y = h5Y_left.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH5Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(3, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "D5-L" : "D5";
-                }
-
-                if (GraphSettings.ShowD6)
-                {
-                    double[] logH6Y = h6Y_left.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH6Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(4, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "D6+-L" : "D6+";
-                }
-
-
-                if (GraphSettings.ShowNoiseFloor)
-                {
-                    double[] logNoiseY = noiseY_left.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logNoiseY);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(9, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "Noise-L" : "Noise";
-                    plot.LinePattern = showRightChannel ? LinePattern.Solid : LinePattern.Dotted;
-                }
+                if (GraphSettings.ShowTHD) AddPlot(hTotY_left, 8, showRightChannel ? "THD-L" : "THD", LinePattern.Solid);
+                if (GraphSettings.ShowD2) AddPlot(h2Y_left, 0, showRightChannel ? "D2-L" : "D2", LinePattern.Solid);
+                if (GraphSettings.ShowD3) AddPlot(h3Y_left, 1, showRightChannel ? "D3-L" : "D3", LinePattern.Solid);
+                if (GraphSettings.ShowD4) AddPlot(h4Y_left, 2, showRightChannel ? "D4-L" : "D4", LinePattern.Solid);
+                if (GraphSettings.ShowD5) AddPlot(h5Y_left, 3, showRightChannel ? "D5-L" : "D5", LinePattern.Solid);
+                if (GraphSettings.ShowD6) AddPlot(h6Y_left, 4, showRightChannel ? "D6+-L" : "D6+", LinePattern.Solid);
+                if (GraphSettings.ShowNoiseFloor) AddPlot(noiseY_left, 9, showRightChannel ? "Noise-L" : "Noise", showRightChannel ? LinePattern.Solid : LinePattern.Dotted);
             }
-
 
             if (showRightChannel)
             {
-                if (GraphSettings.ShowTHD)
-                {
-                    double[] logHTotY = hTotY_right.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logHTotY);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(8, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "THD-R" : "THD";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowD2)
-                {
-                    double[] logH2Y = h2Y_right.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH2Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(0, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "D2-R" : "D2";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowD3)
-                {
-                    double[] logH3Y = h3Y_right.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH3Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(1, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "D3-R" : "D3";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowD4)
-                {
-                    double[] logH4Y = h4Y_right.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH4Y);
-                    plot.Color = colors.GetColor(2, color);
-                    plot.LineWidth = lineWidth;
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "D4-R" : "D4";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowD5)
-                {
-                    double[] logH5Y = h5Y_right.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH5Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(3, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "D5-R" : "D5";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowD6)
-                {
-                    double[] logH6Y = h6Y_right.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH6Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(4, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "D6+-R" : "D6+";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-
-                if (GraphSettings.ShowNoiseFloor)
-                {
-                    double[] logNoiseY = noiseY_right.Select(Math.Log10).ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logNoiseY);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(9, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "Noise-R" : "Noise";
-                    plot.LinePattern = LinePattern.Dotted;
-                }
+                if (GraphSettings.ShowTHD) AddPlot(hTotY_right, 8, showLeftChannel ? "THD-R" : "THD", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD2) AddPlot(h2Y_right, 0, showLeftChannel ? "D2-R" : "D2", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD3) AddPlot(h3Y_right, 1, showLeftChannel ? "D3-R" : "D3", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD4) AddPlot(h4Y_right, 2, showLeftChannel ? "D4-R" : "D4", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD5) AddPlot(h5Y_right, 3, showLeftChannel ? "D5-R" : "D5", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD6) AddPlot(h6Y_right, 4, showLeftChannel ? "D6+-R" : "D6+", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowNoiseFloor) AddPlot(noiseY_right, 9, showLeftChannel ? "Noise-R" : "Noise", LinePattern.Dotted);
             }
 
             if (markerIndex != -1)
@@ -1280,272 +1135,129 @@ namespace QA40x_AUDIO_ANALYSER
         void PlotMagnitude(ThdAmplitudeMeasurementResult measurementResult, int measurementNr, bool showLeftChannel, bool showRightChannel)
         {
             // Create lists for line data
-            List<double> freqX = [];
-            List<double> magnY_left = [];
-            List<double> hTotY_left = [];
-            List<double> h2Y_left = [];
-            List<double> h3Y_left = [];
-            List<double> h4Y_left = [];
-            List<double> h5Y_left = [];
-            List<double> h6Y_left = [];
-            List<double> noiseY_left = [];
+            var freqX = new List<double>();
+            var magnY_left = new List<double>();
+            var hTotY_left = new List<double>();
+            var h2Y_left = new List<double>();
+            var h3Y_left = new List<double>();
+            var h4Y_left = new List<double>();
+            var h5Y_left = new List<double>();
+            var h6Y_left = new List<double>();
+            var noiseY_left = new List<double>();
 
-            List<double> magnY_right = [];
-            List<double> hTotY_right = [];
-            List<double> h2Y_right = [];
-            List<double> h3Y_right = [];
-            List<double> h4Y_right = [];
-            List<double> h5Y_right = [];
-            List<double> h6Y_right = [];
-            List<double> noiseY_right = [];
+            var magnY_right = new List<double>();
+            var hTotY_right = new List<double>();
+            var h2Y_right = new List<double>();
+            var h3Y_right = new List<double>();
+            var h4Y_right = new List<double>();
+            var h5Y_right = new List<double>();
+            var h6Y_right = new List<double>();
+            var noiseY_right = new List<double>();
 
             // Add data to the line lists
-            for (int i = 0; i < measurementResult.FrequencySteps.Count; i++)
+            foreach (var step in measurementResult.AmplitudeSteps)
             {
-                if (GraphSettings.XAxisType == E_X_AxisType.OUTPUT_VOLTAGE)
-                    freqX.Add(measurementResult.FrequencySteps[i].Left.Fundamental_V);
-                else if (GraphSettings.XAxisType == E_X_AxisType.OUTPUT_POWER)
-                    freqX.Add(measurementResult.FrequencySteps[i].Left.Power_Watt);
-                else if (GraphSettings.XAxisType == E_X_AxisType.INPUT_VOLTAGE)
-                    freqX.Add(measurementResult.FrequencySteps[i].GeneratorVoltage);
+                double xValue = GraphSettings.XAxisType switch
+                {
+                    E_X_AxisType.OUTPUT_VOLTAGE => step.Left.Fundamental_V,
+                    E_X_AxisType.OUTPUT_POWER => step.Left.Power_Watt,
+                    _ => step.GeneratorVoltage
+                };
+                freqX.Add(xValue);
 
                 if (showLeftChannel && measurementResult.MeasurementSettings.EnableLeftChannel)
-                { 
+                {
                     if (GraphSettings.ShowMagnitude)
-                        magnY_left.Add(measurementResult.FrequencySteps[i].Left.Gain_dB);
+                        magnY_left.Add(step.Left.Gain_dB);
 
-                    if (measurementResult.FrequencySteps[i].Left.Harmonics.Count > 0)
+                    if (step.Left.Harmonics.Count > 0)
                     {
-                        hTotY_left.Add(measurementResult.FrequencySteps[i].Left.Thd_dB + measurementResult.FrequencySteps[i].Left.Gain_dB);
-                        h2Y_left.Add(measurementResult.FrequencySteps[i].Left.Harmonics[0].Amplitude_dBV - measurementResult.FrequencySteps[i].Left.Fundamental_dBV + measurementResult.FrequencySteps[i].Left.Gain_dB);
+                        hTotY_left.Add(step.Left.Thd_dB + step.Left.Gain_dB);
+                        h2Y_left.Add(step.Left.Harmonics[0].Amplitude_dBV - step.Left.Fundamental_dBV + step.Left.Gain_dB);
                     }
-                    if (measurementResult.FrequencySteps[i].Left.Harmonics.Count > 1)
-                        h3Y_left.Add(measurementResult.FrequencySteps[i].Left.Harmonics[1].Amplitude_dBV - measurementResult.FrequencySteps[i].Left.Fundamental_dBV + measurementResult.FrequencySteps[i].Left.Gain_dB);
-                    if (measurementResult.FrequencySteps[i].Left.Harmonics.Count > 2)
-                        h4Y_left.Add(measurementResult.FrequencySteps[i].Left.Harmonics[2].Amplitude_dBV - measurementResult.FrequencySteps[i].Left.Fundamental_dBV + measurementResult.FrequencySteps[i].Left.Gain_dB);
-                    if (measurementResult.FrequencySteps[i].Left.Harmonics.Count > 3)
-                        h5Y_left.Add(measurementResult.FrequencySteps[i].Left.Harmonics[3].Amplitude_dBV - measurementResult.FrequencySteps[i].Left.Fundamental_dBV + measurementResult.FrequencySteps[i].Left.Gain_dB);
-                    if (measurementResult.FrequencySteps[i].Left.D6Plus_dBV != 0 && measurementResult.FrequencySteps[i].Left.Harmonics.Count > 4 && GraphSettings.ShowD6)
-                        h6Y_left.Add(measurementResult.FrequencySteps[i].Left.D6Plus_dBV - measurementResult.FrequencySteps[i].Left.Fundamental_dBV + measurementResult.FrequencySteps[i].Left.Gain_dB);
+                    if (step.Left.Harmonics.Count > 1)
+                        h3Y_left.Add(step.Left.Harmonics[1].Amplitude_dBV - step.Left.Fundamental_dBV + step.Left.Gain_dB);
+                    if (step.Left.Harmonics.Count > 2)
+                        h4Y_left.Add(step.Left.Harmonics[2].Amplitude_dBV - step.Left.Fundamental_dBV + step.Left.Gain_dB);
+                    if (step.Left.Harmonics.Count > 3)
+                        h5Y_left.Add(step.Left.Harmonics[3].Amplitude_dBV - step.Left.Fundamental_dBV + step.Left.Gain_dB);
+                    if (step.Left.D6Plus_dBV != 0 && step.Left.Harmonics.Count > 4 && GraphSettings.ShowD6)
+                        h6Y_left.Add(step.Left.D6Plus_dBV - step.Left.Fundamental_dBV + step.Left.Gain_dB);
                     if (GraphSettings.ShowNoiseFloor)
-                        noiseY_left.Add(measurementResult.FrequencySteps[i].Left.Average_NoiseFloor_dBV - measurementResult.FrequencySteps[i].Left.Fundamental_dBV + measurementResult.FrequencySteps[i].Left.Gain_dB);
+                        noiseY_left.Add(step.Left.Average_NoiseFloor_dBV - step.Left.Fundamental_dBV + step.Left.Gain_dB);
                 }
 
                 if (showRightChannel && measurementResult.MeasurementSettings.EnableRightChannel)
                 {
                     if (GraphSettings.ShowMagnitude)
-                        magnY_right.Add(measurementResult.FrequencySteps[i].Right.Gain_dB);
+                        magnY_right.Add(step.Right.Gain_dB);
 
-                    if (measurementResult.FrequencySteps[i].Right.Harmonics.Count > 0)
+                    if (step.Right.Harmonics.Count > 0)
                     {
-                        hTotY_right.Add(measurementResult.FrequencySteps[i].Right.Thd_dB + measurementResult.FrequencySteps[i].Right.Gain_dB);
-                        h2Y_right.Add(measurementResult.FrequencySteps[i].Right.Harmonics[0].Amplitude_dBV - measurementResult.FrequencySteps[i].Right.Fundamental_dBV + measurementResult.FrequencySteps[i].Right.Gain_dB);
+                        hTotY_right.Add(step.Right.Thd_dB + step.Right.Gain_dB);
+                        h2Y_right.Add(step.Right.Harmonics[0].Amplitude_dBV - step.Right.Fundamental_dBV + step.Right.Gain_dB);
                     }
-                    if (measurementResult.FrequencySteps[i].Right.Harmonics.Count > 1)
-                        h3Y_right.Add(measurementResult.FrequencySteps[i].Right.Harmonics[1].Amplitude_dBV - measurementResult.FrequencySteps[i].Right.Fundamental_dBV + measurementResult.FrequencySteps[i].Right.Gain_dB);
-                    if (measurementResult.FrequencySteps[i].Right.Harmonics.Count > 2)
-                        h4Y_right.Add(measurementResult.FrequencySteps[i].Right.Harmonics[2].Amplitude_dBV - measurementResult.FrequencySteps[i].Right.Fundamental_dBV + measurementResult.FrequencySteps[i].Right.Gain_dB);
-                    if (measurementResult.FrequencySteps[i].Right.Harmonics.Count > 3)
-                        h5Y_right.Add(measurementResult.FrequencySteps[i].Right.Harmonics[3].Amplitude_dBV - measurementResult.FrequencySteps[i].Right.Fundamental_dBV + measurementResult.FrequencySteps[i].Right.Gain_dB);
-                    if (measurementResult.FrequencySteps[i].Right.D6Plus_dBV != 0 && measurementResult.FrequencySteps[i].Right.Harmonics.Count > 4 && GraphSettings.ShowD6)
-                        h6Y_right.Add(measurementResult.FrequencySteps[i].Right.D6Plus_dBV - measurementResult.FrequencySteps[i].Right.Fundamental_dBV + measurementResult.FrequencySteps[i].Right.Gain_dB);
+                    if (step.Right.Harmonics.Count > 1)
+                        h3Y_right.Add(step.Right.Harmonics[1].Amplitude_dBV - step.Right.Fundamental_dBV + step.Right.Gain_dB);
+                    if (step.Right.Harmonics.Count > 2)
+                        h4Y_right.Add(step.Right.Harmonics[2].Amplitude_dBV - step.Right.Fundamental_dBV + step.Right.Gain_dB);
+                    if (step.Right.Harmonics.Count > 3)
+                        h5Y_right.Add(step.Right.Harmonics[3].Amplitude_dBV - step.Right.Fundamental_dBV + step.Right.Gain_dB);
+                    if (step.Right.D6Plus_dBV != 0 && step.Right.Harmonics.Count > 4 && GraphSettings.ShowD6)
+                        h6Y_right.Add(step.Right.D6Plus_dBV - step.Right.Fundamental_dBV + step.Right.Gain_dB);
                     if (GraphSettings.ShowNoiseFloor)
-                        noiseY_right.Add(measurementResult.FrequencySteps[i].Right.Average_NoiseFloor_dBV - measurementResult.FrequencySteps[i].Right.Fundamental_dBV + measurementResult.FrequencySteps[i].Right.Gain_dB);
+                        noiseY_right.Add(step.Right.Average_NoiseFloor_dBV - step.Right.Fundamental_dBV + step.Right.Gain_dB);
                 }
             }
 
             // add a scatter plot to the plot
             double[] logFreqX = freqX.Select(Math.Log10).ToArray();
-            float lineWidth = (GraphSettings.ThickLines ? 2 : 1);
-            float markerSize = (GraphSettings.ShowDataPoints ? lineWidth + 3 : 1);
+            float lineWidth = GraphSettings.ThickLines ? 2 : 1;
+            float markerSize = GraphSettings.ShowDataPoints ? lineWidth + 3 : 1;
 
-            GraphColors colors = new GraphColors();
+            var colors = new GraphColors();
             int color = measurementNr * 2;
 
-            if (showLeftChannel && measurementResult.MeasurementSettings.EnableLeftChannel)
+            void AddPlot(List<double> yValues, int colorIndex, string legendText, LinePattern linePattern)
             {
-                if (GraphSettings.ShowMagnitude)
-                {
-                    double[] logMagnY = magnY_left.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logMagnY);
-                    plot.LineWidth = lineWidth;
-                    plot.LinePattern = LinePattern.DenselyDashed;
-                    plot.Color = colors.GetColor(9, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "Magn-L" : "Magn";
-                }
-
-                if (GraphSettings.ShowTHD)
-                {
-                    double[] logHTotY = hTotY_left.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logHTotY);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(8, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "THD-L" : "THD";
-                }
-
-                if (GraphSettings.ShowD2)
-                {
-                    double[] logH2Y = h2Y_left.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH2Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(0, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = "H2";
-                    plot.LegendText = showRightChannel ? "H2-L" : "H2";
-                }
-
-                if (GraphSettings.ShowD3)
-                {
-                    double[] logH3Y = h3Y_left.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH3Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(1, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = "H3";
-                    plot.LegendText = showRightChannel ? "H3-L" : "H3";
-                }
-
-                if (GraphSettings.ShowD4)
-                {
-                    double[] logH4Y = h4Y_left.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH4Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(2, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "H4-L" : "H4";
-                }
-
-                if (GraphSettings.ShowD5)
-                {
-                    double[] logH5Y = h5Y_left.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH5Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(3, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "H5-L" : "H5";
-                }
-
-                if (GraphSettings.ShowD6)
-                {
-                    double[] logH6Y = h6Y_left.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH6Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(4, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "H6+-L" : "H6+";
-                }
-
-                if (GraphSettings.ShowNoiseFloor)
-                {
-                    double[] logNoiseY = noiseY_left.ToArray();
-                    var plot = thdPlot.Plot.Add.ScatterLine(logFreqX, logNoiseY);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(9, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showRightChannel ? "Noise-L" : "Noise";
-                    plot.LinePattern = showRightChannel ? LinePattern.Solid : LinePattern.Dotted;
-                }
+                if (yValues.Count == 0) return;
+                double[] logYValues = yValues.ToArray();
+                var plot = thdPlot.Plot.Add.Scatter(logFreqX, logYValues);
+                plot.LineWidth = lineWidth;
+                plot.Color = colors.GetColor(colorIndex, color);
+                plot.MarkerSize = markerSize;
+                plot.LegendText = legendText;
+                plot.LinePattern = linePattern;
             }
 
-
-            if (showRightChannel && measurementResult.MeasurementSettings.EnableRightChannel)
+            if (showLeftChannel)
             {
-                if (GraphSettings.ShowMagnitude)
-                {
-                    double[] logMagnY = magnY_right.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logMagnY);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(9, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "Magn-R" : "Magn";
-                    plot.LinePattern = showLeftChannel ? LinePattern.Dotted : LinePattern.DenselyDashed;
-                }
-
-                if (GraphSettings.ShowTHD)
-                {
-                    double[] logHTotY = hTotY_right.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logHTotY);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(8, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "THD-R" : "THD";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowD2)
-                {
-                    double[] logH2Y = h2Y_right.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH2Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(0, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "H2-R" : "H2";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowD3)
-                {
-                    double[] logH3Y = h3Y_right.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH3Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(1, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "H3-R" : "H3";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowD4)
-                {
-                    double[] logH4Y = h4Y_right.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH4Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(2, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "H4-R" : "H4";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowD5)
-                {
-                    double[] logH5Y = h5Y_right.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH5Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(3, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "H5-R" : "H5";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowD6)
-                {
-                    double[] logH6Y = h6Y_right.ToArray();
-                    var plot = thdPlot.Plot.Add.Scatter(logFreqX, logH6Y);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(4, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "H6+-R" : "H6+";
-                    plot.LinePattern = showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid;
-                }
-
-                if (GraphSettings.ShowNoiseFloor)
-                {
-                    double[] logNoiseY = noiseY_right.ToArray();
-                    var plot = thdPlot.Plot.Add.ScatterLine(logFreqX, logNoiseY);
-                    plot.LineWidth = lineWidth;
-                    plot.Color = colors.GetColor(9, color);
-                    plot.MarkerSize = markerSize;
-                    plot.LegendText = showLeftChannel ? "Noise-R" : "Noise";
-                    plot.LinePattern = LinePattern.Dotted;
-                }
+                if (GraphSettings.ShowMagnitude) AddPlot(magnY_left, 9, showRightChannel ? "Magn-L" : "Magn", LinePattern.DenselyDashed);
+                if (GraphSettings.ShowTHD) AddPlot(hTotY_left, 8, showRightChannel ? "THD-L" : "THD", LinePattern.Solid);
+                if (GraphSettings.ShowD2) AddPlot(h2Y_left, 0, showRightChannel ? "H2-L" : "H2", LinePattern.Solid);
+                if (GraphSettings.ShowD3) AddPlot(h3Y_left, 1, showRightChannel ? "H3-L" : "H3", LinePattern.Solid);
+                if (GraphSettings.ShowD4) AddPlot(h4Y_left, 2, showRightChannel ? "H4-L" : "H4", LinePattern.Solid);
+                if (GraphSettings.ShowD5) AddPlot(h5Y_left, 3, showRightChannel ? "H5-L" : "H5", LinePattern.Solid);
+                if (GraphSettings.ShowD6) AddPlot(h6Y_left, 4, showRightChannel ? "H6+-L" : "H6+", LinePattern.Solid);
+                if (GraphSettings.ShowNoiseFloor) AddPlot(noiseY_left, 9, showRightChannel ? "Noise-L" : "Noise", showRightChannel ? LinePattern.Solid : LinePattern.Dotted);
             }
 
+            if (showRightChannel)
+            {
+                if (GraphSettings.ShowMagnitude) AddPlot(magnY_right, 9, showLeftChannel ? "Magn-R" : "Magn", showLeftChannel ? LinePattern.Dotted : LinePattern.DenselyDashed);
+                if (GraphSettings.ShowTHD) AddPlot(hTotY_right, 8, showLeftChannel ? "THD-R" : "THD", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD2) AddPlot(h2Y_right, 0, showLeftChannel ? "H2-R" : "H2", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD3) AddPlot(h3Y_right, 1, showLeftChannel ? "H3-R" : "H3", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD4) AddPlot(h4Y_right, 2, showLeftChannel ? "H4-R" : "H4", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD5) AddPlot(h5Y_right, 3, showLeftChannel ? "H5-R" : "H5", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD6) AddPlot(h6Y_right, 4, showLeftChannel ? "H6+-R" : "H6+", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowNoiseFloor) AddPlot(noiseY_right, 9, showLeftChannel ? "Noise-R" : "Noise", LinePattern.Dotted);
+            }
 
             // If marker selected draw marker line
             if (markerIndex != -1)
                 QaLibrary.PlotCursorMarker(thdPlot, 1, LinePattern.Solid, markerDataPoint);
-            
+
             thdPlot.Refresh();
         }
 
@@ -1597,8 +1309,8 @@ namespace QA40x_AUDIO_ANALYSER
                 // If persistent marker set then show mini plots of that marker
                 if (markerIndex >= 0)
                 {
-                    QaLibrary.PlotMiniFftGraph(graphFft, MeasurementResult.FrequencySteps[markerIndex].fftData, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
-                    QaLibrary.PlotMiniTimeGraph(graphTime, MeasurementResult.FrequencySteps[markerIndex].timeData, MeasurementResult.FrequencySteps[markerIndex].FundamentalFrequency, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
+                    QaLibrary.PlotMiniFftGraph(graphFft, MeasurementResult.AmplitudeSteps[markerIndex].fftData, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
+                    QaLibrary.PlotMiniTimeGraph(graphTime, MeasurementResult.AmplitudeSteps[markerIndex].timeData, MeasurementResult.AmplitudeSteps[markerIndex].FundamentalFrequency, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
                 }
             };
 
@@ -1625,8 +1337,8 @@ namespace QA40x_AUDIO_ANALYSER
             // place the crosshair over the highlighted point
             if (nearest1.IsReal)
             {
-                QaLibrary.PlotMiniFftGraph(graphFft, MeasurementResult.FrequencySteps[nearest1.Index].fftData, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
-                QaLibrary.PlotMiniTimeGraph(graphTime, MeasurementResult.FrequencySteps[nearest1.Index].timeData, MeasurementResult.FrequencySteps[nearest1.Index].FundamentalFrequency, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
+                QaLibrary.PlotMiniFftGraph(graphFft, MeasurementResult.AmplitudeSteps[nearest1.Index].fftData, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
+                QaLibrary.PlotMiniTimeGraph(graphTime, MeasurementResult.AmplitudeSteps[nearest1.Index].timeData, MeasurementResult.AmplitudeSteps[nearest1.Index].FundamentalFrequency, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
             }
         }
 
@@ -1688,9 +1400,9 @@ namespace QA40x_AUDIO_ANALYSER
                 QaLibrary.PlotCursorMarker(thdPlot, lineWidth, linePattern, nearest1);
 
                 // Check if index in StepData array
-                if (MeasurementResult.FrequencySteps.Count > nearest1.Index)
+                if (MeasurementResult.AmplitudeSteps.Count > nearest1.Index)
                 {
-                    ThdFrequencyStep step = MeasurementResult.FrequencySteps[nearest1.Index];
+                    var step = MeasurementResult.AmplitudeSteps[nearest1.Index];
 
                     // Write cursor texts based in plot type
                     if (GraphSettings.GraphType == E_ThdAmplitude_GraphType.DB)
@@ -1982,12 +1694,12 @@ namespace QA40x_AUDIO_ANALYSER
 
         private void btnFitDGraphY_Click(object sender, EventArgs e)
         {
-            if (MeasurementResult.FrequencySteps.Count == 0)
+            if (MeasurementResult.AmplitudeSteps.Count == 0)
                 return;
 
             // Determine top Y
-            double maxThd_left = MeasurementResult.FrequencySteps.Max(d => d.Left.Thd_Percent);
-            double maxThd_right = MeasurementResult.FrequencySteps.Max(d => d.Right.Thd_Percent);
+            double maxThd_left = MeasurementResult.AmplitudeSteps.Max(d => d.Left.Thd_Percent);
+            double maxThd_right = MeasurementResult.AmplitudeSteps.Max(d => d.Right.Thd_Percent);
             double max = Math.Max(maxThd_left, maxThd_right);
 
             if (max <= 1)
@@ -1999,24 +1711,24 @@ namespace QA40x_AUDIO_ANALYSER
 
 
             // Determine bottom Y
-            double minThd_left = MeasurementResult.FrequencySteps.Min(d => (d.Left.Average_NoiseFloor_V / d.Left.Fundamental_V) * 100);
-            double minD2_left = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 1).Min(d => (d.Left.Harmonics[0].Amplitude_V / d.Left.Fundamental_V) * 100);
-            double minD3_left = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 2).Min(d => (d.Left.Harmonics[1].Amplitude_V / d.Left.Fundamental_V) * 100);
-            double minD4_left = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 3).Min(d => (d.Left.Harmonics[2].Amplitude_V / d.Left.Fundamental_V) * 100);
-            double minD5_left = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 4).Min(d => (d.Left.Harmonics[3].Amplitude_V / d.Left.Fundamental_V) * 100);
-            double minD6_left = MeasurementResult.FrequencySteps.Min(d => d.Left.ThdPercent_D6plus);
+            double minThd_left = MeasurementResult.AmplitudeSteps.Min(d => (d.Left.Average_NoiseFloor_V / d.Left.Fundamental_V) * 100);
+            double minD2_left = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 1).Min(d => (d.Left.Harmonics[0].Amplitude_V / d.Left.Fundamental_V) * 100);
+            double minD3_left = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 2).Min(d => (d.Left.Harmonics[1].Amplitude_V / d.Left.Fundamental_V) * 100);
+            double minD4_left = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 3).Min(d => (d.Left.Harmonics[2].Amplitude_V / d.Left.Fundamental_V) * 100);
+            double minD5_left = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 4).Min(d => (d.Left.Harmonics[3].Amplitude_V / d.Left.Fundamental_V) * 100);
+            double minD6_left = MeasurementResult.AmplitudeSteps.Min(d => d.Left.ThdPercent_D6plus);
 
             double min = Math.Min(minThd_left, minD2_left);
             min = Math.Min(min, minD3_left);
             min = Math.Min(min, minD4_left);
             min = Math.Min(min, minD5_left);
 
-            double minThd_right = MeasurementResult.FrequencySteps.Min(d => (d.Right.Average_NoiseFloor_V / d.Right.Fundamental_V) * 100);
-            double minD2_right = MeasurementResult.FrequencySteps.Where(d => d.Right.Harmonics.Count >= 1).Min(d => (d.Right.Harmonics[0].Amplitude_V / d.Right.Fundamental_V) * 100);
-            double minD3_right = MeasurementResult.FrequencySteps.Where(d => d.Right.Harmonics.Count >= 2).Min(d => (d.Right.Harmonics[1].Amplitude_V / d.Right.Fundamental_V) * 100);
-            double minD4_right = MeasurementResult.FrequencySteps.Where(d => d.Right.Harmonics.Count >= 3).Min(d => (d.Right.Harmonics[2].Amplitude_V / d.Right.Fundamental_V) * 100);
-            double minD5_right = MeasurementResult.FrequencySteps.Where(d => d.Right.Harmonics.Count >= 4).Min(d => (d.Right.Harmonics[3].Amplitude_V / d.Right.Fundamental_V) * 100);
-            double minD6_right = MeasurementResult.FrequencySteps.Min(d => d.Right.ThdPercent_D6plus);
+            double minThd_right = MeasurementResult.AmplitudeSteps.Min(d => (d.Right.Average_NoiseFloor_V / d.Right.Fundamental_V) * 100);
+            double minD2_right = MeasurementResult.AmplitudeSteps.Where(d => d.Right.Harmonics.Count >= 1).Min(d => (d.Right.Harmonics[0].Amplitude_V / d.Right.Fundamental_V) * 100);
+            double minD3_right = MeasurementResult.AmplitudeSteps.Where(d => d.Right.Harmonics.Count >= 2).Min(d => (d.Right.Harmonics[1].Amplitude_V / d.Right.Fundamental_V) * 100);
+            double minD4_right = MeasurementResult.AmplitudeSteps.Where(d => d.Right.Harmonics.Count >= 3).Min(d => (d.Right.Harmonics[2].Amplitude_V / d.Right.Fundamental_V) * 100);
+            double minD5_right = MeasurementResult.AmplitudeSteps.Where(d => d.Right.Harmonics.Count >= 4).Min(d => (d.Right.Harmonics[3].Amplitude_V / d.Right.Fundamental_V) * 100);
+            double minD6_right = MeasurementResult.AmplitudeSteps.Min(d => d.Right.ThdPercent_D6plus);
 
             min = Math.Min(min, minThd_right);
             min = Math.Min(min, minD2_right);
@@ -2042,35 +1754,35 @@ namespace QA40x_AUDIO_ANALYSER
         private void btnFitDbGraphY_Click(object sender, EventArgs e)
         {
 
-            if (MeasurementResult.FrequencySteps.Count == 0)
+            if (MeasurementResult.AmplitudeSteps.Count == 0)
                 return;
 
             // Determine top Y
-            double maxGain_left = MeasurementResult.FrequencySteps.Max(d => d.Left.Gain_dB);
-            double maxGain_right = MeasurementResult.FrequencySteps.Max(d => d.Right.Gain_dB);
+            double maxGain_left = MeasurementResult.AmplitudeSteps.Max(d => d.Left.Gain_dB);
+            double maxGain_right = MeasurementResult.AmplitudeSteps.Max(d => d.Right.Gain_dB);
             double max = Math.Max(maxGain_left, maxGain_right);
             ud_dB_Graph_Top.Value = (Math.Ceiling((decimal)((int)max) / 10) * 10) + 20;
 
 
             // Determine bottom Y
-            double minDb_left = MeasurementResult.FrequencySteps.Min(d => d.Left.Average_NoiseFloor_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
-            double minD2_left = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 1).Min(d => d.Left.Harmonics[0].Amplitude_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
-            double minD3_left = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 2).Min(d => d.Left.Harmonics[1].Amplitude_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
-            double minD4_left = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 3).Min(d => d.Left.Harmonics[2].Amplitude_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
-            double minD5_left = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 4).Min(d => d.Left.Harmonics[3].Amplitude_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
-            double minD6_left = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 5).Min(d => d.Left.Harmonics[4].Amplitude_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
+            double minDb_left = MeasurementResult.AmplitudeSteps.Min(d => d.Left.Average_NoiseFloor_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
+            double minD2_left = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 1).Min(d => d.Left.Harmonics[0].Amplitude_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
+            double minD3_left = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 2).Min(d => d.Left.Harmonics[1].Amplitude_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
+            double minD4_left = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 3).Min(d => d.Left.Harmonics[2].Amplitude_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
+            double minD5_left = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 4).Min(d => d.Left.Harmonics[3].Amplitude_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
+            double minD6_left = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 5).Min(d => d.Left.Harmonics[4].Amplitude_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
 
             double min = Math.Min(minDb_left, minD2_left);
             min = Math.Min(min, minD3_left);
             min = Math.Min(min, minD4_left);
             min = Math.Min(min, minD5_left);
 
-            double minDb_right = MeasurementResult.FrequencySteps.Min(d => d.Left.Average_NoiseFloor_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
-            double minD2_right = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 1).Min(d => d.Left.Harmonics[0].Amplitude_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
-            double minD3_right = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 2).Min(d => d.Left.Harmonics[1].Amplitude_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
-            double minD4_right = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 3).Min(d => d.Left.Harmonics[2].Amplitude_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
-            double minD5_right = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 4).Min(d => d.Left.Harmonics[3].Amplitude_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
-            double minD6_right = MeasurementResult.FrequencySteps.Where(d => d.Left.Harmonics.Count >= 5).Min(d => d.Left.Harmonics[4].Amplitude_dBV) - MeasurementResult.FrequencySteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.FrequencySteps[0].Left.Gain_dB;
+            double minDb_right = MeasurementResult.AmplitudeSteps.Min(d => d.Left.Average_NoiseFloor_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
+            double minD2_right = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 1).Min(d => d.Left.Harmonics[0].Amplitude_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
+            double minD3_right = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 2).Min(d => d.Left.Harmonics[1].Amplitude_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
+            double minD4_right = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 3).Min(d => d.Left.Harmonics[2].Amplitude_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
+            double minD5_right = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 4).Min(d => d.Left.Harmonics[3].Amplitude_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
+            double minD6_right = MeasurementResult.AmplitudeSteps.Where(d => d.Left.Harmonics.Count >= 5).Min(d => d.Left.Harmonics[4].Amplitude_dBV) - MeasurementResult.AmplitudeSteps.Average(d => d.Left.Fundamental_dBV) + MeasurementResult.AmplitudeSteps[0].Left.Gain_dB;
 
             min = Math.Min(min, minDb_right);
             min = Math.Min(min, minD2_right);
@@ -2105,20 +1817,20 @@ namespace QA40x_AUDIO_ANALYSER
             switch ((int)GraphSettings.XAxisType)
             {
                 case 0:
-                    min_left = MeasurementResult.FrequencySteps.Min(v => v.Left.Fundamental_V);
-                    max_left = MeasurementResult.FrequencySteps.Max(v => v.Left.Fundamental_V);
-                    min_right = MeasurementResult.FrequencySteps.Min(v => v.Right.Fundamental_V);
-                    max_right = MeasurementResult.FrequencySteps.Max(v => v.Right.Fundamental_V);
+                    min_left = MeasurementResult.AmplitudeSteps.Min(v => v.Left.Fundamental_V);
+                    max_left = MeasurementResult.AmplitudeSteps.Max(v => v.Left.Fundamental_V);
+                    min_right = MeasurementResult.AmplitudeSteps.Min(v => v.Right.Fundamental_V);
+                    max_right = MeasurementResult.AmplitudeSteps.Max(v => v.Right.Fundamental_V);
                     break;
                 case 1:
-                    min_left = MeasurementResult.FrequencySteps.Min(v => v.Left.Power_Watt);
-                    max_left = MeasurementResult.FrequencySteps.Max(v => v.Left.Power_Watt);
-                    min_right = MeasurementResult.FrequencySteps.Min(v => v.Right.Power_Watt);
-                    max_right = MeasurementResult.FrequencySteps.Max(v => v.Right.Power_Watt);
+                    min_left = MeasurementResult.AmplitudeSteps.Min(v => v.Left.Power_Watt);
+                    max_left = MeasurementResult.AmplitudeSteps.Max(v => v.Left.Power_Watt);
+                    min_right = MeasurementResult.AmplitudeSteps.Min(v => v.Right.Power_Watt);
+                    max_right = MeasurementResult.AmplitudeSteps.Max(v => v.Right.Power_Watt);
                     break;
                 case 2:
-                    min_left = MeasurementResult.FrequencySteps.Min(v => v.GeneratorVoltage);
-                    max_left = MeasurementResult.FrequencySteps.Max(v => v.GeneratorVoltage);
+                    min_left = MeasurementResult.AmplitudeSteps.Min(v => v.GeneratorVoltage);
+                    max_left = MeasurementResult.AmplitudeSteps.Max(v => v.GeneratorVoltage);
                     break;
             }
             min = Math.Min(min_left, min_right);

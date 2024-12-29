@@ -14,7 +14,7 @@ namespace QA40x_AUDIO_ANALYSER
         public DateTime CreateDate { get; set; }                                        // Measurement date time
         public bool Show { get; set; }                                                  // Show in graph
         public bool Saved { get; set; }                                                 // Has been saved
-        public List<ThdFrequencyStep> FrequencySteps { get; set; }                      // Measurement data
+        public List<ThdAmplitudeStep> AmplitudeSteps { get; set; }                      // Measurement data
         public ThdAmplitudeMeasurementSettings MeasurementSettings { get; set; }        //  Settings used for this measurement
 
         [JsonIgnore]
@@ -22,7 +22,7 @@ namespace QA40x_AUDIO_ANALYSER
 
         public ThdAmplitudeMeasurementResult()
         {
-            FrequencySteps = [];
+            AmplitudeSteps = [];
             MeasurementSettings = new();
         }
     }

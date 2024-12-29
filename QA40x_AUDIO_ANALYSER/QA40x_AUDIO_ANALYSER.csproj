@@ -158,6 +158,7 @@
     <Compile Include="Data\ThdAmplitude\E_X_AxisType.cs" />
     <Compile Include="Data\ThdAmplitude\ThdAmplitudeGraphSettings.cs" />
     <Compile Include="Data\ThdAmplitude\ThdAmplitudeMeasurementResult.cs" />
+    <Compile Include="Data\ThdAmplitude\ThdAmplitudeStep.cs" />
     <Compile Include="Data\ThdFrequency\E_GeneratorType.cs" />
     <Compile Include="Data\ThdFrequency\E_ThdFreq_GraphType.cs" />
     <Compile Include="Data\E_VoltageUnit.cs" />

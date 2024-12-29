@@ -14,6 +14,7 @@ using QA40x_AUDIO_ANALYSER;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
+using System.Security.Policy;
 
 namespace QaControl
 {
@@ -256,30 +257,21 @@ namespace QaControl
         /// <returns>The attenuation in dB</returns>
         public static int DetermineAttenuation(double dBV)
         {
-            int attenuation = 42;
-            double testdBV = dBV + 5;       // Add 5 dBV extra for better thd measurement
-            // Determine attenuation needed
-            if (testdBV <= 0)
-                attenuation = 0;
-            else if (testdBV <= 6)
-                attenuation = 6;
-            else if (testdBV <= 12)
-                attenuation = 12;
-            else if (testdBV <= 18)
-                attenuation = 18;
-            else if (testdBV <= 24)
-                attenuation = 24;
-            else if (testdBV <= 30)
-                attenuation = 30;
-            else if (testdBV <= 36)
-                attenuation = 36;
-            else
-                attenuation = 42;
-
-            return attenuation;
+            double testdBV = dBV + 5; // Add 5 dBV extra for better thd measurement
+            if (testdBV <= 0) return 0;
+            if (testdBV <= 6) return 6;
+            if (testdBV <= 12) return 12;
+            if (testdBV <= 18) return 18;
+            if (testdBV <= 24) return 24;
+            if (testdBV <= 30) return 30;
+            if (testdBV <= 36) return 36;
+            return 42;
         }
 
-
+        /// <summary>
+        /// This method checks if the server is running by attempting to connect to it on localhost at port 9402.
+        /// </summary>
+        /// <returns></returns>
         public static bool IsServerRunning()
         {
             using (Socket socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -295,8 +287,6 @@ namespace QaControl
 
                 return resturnVal;
             }
-
-
         }
 
         static public async Task<bool> CheckDeviceConnected()
@@ -885,6 +875,7 @@ namespace QaControl
         {
             Clipboard.SetImage(bm);
         }
+
     }
 }           
     

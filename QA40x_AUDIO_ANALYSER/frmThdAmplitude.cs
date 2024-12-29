@@ -995,29 +995,43 @@ namespace QA40x_AUDIO_ANALYSER
 
                 if (showLeftChannel && measurementResult.MeasurementSettings.EnableLeftChannel)
                 {
-                    if (GraphSettings.ShowTHD) hTotY_left.Add(step.Left.Thd_Percent);
-                    if (GraphSettings.ShowD2) h2Y_left.Add(step.Left.Harmonics.ElementAtOrDefault(0)?.Thd_Percent ?? 0);
-                    if (GraphSettings.ShowD3) h3Y_left.Add(step.Left.Harmonics.ElementAtOrDefault(1)?.Thd_Percent ?? 0);
-                    if (GraphSettings.ShowD4) h4Y_left.Add(step.Left.Harmonics.ElementAtOrDefault(2)?.Thd_Percent ?? 0);
-                    if (GraphSettings.ShowD5) h5Y_left.Add(step.Left.Harmonics.ElementAtOrDefault(3)?.Thd_Percent ?? 0);
-                    if (GraphSettings.ShowD6) h6Y_left.Add(step.Left.ThdPercent_D6plus);
-                    if (GraphSettings.ShowNoiseFloor) noiseY_left.Add((step.Left.Average_NoiseFloor_V / step.Left.Fundamental_V) * 100);
+                    if (step.Left.Harmonics.Count > 0 && GraphSettings.ShowTHD)
+                        hTotY_left.Add(step.Left.Thd_Percent);
+                    if (step.Left.Harmonics.Count > 0 && GraphSettings.ShowD2)
+                        h2Y_left.Add(step.Left.Harmonics[0].Thd_Percent);
+                    if (step.Left.Harmonics.Count > 1 && GraphSettings.ShowD3)
+                        h3Y_left.Add(step.Left.Harmonics[1].Thd_Percent);
+                    if (step.Left.Harmonics.Count > 2 && GraphSettings.ShowD4)
+                        h4Y_left.Add(step.Left.Harmonics[2].Thd_Percent);
+                    if (step.Left.Harmonics.Count > 3 && GraphSettings.ShowD5)
+                        h5Y_left.Add(step.Left.Harmonics[3].Thd_Percent);
+                    if (step.Left.Harmonics.Count > 4 && step.Left.ThdPercent_D6plus != 0 && GraphSettings.ShowD6)
+                        h6Y_left.Add(step.Left.ThdPercent_D6plus);        // D6+
+                    if (GraphSettings.ShowNoiseFloor)
+                        noiseY_left.Add((step.Left.Average_NoiseFloor_V / step.Left.Fundamental_V) * 100);
                 }
 
                 if (showRightChannel && measurementResult.MeasurementSettings.EnableRightChannel)
                 {
-                    if (GraphSettings.ShowTHD) hTotY_right.Add(step.Right.Thd_Percent);
-                    if (GraphSettings.ShowD2) h2Y_right.Add(step.Right.Harmonics.ElementAtOrDefault(0)?.Thd_Percent ?? 0);
-                    if (GraphSettings.ShowD3) h3Y_right.Add(step.Right.Harmonics.ElementAtOrDefault(1)?.Thd_Percent ?? 0);
-                    if (GraphSettings.ShowD4) h4Y_right.Add(step.Right.Harmonics.ElementAtOrDefault(2)?.Thd_Percent ?? 0);
-                    if (GraphSettings.ShowD5) h5Y_right.Add(step.Right.Harmonics.ElementAtOrDefault(3)?.Thd_Percent ?? 0);
-                    if (GraphSettings.ShowD6) h6Y_right.Add(step.Right.ThdPercent_D6plus);
-                    if (GraphSettings.ShowNoiseFloor) noiseY_right.Add((step.Right.Average_NoiseFloor_V / step.Right.Fundamental_V) * 100);
+                    if (step.Right.Harmonics.Count > 0 && GraphSettings.ShowTHD)
+                        hTotY_right.Add(step.Right.Thd_Percent);
+                    if (step.Right.Harmonics.Count > 0 && GraphSettings.ShowD2)
+                        h2Y_right.Add(step.Right.Harmonics[0].Thd_Percent);
+                    if (step.Right.Harmonics.Count > 1 && GraphSettings.ShowD3)
+                        h3Y_right.Add(step.Right.Harmonics[1].Thd_Percent);
+                    if (step.Right.Harmonics.Count > 2 && GraphSettings.ShowD4)
+                        h4Y_right.Add(step.Right.Harmonics[2].Thd_Percent);
+                    if (step.Right.Harmonics.Count > 3 && GraphSettings.ShowD5)
+                        h5Y_right.Add(step.Right.Harmonics[3].Thd_Percent);
+                    if (step.Right.Harmonics.Count > 4 && step.Right.ThdPercent_D6plus != 0 && GraphSettings.ShowD6)
+                        h6Y_right.Add(step.Right.ThdPercent_D6plus);        // D6+
+                    if (GraphSettings.ShowNoiseFloor)
+                        noiseY_right.Add((step.Right.Average_NoiseFloor_V / step.Right.Fundamental_V) * 100);
                 }
             }
 
             var colors = new GraphColors();
-            float lineWidth = GraphSettings.ThickLines ? 1.8f : 1;
+            float lineWidth = GraphSettings.ThickLines ? 1.6f : 1;
             float markerSize = GraphSettings.ShowDataPoints ? lineWidth + 3 : 1;
 
             double[] logFreqX = freqX.Select(Math.Log10).ToArray();
@@ -1058,7 +1072,7 @@ namespace QA40x_AUDIO_ANALYSER
             }
 
             if (markerIndex != -1)
-                QaLibrary.PlotCursorMarker(thdPlot, 1, LinePattern.Solid, markerDataPoint);
+                QaLibrary.PlotCursorMarker(thdPlot, lineWidth, LinePattern.Solid, markerDataPoint);
 
             thdPlot.Refresh();
         }
@@ -1212,7 +1226,7 @@ namespace QA40x_AUDIO_ANALYSER
 
             // add a scatter plot to the plot
             double[] logFreqX = freqX.Select(Math.Log10).ToArray();
-            float lineWidth = GraphSettings.ThickLines ? 2 : 1;
+            float lineWidth = GraphSettings.ThickLines ? 1.6f : 1;
             float markerSize = GraphSettings.ShowDataPoints ? lineWidth + 3 : 1;
 
             var colors = new GraphColors();
@@ -1256,7 +1270,7 @@ namespace QA40x_AUDIO_ANALYSER
 
             // If marker selected draw marker line
             if (markerIndex != -1)
-                QaLibrary.PlotCursorMarker(thdPlot, 1, LinePattern.Solid, markerDataPoint);
+                QaLibrary.PlotCursorMarker(thdPlot, lineWidth, LinePattern.Solid, markerDataPoint);
 
             thdPlot.Refresh();
         }

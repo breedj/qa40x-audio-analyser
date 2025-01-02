@@ -5,6 +5,8 @@ An audio amplifier analyser program for the Quant Asylum QA40x series.
 
 ![{35BD0BD1-255D-47B4-AE39-6C635A449D2B}](https://github.com/user-attachments/assets/157ee6ab-7afb-4e40-bc64-7134debbda6e)
 
+![image](https://github.com/user-attachments/assets/7ac02e58-0fa7-4a78-aa42-2f42ed06aab3)
+
 **DONE:**
 - [x] THD vs frequency measurement
 - [x] Automatic determination of input attenuation
@@ -14,7 +16,8 @@ An audio amplifier analyser program for the Quant Asylum QA40x series.
 - [x] Autofitting if graph data
 - [x] Plotting of noise floor in graphs
 - [x] THD vs Output amplitude measurement
-- [x] Added right channel support to measurements 
+- [x] Added right channel support to measurements
+- [x] Added Frequency Response measurement with bandwidth analysis 
       
 **TODO:**
 - [ ] FFT with automatic peak search
@@ -29,7 +32,7 @@ An audio amplifier analyser program for the Quant Asylum QA40x series.
 
 ## INSTALLATION NOTES
 
-To install download the msi here: https://github.com/breedj/qa40x-audio-analyser/releases/download/V0.4/QA40xAudioAnalyserSetup.msi
+To install download the msi here: https://github.com/breedj/qa40x-audio-analyser/releases/download/V0.5/QA40xAudioAnalyserSetup.msi
 
 The applicaton requires .net framework 4.8.
 

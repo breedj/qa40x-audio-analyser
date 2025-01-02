@@ -7,6 +7,8 @@ An audio amplifier analyser program for the QuantAsylum QA40x series.
 
 ![image](https://github.com/user-attachments/assets/7ac02e58-0fa7-4a78-aa42-2f42ed06aab3)
 
+![image](https://github.com/user-attachments/assets/b3003300-b136-4545-9260-cc9436383a9a)
+
 **DONE:**
 - [x] THD vs frequency measurement
 - [x] Automatic determination of input attenuation

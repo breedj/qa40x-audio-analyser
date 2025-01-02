@@ -1,5 +1,5 @@
 # qa40x-audio-analyser
-An audio amplifier analyser program for the Quant Asylum QA40x series.
+An audio amplifier analyser program for the QuantAsylum QA40x series.
 
 ![{CC259019-3909-43AA-BC9D-5B96E9AE9685}](https://github.com/user-attachments/assets/c979e4ae-1325-40b0-8e2a-dd537c14313d)
 

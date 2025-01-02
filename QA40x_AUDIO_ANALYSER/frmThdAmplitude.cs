@@ -354,7 +354,7 @@ namespace QA40x_AUDIO_ANALYSER
         async Task<bool> PerformMeasurementSteps(CancellationToken ct)
         {
 
-            //ClearPlot();
+            ClearPlot();
             ClearCursorTexts();
 
             var _measurementSettings = MeasurementSettings.Copy();             // Create snapshot so it is not changed during measuring
@@ -404,11 +404,11 @@ namespace QA40x_AUDIO_ANALYSER
 
             double testFrequency = QaLibrary.GetNearestBinFrequency(_measurementSettings.Frequency, _measurementSettings.SampleRate, _measurementSettings.FftSize);
             // Determine correct input attenuation
-            var result = await QaLibrary.DetermineAttenuationForGeneratorVoltage(generatorAmplitudedBV, testFrequency, 42, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel, ct);
+            var result = await QaLibrary.DetermineAttenuationForGeneratorVoltageWithChirp(generatorAmplitudedBV, 42, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel, ct);
             if (ct.IsCancellationRequested)
                 return false;
             QaLibrary.PlotMiniFftGraph(graphFft, result.Item3.FreqInput, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel);
-            QaLibrary.PlotMiniTimeGraph(graphTime, result.Item3.TimeInput, testFrequency, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel);
+            QaLibrary.PlotMiniTimeGraph(graphTime, result.Item3.TimeInput, testFrequency, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel, true);
             var prevInputAmplitudedBV = result.Item2;
             
 
@@ -751,7 +751,7 @@ namespace QA40x_AUDIO_ANALYSER
             else
                 lblCursor_Power_L.Text = $"{power:0.00# W} ({load:0.##} Ω)";
 
-            lblCursor_NoiseFloor_L.Text = $"{noiseFloor:0.00000 \\%}";
+            lblCursor_NoiseFloor_L.Text = $"{noiseFloor:0.000000 \\%}";
             scGraphCursors.Panel2.Refresh();
         }
 
@@ -779,7 +779,7 @@ namespace QA40x_AUDIO_ANALYSER
             else
                 lblCursor_Power_R.Text = $"{power:0.00# W} ({load:0.##} Ω)";
 
-            lblCursor_NoiseFloor_R.Text = $"{noiseFloor:0.00000 \\%}";
+            lblCursor_NoiseFloor_R.Text = $"{noiseFloor:0.000000 \\%}";
             scGraphCursors.Panel2.Refresh();
         }
 
@@ -870,7 +870,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// <summary>
         /// Clear the plot
         /// </summary>
-        void clearPlot()
+        void ClearPlot()
         {
             thdPlot.Plot.Clear();
             thdPlot.Refresh();
@@ -1318,7 +1318,7 @@ namespace QA40x_AUDIO_ANALYSER
             };
 
             // Mouse is leaving the graph
-            thdPlot.MouseLeave += (s, e) =>
+            thdPlot.SKControl.MouseLeave += (s, e) =>
             {
                 // If persistent marker set then show mini plots of that marker
                 if (markerIndex >= 0)
@@ -1349,7 +1349,7 @@ namespace QA40x_AUDIO_ANALYSER
             DataPoint nearest1 = thdPlot.Plot.GetPlottables<Scatter>().First().Data.GetNearestX(mouseLocation, thdPlot.Plot.LastRender);
 
             // place the crosshair over the highlighted point
-            if (nearest1.IsReal)
+            if (nearest1.IsReal && MeasurementResult.AmplitudeSteps.Count > nearest1.Index)
             {
                 QaLibrary.PlotMiniFftGraph(graphFft, MeasurementResult.AmplitudeSteps[nearest1.Index].fftData, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
                 QaLibrary.PlotMiniTimeGraph(graphTime, MeasurementResult.AmplitudeSteps[nearest1.Index].timeData, MeasurementResult.AmplitudeSteps[nearest1.Index].FundamentalFrequency, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
@@ -1408,7 +1408,7 @@ namespace QA40x_AUDIO_ANALYSER
                 {
                     // Mouse hoover
                     if (markerIndex != -1)
-                        return;                     // Do not show new marker. There is already a clicked marker
+                        return;                                 // Do not show new marker. There is already a clicked marker
                 }
 
                 QaLibrary.PlotCursorMarker(thdPlot, lineWidth, linePattern, nearest1);
@@ -1762,7 +1762,6 @@ namespace QA40x_AUDIO_ANALYSER
                 cmbD_Graph_Bottom.SelectedIndex = 4;
             else
                 cmbD_Graph_Bottom.SelectedIndex = 5;
-
         }
 
         private void btnFitDbGraphY_Click(object sender, EventArgs e)
@@ -1849,7 +1848,8 @@ namespace QA40x_AUDIO_ANALYSER
             }
             min = Math.Min(min_left, min_right);
             max = Math.Max(max_left, max_right);
-            
+
+
             if (min < 0.0002)
                 cmbGraph_VoltageStart.SelectedIndex = 0;
             else if (min < 0.0005)
@@ -1876,7 +1876,7 @@ namespace QA40x_AUDIO_ANALYSER
                 cmbGraph_VoltageStart.SelectedIndex = 11;
 
 
-            
+
             if (max <= 1)
                 cmbGraph_VoltageEnd.SelectedIndex = 0;
             else if (max <= 2)
@@ -1929,13 +1929,57 @@ namespace QA40x_AUDIO_ANALYSER
 
         private void ud_dB_Graph_Top_ValueChanged(object sender, EventArgs e)
         {
+            // Prevent top lower than bottom
+            if (ud_dB_Graph_Top.Value - ud_dB_Graph_Bottom.Value < 1)
+            {
+                ud_dB_Graph_Top.Value = ud_dB_Graph_Bottom.Value + 1;
+            }
+
+            // Change increment when top and bottom closer together
             GraphSettings.DbRangeTop = (double)ud_dB_Graph_Top.Value;
+            if (GraphSettings.DbRangeTop - GraphSettings.DbRangeBottom < 20)
+            {
+                ud_dB_Graph_Top.Increment = 1;
+                ud_dB_Graph_Bottom.Increment = 1;
+            }
+            else if (GraphSettings.DbRangeTop - GraphSettings.DbRangeBottom < 50)
+            {
+                ud_dB_Graph_Top.Increment = 5;
+                ud_dB_Graph_Bottom.Increment = 5;
+            }
+            else
+            {
+                ud_dB_Graph_Top.Increment = 10;
+                ud_dB_Graph_Bottom.Increment = 10;
+            }
             UpdateGraph(true);
         }
 
         private void ud_dB_Graph_Bottom_ValueChanged(object sender, EventArgs e)
         {
+            // Prevent bottom higher than top
+            if (ud_dB_Graph_Top.Value - ud_dB_Graph_Bottom.Value < 1)
+            {
+                ud_dB_Graph_Bottom.Value = ud_dB_Graph_Top.Value - 1;
+            }
+
+            // Change increment when top and bottom closer together
             GraphSettings.DbRangeBottom = (double)ud_dB_Graph_Bottom.Value;
+            if (GraphSettings.DbRangeTop - GraphSettings.DbRangeBottom < 20)
+            {
+                ud_dB_Graph_Top.Increment = 1;
+                ud_dB_Graph_Bottom.Increment = 1;
+            }
+            else if (GraphSettings.DbRangeTop - GraphSettings.DbRangeBottom < 50)
+            {
+                ud_dB_Graph_Top.Increment = 5;
+                ud_dB_Graph_Bottom.Increment = 5;
+            }
+            else
+            {
+                ud_dB_Graph_Top.Increment = 10;
+                ud_dB_Graph_Bottom.Increment = 10;
+            }
             UpdateGraph(true);
         }
 

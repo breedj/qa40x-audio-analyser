@@ -343,7 +343,7 @@ namespace QA402_AUDIO_ANALYSER
 
         static double[] ConvertBase64ToDoubles(string base64DoubleArray)
         {
-            byte[] byteArray = Convert.FromBase64String(base64DoubleArray);
+            byte[] byteArray = Convert.FromBase64String(base64DoubleArray); 
             double[] doubleArray = new double[byteArray.Length / sizeof(double)];
             Buffer.BlockCopy(byteArray, 0, doubleArray, 0, byteArray.Length);
             return doubleArray;

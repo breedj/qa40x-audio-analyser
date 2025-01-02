@@ -113,6 +113,7 @@ namespace QA40x_AUDIO_ANALYSER
                 new (10, "10"),
                 new (20, "20"),
                 new (50, "50"),
+                new (100, "100"),
                 new (200, "200"),
                 new (500, "500")
             };
@@ -327,7 +328,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// <returns>result. false if cancelled</returns>
         async Task<bool> PerformMeasurementSteps(CancellationToken ct)
         {
-            //ClearPlot();
+            ClearPlot();
             ClearCursorTexts();
                         
             var _measurementSettings = MeasurementSettings.Copy();             // Create snapshot so it is not changed during measuring
@@ -385,13 +386,13 @@ namespace QA40x_AUDIO_ANALYSER
                     // Get input voltage based on desired output voltage
                     _measurementSettings.InputRange = QaLibrary.DetermineAttenuation(amplifierOutputVoltagedBV);
                     double startAmplitude = -40;  // We start a measurement with a 10 mV signal.
-                    var result = await QaLibrary.DetermineGenAmplitudeByOutputAmplitude(testFrequency, startAmplitude, amplifierOutputVoltagedBV, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel, ct);
+                    var result = await QaLibrary.DetermineGenAmplitudeByOutputAmplitudeWithChirp(startAmplitude, amplifierOutputVoltagedBV, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel, ct);
                     if (ct.IsCancellationRequested)
                         return false;
                     _measurementSettings.GeneratorAmplitude = result.Item1;
                     _measurementSettings.GeneratorAmplitudeUnit = E_VoltageUnit.dBV;
                     QaLibrary.PlotMiniFftGraph(graphFft, result.Item2.FreqInput, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);                                             // Plot fft data in mini graph
-                    QaLibrary.PlotMiniTimeGraph(graphTime, result.Item2.TimeInput, testFrequency, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);                                      // Plot time data in mini graph
+                    QaLibrary.PlotMiniTimeGraph(graphTime, result.Item2.TimeInput, testFrequency, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel, true);                                      // Plot time data in mini graph
                     if (_measurementSettings.GeneratorAmplitude == -150)
                     {
                         await Program.MainForm.ShowMessage($"Could not determine a valid generator amplitude. The amplitude would be {_measurementSettings.GeneratorAmplitude:0.00#} dBV.");
@@ -408,12 +409,12 @@ namespace QA40x_AUDIO_ANALYSER
                         await Program.MainForm.ShowMessage($"Found an input amplitude of {_measurementSettings.GeneratorAmplitude:0.00#} dBV. Doing second pass.");
 
                         // 2nd time for extra accuracy
-                        result = await QaLibrary.DetermineGenAmplitudeByOutputAmplitude(testFrequency, _measurementSettings.GeneratorAmplitude, amplifierOutputVoltagedBV, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel, ct);
+                        result = await QaLibrary.DetermineGenAmplitudeByOutputAmplitudeWithChirp(_measurementSettings.GeneratorAmplitude, amplifierOutputVoltagedBV, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel, ct);
                         if (ct.IsCancellationRequested)
                             return false;
                         _measurementSettings.GeneratorAmplitude = result.Item1;
                         QaLibrary.PlotMiniFftGraph(graphFft, result.Item2.FreqInput, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);                                             // Plot fft data in mini graph
-                        QaLibrary.PlotMiniTimeGraph(graphTime, result.Item2.TimeInput, testFrequency, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);                                      // Plot time data in mini graph
+                        QaLibrary.PlotMiniTimeGraph(graphTime, result.Item2.TimeInput, testFrequency, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel, true);                                      // Plot time data in mini graph
                         if (_measurementSettings.GeneratorAmplitude == -150)
                         {
                             await Program.MainForm.ShowMessage($"Could not determine a valid generator amplitude. The amplitude would be {_measurementSettings.GeneratorAmplitude:0.00#} dBV.");
@@ -431,12 +432,12 @@ namespace QA40x_AUDIO_ANALYSER
                     await Program.MainForm.ShowMessage($"Determining the best input attenuation for a generator voltage of {genVoltagedBV:0.00#} dBV.");
 
                     // Determine correct input attenuation
-                    var result = await QaLibrary.DetermineAttenuationForGeneratorVoltage(genVoltagedBV, testFrequency, QaLibrary.MAXIMUM_DEVICE_ATTENUATION, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel, ct);
+                    var result = await QaLibrary.DetermineAttenuationForGeneratorVoltageWithChirp(genVoltagedBV, QaLibrary.MAXIMUM_DEVICE_ATTENUATION, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel, ct);
                     if (ct.IsCancellationRequested)
                         return false;
                     _measurementSettings.InputRange = result.Item1;
                     QaLibrary.PlotMiniFftGraph(graphFft, result.Item3.FreqInput, _measurementSettings.EnableLeftChannel, _measurementSettings.EnableRightChannel);
-                    QaLibrary.PlotMiniTimeGraph(graphTime, result.Item3.TimeInput, testFrequency, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
+                    QaLibrary.PlotMiniTimeGraph(graphTime, result.Item3.TimeInput, testFrequency, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel, true);
 
                     await Program.MainForm.ShowMessage($"Found correct input attenuation of {_measurementSettings.InputRange:0} dBV for an amplfier amplitude of {result.Item2:0.00#} dBV.", 500);
                 }
@@ -720,7 +721,7 @@ namespace QA40x_AUDIO_ANALYSER
             else
                 lblCursor_Power_L.Text = $"{power:0.00# W} ({load:0.##} Ω)";
 
-            lblCursor_NoiseFloor_L.Text = $"{noiseFloor:0.00000 \\%}";
+            lblCursor_NoiseFloor_L.Text = $"{noiseFloor:0.000000 \\%}";
 
             lblCursor_Frequency.Refresh();
             pnlCursorsLeft.Refresh();
@@ -743,7 +744,7 @@ namespace QA40x_AUDIO_ANALYSER
             else
                 lblCursor_Power_R.Text = $"{power:0.00# W} ({load:0.##} Ω)";
 
-            lblCursor_NoiseFloor_R.Text = $"{noiseFloor:0.00000 \\%}";
+            lblCursor_NoiseFloor_R.Text = $"{noiseFloor:0.000000 \\%}";
 
             lblCursor_Frequency.Refresh();
             pnlCursorsRight.Refresh();
@@ -1282,7 +1283,7 @@ namespace QA40x_AUDIO_ANALYSER
             };
 
             // Mouse is leaving the graph
-            thdPlot.MouseLeave += (s, e) =>
+            thdPlot.SKControl.MouseLeave += (s, e) =>
             {
                 // If persistent marker set then show mini plots of that marker
                 if (markerIndex >= 0)
@@ -1312,7 +1313,7 @@ namespace QA40x_AUDIO_ANALYSER
             DataPoint nearest1 = thdPlot.Plot.GetPlottables<Scatter>().First().Data.GetNearestX(mouseLocation, thdPlot.Plot.LastRender);
 
             // place the crosshair over the highlighted point
-            if (nearest1.IsReal)
+            if (nearest1.IsReal && MeasurementResult.FrequencySteps.Count > nearest1.Index)
             {
                 QaLibrary.PlotMiniFftGraph(graphFft, MeasurementResult.FrequencySteps[nearest1.Index].fftData, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
                 QaLibrary.PlotMiniTimeGraph(graphTime, MeasurementResult.FrequencySteps[nearest1.Index].timeData, MeasurementResult.FrequencySteps[nearest1.Index].FundamentalFrequency, MeasurementResult.MeasurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, MeasurementResult.MeasurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
@@ -1954,13 +1955,57 @@ namespace QA40x_AUDIO_ANALYSER
 
         private void ud_dB_Graph_Top_ValueChanged(object sender, EventArgs e)
         {
+            // Prevent top lower than bottom
+            if (ud_dB_Graph_Top.Value - ud_dB_Graph_Bottom.Value < 1)
+            {
+                ud_dB_Graph_Top.Value = ud_dB_Graph_Bottom.Value + 1;
+            }
+
+            // Change increment when top and bottom closer together
             GraphSettings.DbRangeTop = (double)ud_dB_Graph_Top.Value;
+            if (GraphSettings.DbRangeTop - GraphSettings.DbRangeBottom < 20)
+            {
+                ud_dB_Graph_Top.Increment = 1;
+                ud_dB_Graph_Bottom.Increment = 1;
+            }
+            else if (GraphSettings.DbRangeTop - GraphSettings.DbRangeBottom < 50)
+            {
+                ud_dB_Graph_Top.Increment = 5;
+                ud_dB_Graph_Bottom.Increment = 5;
+            }
+            else
+            {
+                ud_dB_Graph_Top.Increment = 10;
+                ud_dB_Graph_Bottom.Increment = 10;
+            }
             UpdateGraph(true);
         }
 
         private void ud_dB_Graph_Bottom_ValueChanged(object sender, EventArgs e)
         {
+            // Prevent bottom higher than top
+            if (ud_dB_Graph_Top.Value - ud_dB_Graph_Bottom.Value < 1)
+            {
+                ud_dB_Graph_Bottom.Value = ud_dB_Graph_Top.Value - 1;
+            }
+
+            // Change increment when top and bottom closer together
             GraphSettings.DbRangeBottom = (double)ud_dB_Graph_Bottom.Value;
+            if (GraphSettings.DbRangeTop - GraphSettings.DbRangeBottom < 20)
+            {
+                ud_dB_Graph_Top.Increment = 1;
+                ud_dB_Graph_Bottom.Increment = 1;
+            }
+            else if (GraphSettings.DbRangeTop - GraphSettings.DbRangeBottom < 50)
+            {
+                ud_dB_Graph_Top.Increment = 5;
+                ud_dB_Graph_Bottom.Increment = 5;
+            }
+            else
+            {
+                ud_dB_Graph_Top.Increment = 10;
+                ud_dB_Graph_Bottom.Increment = 10;
+            }
             UpdateGraph(true);
         }
 

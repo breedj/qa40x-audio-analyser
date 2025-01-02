@@ -506,9 +506,9 @@
             this.lblGeneratorType.ForeColor = System.Drawing.SystemColors.ControlText;
             this.lblGeneratorType.Location = new System.Drawing.Point(15, 22);
             this.lblGeneratorType.Name = "lblGeneratorType";
-            this.lblGeneratorType.Size = new System.Drawing.Size(73, 13);
+            this.lblGeneratorType.Size = new System.Drawing.Size(85, 13);
             this.lblGeneratorType.TabIndex = 9;
-            this.lblGeneratorType.Text = "Set Generator";
+            this.lblGeneratorType.Text = "Set generator by";
             // 
             // cmbGeneratorType
             // 

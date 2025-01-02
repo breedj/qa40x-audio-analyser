@@ -209,42 +209,51 @@ namespace QaControl
             return binnedFrequencies;
         }
 
-        static public async Task<LeftRightSeries> DoAcquisitions(uint averages, CancellationToken ct)
+        static public async Task<LeftRightSeries> DoAcquisitions(uint averages, CancellationToken ct, bool getFrequencySeries = true, bool getTimeSeries = true)
         {
             LeftRightSeries leftRightSeries = new LeftRightSeries();
 
             await Qa40x.DoAcquisition();
             if (ct.IsCancellationRequested)
                 return null;
-            leftRightSeries.FreqInput = await Qa40x.GetInputFrequencySeries();
-            if (ct.IsCancellationRequested)
-                return null;
-            leftRightSeries.TimeInput = await Qa40x.GetInputTimeSeries();
-            if (ct.IsCancellationRequested)
-                return null;
+            if (getFrequencySeries)
+            {
+                leftRightSeries.FreqInput = await Qa40x.GetInputFrequencySeries();
+                if (ct.IsCancellationRequested)
+                    return null;
+            }
+            if (getTimeSeries)
+            {
+                leftRightSeries.TimeInput = await Qa40x.GetInputTimeSeries();
+                if (ct.IsCancellationRequested)
+                    return null;
+            }
 
             if (averages <= 1)
                 return leftRightSeries;        // Only one measurement
 
-            for (int i = 1; i < averages; i++)
+            if (getFrequencySeries)
             {
-                await Qa40x.DoAcquisition();
-                if (ct.IsCancellationRequested)
-                    return null;
-                LeftRightSeries leftRightSeries2 = new LeftRightSeries();
-                leftRightSeries2.FreqInput = await Qa40x.GetInputFrequencySeries();
-      
-                for (int j = 0; j < leftRightSeries2.FreqInput.Left.Length; j++)
+                for (int i = 1; i < averages; i++)
                 {
-                    leftRightSeries.FreqInput.Left[j] += leftRightSeries2.FreqInput.Left[j];
-                    leftRightSeries.FreqInput.Right[j] += leftRightSeries2.FreqInput.Right[j];
-                }
-            }
+                    await Qa40x.DoAcquisition();
+                    if (ct.IsCancellationRequested)
+                        return null;
+                    LeftRightSeries leftRightSeries2 = new LeftRightSeries();
+                    leftRightSeries2.FreqInput = await Qa40x.GetInputFrequencySeries();
 
-            for (int j = 0; j < leftRightSeries.FreqInput.Left.Length; j++)
-            {
-                leftRightSeries.FreqInput.Left[j] = leftRightSeries.FreqInput.Left[j] / averages;
-                leftRightSeries.FreqInput.Right[j] = leftRightSeries.FreqInput.Right[j] / averages;
+                    for (int j = 0; j < leftRightSeries2.FreqInput.Left.Length; j++)
+                    {
+                        leftRightSeries.FreqInput.Left[j] += leftRightSeries2.FreqInput.Left[j];
+                        leftRightSeries.FreqInput.Right[j] += leftRightSeries2.FreqInput.Right[j];
+                    }
+                }
+
+                for (int j = 0; j < leftRightSeries.FreqInput.Left.Length; j++)
+                {
+                    leftRightSeries.FreqInput.Left[j] = leftRightSeries.FreqInput.Left[j] / averages;
+                    leftRightSeries.FreqInput.Right[j] = leftRightSeries.FreqInput.Right[j] / averages;
+                }
             }
 
             return leftRightSeries;
@@ -323,7 +332,7 @@ namespace QaControl
         /// <param name="testFrequency">The generator frequency</param>
         /// <param name="testAttenuation">The test attenuation</param>
         /// <returns>The attanuation determined by the test</returns>
-        public static async Task<(int, double, LeftRightSeries)> DetermineAttenuationForGeneratorVoltage(double voltageDbv, double testFrequency, int testAttenuation, bool leftChannelEnable, bool rightChannelEnabled, CancellationToken ct)
+        public static async Task<(int, double, LeftRightSeries)> DetermineAttenuationForGeneratorVoltageWithSine(double voltageDbv, double testFrequency, int testAttenuation, bool leftChannelEnable, bool rightChannelEnabled, CancellationToken ct)
         {
             await Qa40x.SetInputRange(testAttenuation);                         // Set input range to initial range
             await Qa40x.SetGen1(testFrequency, voltageDbv, true);               // Enable generator at set voltage
@@ -348,12 +357,56 @@ namespace QaControl
 
 
         /// <summary>
+        /// Determine the best attenuation for the input amplitude
+        /// </summary>
+        /// <param name="voltageDbv">The generator voltage</param>
+        /// <param name="testFrequency">The generator frequency</param>
+        /// <param name="testAttenuation">The test attenuation</param>
+        /// <returns>The attanuation determined by the test</returns>
+        public static async Task<(int, double, LeftRightSeries)> DetermineAttenuationForGeneratorVoltageWithChirp(double voltageDbv, int testAttenuation, bool leftChannelEnabled, bool rightChannelEnabled, CancellationToken ct)
+        {
+            await Qa40x.SetInputRange(testAttenuation);                         // Set input range to initial range
+            await Qa40x.SetExpoChirpGen(voltageDbv, 0, 28, false);
+            await Qa40x.SetOutputSource(OutputSources.ExpoChirp);
+            LeftRightSeries acqData = await DoAcquisitions(1, ct);        // Do acquisition
+
+            DetermineAttenuationFromLeftRightSeriesData(leftChannelEnabled, rightChannelEnabled, acqData, out double peak_dBV, out int attenuation);
+            await Qa40x.SetOutputSource(OutputSources.Off);                     // Disable generator
+
+            return (attenuation, peak_dBV, acqData);       // Return attenuation, measured amplitude in dBV and acquisition data
+        }
+
+        public static bool DetermineAttenuationFromLeftRightSeriesData(bool leftChannelEnabled, bool rightChannelEnabled, LeftRightSeries acqData, out double peak_dBV, out int attenuation)
+        {
+            if (acqData == null || acqData.FreqInput == null)
+            {
+                peak_dBV = 0;
+                attenuation = 42;
+                return false;
+            }
+
+            // Determine highest channel value
+            double peak_left = -150;
+            double peak_right = -150;
+            if (leftChannelEnabled)
+                peak_left = acqData.TimeInput.Left.Max();
+            if (rightChannelEnabled)
+                peak_right = acqData.TimeInput.Right.Max();
+
+            peak_dBV = 20 * Math.Log10(Math.Max(peak_left, peak_right));
+            attenuation = DetermineAttenuation(peak_dBV);
+
+            return true;
+        }
+
+
+        /// <summary>
         /// Determine the generator voltage in dBV for the desired output voltage
         /// </summary>
         /// <param name="startGeneratorAmplitude">The amplitude to start with. Should be small but the output should be detectable</param>
         /// <param name="desiredOutputAmplitude">The desired output amplitude</param>
         /// <returns>Generator amplitude in dBV</returns>
-        public static async Task<(double, LeftRightSeries)> DetermineGenAmplitudeByOutputAmplitude(double testFrequency, double startGeneratorAmplitude, double desiredOutputAmplitude, bool leftChannelEnable, bool rightChannelEnabled, CancellationToken ct)
+        public static async Task<(double, LeftRightSeries)> DetermineGenAmplitudeByOutputAmplitudeWithSine(double testFrequency, double startGeneratorAmplitude, double desiredOutputAmplitude, bool leftChannelEnable, bool rightChannelEnabled, CancellationToken ct)
         {
             await Qa40x.SetGen1(testFrequency, startGeneratorAmplitude, true);           // Enable generator with start amplitude at 1 kHz
             await Qa40x.SetOutputSource(OutputSources.Sine);                    // Set sine wave
@@ -399,6 +452,63 @@ namespace QaControl
 
             return (amplitude, acqData);       // Return the new generator amplitude and acquisition data
         }
+
+
+        /// <summary>
+        /// Determine the generator voltage in dBV for the desired output voltage
+        /// </summary>
+        /// <param name="startGeneratorAmplitude">The amplitude to start with. Should be small but the output should be detectable</param>
+        /// <param name="desiredOutputAmplitude">The desired output amplitude</param>
+        /// <returns>Generator amplitude in dBV</returns>
+        public static async Task<(double, LeftRightSeries)> DetermineGenAmplitudeByOutputAmplitudeWithChirp(double startGeneratorAmplitude, double desiredOutputAmplitude, bool leftChannelEnabled, bool rightChannelEnabled, CancellationToken ct)
+        {
+            await Qa40x.SetExpoChirpGen(startGeneratorAmplitude, 0, 48, false);
+            await Qa40x.SetOutputSource(OutputSources.ExpoChirp);                    // Set sine wave
+            LeftRightSeries acqData = await DoAcquisitions(1, ct);            // Do a single aqcuisition
+            if (acqData == null || acqData.FreqInput == null)
+                return (150, null);
+
+            // Determine highest channel value
+            double peak_left = -150;
+            double peak_right = -150;
+            if (leftChannelEnabled)
+                peak_left = acqData.FreqInput.Left.Max();
+            if (rightChannelEnabled)
+                peak_right = acqData.FreqInput.Right.Max();
+
+            double peak_dBV = 20 * Math.Log10(Math.Max(peak_left, peak_right));
+
+            double amplitude = startGeneratorAmplitude + (desiredOutputAmplitude - peak_dBV);    // Determine amplitude for desired output amplitude based on measurement
+                                                                                                 // Check if amplitude not too high or too low.
+            if (amplitude >= 18)
+            {
+                // Display a message box with OK and Cancel buttons
+                DialogResult result = MessageBox.Show(
+                    "The generator will be set to its maximum amplitude.\nDo you want to proceed?",          // Message
+                    "Maximum generator amplitude",                    // Title
+                    MessageBoxButtons.OKCancel,        // Buttons
+                    MessageBoxIcon.Question            // Icon
+                );
+
+                // Check which button was clicked
+                if (result == DialogResult.OK)
+                {
+                    return (18, acqData);
+                }
+                else if (result == DialogResult.Cancel)
+                {
+                    return (-150, acqData);
+                }
+            }
+            else if (amplitude <= -60)
+            {
+                MessageBox.Show("Check if the amplifier is connected and switched on.", "Could not determine amplitude", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return (-150, acqData);
+            }
+
+            return (amplitude, acqData);       // Return the new generator amplitude and acquisition data
+        }
+
 
 
         public static double ConvertVoltage(double voltage, E_VoltageUnit fromUnit, E_VoltageUnit toUnit)
@@ -662,7 +772,7 @@ namespace QaControl
             List<double> dBV_Right_Y = [];
             double frequency = 0;
 
-            for (int f = 0; f < fftData.Left.Length; f++)
+            for (int f = 1; f < fftData.Left.Length; f++)   // Skip dc bin
             {
                 frequency += fftData.Df;
                 freqX.Add(frequency);
@@ -761,7 +871,7 @@ namespace QaControl
         }
 
 
-        public static void PlotMiniTimeGraph(FormsPlot plot, LeftRightTimeSeries timeData, double fundamantalFrequency, bool leftChannelEnabled, bool rightChannelEnabled)
+        public static void PlotMiniTimeGraph(FormsPlot plot, LeftRightTimeSeries timeData, double fundamantalFrequency, bool leftChannelEnabled, bool rightChannelEnabled, bool plotChirp = false)
         {
             plot.Plot.Clear();
 
@@ -769,6 +879,7 @@ namespace QaControl
             List<double> voltY_left = [];
             List<double> voltY_right = [];
             double time = 0;
+            double displaySteps = 0;
 
             double period = 1 / fundamantalFrequency;
             double displayTime = period * 1;
@@ -781,33 +892,43 @@ namespace QaControl
 
             // Get first zero-crossing
             int startStep = 0;
-            if (leftChannelEnabled)
+            if (!plotChirp)
             {
-                for (int f = 1; f < timeData.Left.Length; f++)
+                if (leftChannelEnabled)
                 {
-                    if (timeData.Left[f - 1] < 0 && timeData.Left[f] >= 0)
+                    for (int f = 1; f < timeData.Left.Length; f++)
                     {
-                        startStep = f;
-                        break;
+                        if (timeData.Left[f - 1] < 0 && timeData.Left[f] >= 0)
+                        {
+                            startStep = f;
+                            break;
+                        }
                     }
                 }
+                else
+                {
+                    for (int f = 1; f < timeData.Right.Length; f++)
+                    {
+                        if (timeData.Right[f - 1] < 0 && timeData.Right[f] >= 0)
+                        {
+                            startStep = f;
+                            break;
+                        }
+                    }
+                }
+
+                // Determine start index of array at zero-crossing
+                displaySteps = (displayTime / timeData.dt);
+                if (displaySteps > timeData.Left.Length)
+                    displaySteps = timeData.Left.Length;
             }
             else
             {
-                for (int f = 1; f < timeData.Right.Length; f++)
-                {
-                    if (timeData.Right[f - 1] < 0 && timeData.Right[f] >= 0)
-                    {
-                        startStep = f;
-                        break;
-                    }
-                }
+                // Plot Chirp. Plot half the data.
+                startStep = 0;
+                displaySteps = timeData.Left.Length / 2;
             }
 
-            // Determine start index of array at zero-crossing
-            double displaySteps = (displayTime / timeData.dt);
-            if (displaySteps > timeData.Left.Length)
-                displaySteps = timeData.Left.Length;
 
             double maxVolt = 0;
             for (int f = startStep; f < startStep + displaySteps; f++)
@@ -861,6 +982,9 @@ namespace QaControl
 
             plot.Refresh();
         }
+
+
+
 
 
         public static System.Drawing.Image CopyControlToImage(Control theControl)

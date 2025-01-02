@@ -154,6 +154,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\FrequencyResponse\E_FrequencyResponse_GraphType.cs" />
+    <Compile Include="Data\FrequencyResponse\E_FrequencyResponse_Reference.cs" />
+    <Compile Include="Data\FrequencyResponse\FrequencyResponseData.cs" />
+    <Compile Include="Data\FrequencyResponse\FrequencyResponseGraphSettings.cs" />
+    <Compile Include="Data\FrequencyResponse\FrequencyResponseMeasurementResult.cs" />
+    <Compile Include="Data\FrequencyResponse\FrequencyResponseMeasurementSettings.cs" />
     <Compile Include="Data\ThdAmplitude\E_ThdAmplitude_GraphType.cs" />
     <Compile Include="Data\ThdAmplitude\E_X_AxisType.cs" />
     <Compile Include="Data\ThdAmplitude\ThdAmplitudeGraphSettings.cs" />
@@ -175,6 +181,12 @@
     </Compile>
     <Compile Include="frmMain.Designer.cs">
       <DependentUpon>frmMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmFrequencyResponse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmFrequencyResponse.Designer.cs">
+      <DependentUpon>frmFrequencyResponse.cs</DependentUpon>
     </Compile>
     <Compile Include="frmThdAmplitude.cs">
       <SubType>Form</SubType>
@@ -199,6 +211,9 @@
     <Compile Include="Data\ThdFrequency\ThdFrequencyData.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmFrequencyResponse.resx">
+      <DependentUpon>frmFrequencyResponse.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmThdAmplitude.resx">
       <DependentUpon>frmThdAmplitude.cs</DependentUpon>

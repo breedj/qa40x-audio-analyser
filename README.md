@@ -1,9 +1,9 @@
 # qa40x-audio-analyser
 An audio amplifier analyser program for the Quant Asylum QA40x series.
 
-![image](https://github.com/user-attachments/assets/51656860-b696-4bc5-8334-c33ec1f2b01f)
+![{CC259019-3909-43AA-BC9D-5B96E9AE9685}](https://github.com/user-attachments/assets/c979e4ae-1325-40b0-8e2a-dd537c14313d)
 
-![image](https://github.com/user-attachments/assets/82691402-aceb-4ca5-866d-49693ab9a23d)
+![{35BD0BD1-255D-47B4-AE39-6C635A449D2B}](https://github.com/user-attachments/assets/157ee6ab-7afb-4e40-bc64-7134debbda6e)
 
 **DONE:**
 - [x] THD vs frequency measurement

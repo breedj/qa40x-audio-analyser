@@ -34,8 +34,8 @@
             this.grpMeasurements_L = new System.Windows.Forms.GroupBox();
             this.lblMeas_Highest_Freq_L = new System.Windows.Forms.Label();
             this.lblMeas_HighestGainFreq = new System.Windows.Forms.Label();
-            this.lblMeas_Amplitude_dBV_L = new System.Windows.Forms.Label();
-            this.lblMeas_Amplitude_V_L = new System.Windows.Forms.Label();
+            this.lblMeas_Gain_dB_L = new System.Windows.Forms.Label();
+            this.lblMeas_Gain_L = new System.Windows.Forms.Label();
             this.lblMeas_MaxAmplitude_L = new System.Windows.Forms.Label();
             this.lblMeas_BW1_high_L = new System.Windows.Forms.Label();
             this.lblMeas_BW1_low_L = new System.Windows.Forms.Label();
@@ -69,6 +69,13 @@
             this.scGraphSettings = new System.Windows.Forms.SplitContainer();
             this.phasePlot = new ScottPlot.WinForms.FormsPlot();
             this.freqPlot = new ScottPlot.WinForms.FormsPlot();
+            this.grpPhase = new System.Windows.Forms.GroupBox();
+            this.btnPhase180 = new System.Windows.Forms.Button();
+            this.udPhase_Bottom = new System.Windows.Forms.NumericUpDown();
+            this.udPhase_Top = new System.Windows.Forms.NumericUpDown();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.btnPhase_FitGraph = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.chkGraphShowGain = new System.Windows.Forms.CheckBox();
             this.chkGraphShowPhase = new System.Windows.Forms.CheckBox();
@@ -92,13 +99,6 @@
             this.lblCursorMagnitude = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.lblCursor_Frequency = new System.Windows.Forms.Label();
-            this.grpPhase = new System.Windows.Forms.GroupBox();
-            this.udPhase_Bottom = new System.Windows.Forms.NumericUpDown();
-            this.udPhase_Top = new System.Windows.Forms.NumericUpDown();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
-            this.btnPhase_FitGraph = new System.Windows.Forms.Button();
-            this.btnPhase180 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.scThdVsFreq)).BeginInit();
             this.scThdVsFreq.Panel1.SuspendLayout();
             this.scThdVsFreq.Panel2.SuspendLayout();
@@ -114,15 +114,15 @@
             this.scGraphSettings.Panel1.SuspendLayout();
             this.scGraphSettings.Panel2.SuspendLayout();
             this.scGraphSettings.SuspendLayout();
+            this.grpPhase.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.udPhase_Bottom)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udPhase_Top)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.gbFrequencyRange.SuspendLayout();
             this.gbDb_Range.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ud_Graph_Bottom)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ud_Graph_Top)).BeginInit();
             this.pnlCursorsLeft.SuspendLayout();
-            this.grpPhase.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.udPhase_Bottom)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.udPhase_Top)).BeginInit();
             this.SuspendLayout();
             // 
             // scThdVsFreq
@@ -185,8 +185,8 @@
             // 
             this.grpMeasurements_L.Controls.Add(this.lblMeas_Highest_Freq_L);
             this.grpMeasurements_L.Controls.Add(this.lblMeas_HighestGainFreq);
-            this.grpMeasurements_L.Controls.Add(this.lblMeas_Amplitude_dBV_L);
-            this.grpMeasurements_L.Controls.Add(this.lblMeas_Amplitude_V_L);
+            this.grpMeasurements_L.Controls.Add(this.lblMeas_Gain_dB_L);
+            this.grpMeasurements_L.Controls.Add(this.lblMeas_Gain_L);
             this.grpMeasurements_L.Controls.Add(this.lblMeas_MaxAmplitude_L);
             this.grpMeasurements_L.Controls.Add(this.lblMeas_BW1_high_L);
             this.grpMeasurements_L.Controls.Add(this.lblMeas_BW1_low_L);
@@ -229,29 +229,29 @@
             this.lblMeas_HighestGainFreq.Name = "lblMeas_HighestGainFreq";
             this.lblMeas_HighestGainFreq.Size = new System.Drawing.Size(152, 13);
             this.lblMeas_HighestGainFreq.TabIndex = 66;
-            this.lblMeas_HighestGainFreq.Text = "Highest amplitude freq.";
+            this.lblMeas_HighestGainFreq.Text = "Highest gain freq.";
             // 
-            // lblMeas_Amplitude_dBV_L
+            // lblMeas_Gain_dB_L
             // 
-            this.lblMeas_Amplitude_dBV_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMeas_Amplitude_dBV_L.Location = new System.Drawing.Point(101, 103);
-            this.lblMeas_Amplitude_dBV_L.Margin = new System.Windows.Forms.Padding(0);
-            this.lblMeas_Amplitude_dBV_L.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblMeas_Amplitude_dBV_L.Name = "lblMeas_Amplitude_dBV_L";
-            this.lblMeas_Amplitude_dBV_L.Size = new System.Drawing.Size(75, 15);
-            this.lblMeas_Amplitude_dBV_L.TabIndex = 65;
-            this.lblMeas_Amplitude_dBV_L.Text = "0.00 dBV";
+            this.lblMeas_Gain_dB_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMeas_Gain_dB_L.Location = new System.Drawing.Point(101, 103);
+            this.lblMeas_Gain_dB_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblMeas_Gain_dB_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblMeas_Gain_dB_L.Name = "lblMeas_Gain_dB_L";
+            this.lblMeas_Gain_dB_L.Size = new System.Drawing.Size(75, 15);
+            this.lblMeas_Gain_dB_L.TabIndex = 65;
+            this.lblMeas_Gain_dB_L.Text = "0.00 dB";
             // 
-            // lblMeas_Amplitude_V_L
+            // lblMeas_Gain_L
             // 
-            this.lblMeas_Amplitude_V_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMeas_Amplitude_V_L.Location = new System.Drawing.Point(183, 103);
-            this.lblMeas_Amplitude_V_L.Margin = new System.Windows.Forms.Padding(0);
-            this.lblMeas_Amplitude_V_L.MinimumSize = new System.Drawing.Size(60, 13);
-            this.lblMeas_Amplitude_V_L.Name = "lblMeas_Amplitude_V_L";
-            this.lblMeas_Amplitude_V_L.Size = new System.Drawing.Size(60, 15);
-            this.lblMeas_Amplitude_V_L.TabIndex = 63;
-            this.lblMeas_Amplitude_V_L.Text = "0.00 V";
+            this.lblMeas_Gain_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMeas_Gain_L.Location = new System.Drawing.Point(183, 103);
+            this.lblMeas_Gain_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblMeas_Gain_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblMeas_Gain_L.Name = "lblMeas_Gain_L";
+            this.lblMeas_Gain_L.Size = new System.Drawing.Size(60, 15);
+            this.lblMeas_Gain_L.TabIndex = 63;
+            this.lblMeas_Gain_L.Text = "0.00 x";
             // 
             // lblMeas_MaxAmplitude_L
             // 
@@ -261,7 +261,7 @@
             this.lblMeas_MaxAmplitude_L.Name = "lblMeas_MaxAmplitude_L";
             this.lblMeas_MaxAmplitude_L.Size = new System.Drawing.Size(95, 15);
             this.lblMeas_MaxAmplitude_L.TabIndex = 62;
-            this.lblMeas_MaxAmplitude_L.Text = "Max. amplitude";
+            this.lblMeas_MaxAmplitude_L.Text = "Max. gain";
             // 
             // lblMeas_BW1_high_L
             // 
@@ -667,11 +667,126 @@
             this.freqPlot.Size = new System.Drawing.Size(709, 343);
             this.freqPlot.TabIndex = 2;
             // 
+            // grpPhase
+            // 
+            this.grpPhase.Controls.Add(this.btnPhase180);
+            this.grpPhase.Controls.Add(this.udPhase_Bottom);
+            this.grpPhase.Controls.Add(this.udPhase_Top);
+            this.grpPhase.Controls.Add(this.label12);
+            this.grpPhase.Controls.Add(this.label13);
+            this.grpPhase.Controls.Add(this.btnPhase_FitGraph);
+            this.grpPhase.Location = new System.Drawing.Point(4, 179);
+            this.grpPhase.Name = "grpPhase";
+            this.grpPhase.Size = new System.Drawing.Size(113, 168);
+            this.grpPhase.TabIndex = 57;
+            this.grpPhase.TabStop = false;
+            this.grpPhase.Text = "Phase";
+            // 
+            // btnPhase180
+            // 
+            this.btnPhase180.Location = new System.Drawing.Point(6, 138);
+            this.btnPhase180.Name = "btnPhase180";
+            this.btnPhase180.Size = new System.Drawing.Size(94, 23);
+            this.btnPhase180.TabIndex = 34;
+            this.btnPhase180.Text = "+180 / -180";
+            this.btnPhase180.UseVisualStyleBackColor = true;
+            this.btnPhase180.Click += new System.EventHandler(this.btnPhase180_Click);
+            // 
+            // udPhase_Bottom
+            // 
+            this.udPhase_Bottom.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.udPhase_Bottom.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.udPhase_Bottom.Location = new System.Drawing.Point(8, 76);
+            this.udPhase_Bottom.Maximum = new decimal(new int[] {
+            180,
+            0,
+            0,
+            0});
+            this.udPhase_Bottom.Minimum = new decimal(new int[] {
+            200,
+            0,
+            0,
+            -2147483648});
+            this.udPhase_Bottom.Name = "udPhase_Bottom";
+            this.udPhase_Bottom.Size = new System.Drawing.Size(94, 20);
+            this.udPhase_Bottom.TabIndex = 33;
+            this.udPhase_Bottom.Value = new decimal(new int[] {
+            180,
+            0,
+            0,
+            -2147483648});
+            this.udPhase_Bottom.ValueChanged += new System.EventHandler(this.ud_Graph_Phase_Bottom_ValueChanged);
+            // 
+            // udPhase_Top
+            // 
+            this.udPhase_Top.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.udPhase_Top.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.udPhase_Top.Location = new System.Drawing.Point(8, 35);
+            this.udPhase_Top.Maximum = new decimal(new int[] {
+            200,
+            0,
+            0,
+            0});
+            this.udPhase_Top.Minimum = new decimal(new int[] {
+            180,
+            0,
+            0,
+            -2147483648});
+            this.udPhase_Top.Name = "udPhase_Top";
+            this.udPhase_Top.Size = new System.Drawing.Size(94, 20);
+            this.udPhase_Top.TabIndex = 32;
+            this.udPhase_Top.Value = new decimal(new int[] {
+            180,
+            0,
+            0,
+            0});
+            this.udPhase_Top.ValueChanged += new System.EventHandler(this.ud_Graph_Phase_Top_ValueChanged);
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label12.Location = new System.Drawing.Point(8, 58);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(40, 13);
+            this.label12.TabIndex = 29;
+            this.label12.Text = "Bottom";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label13.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label13.Location = new System.Drawing.Point(8, 17);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(26, 13);
+            this.label13.TabIndex = 27;
+            this.label13.Text = "Top";
+            // 
+            // btnPhase_FitGraph
+            // 
+            this.btnPhase_FitGraph.Location = new System.Drawing.Point(6, 109);
+            this.btnPhase_FitGraph.Name = "btnPhase_FitGraph";
+            this.btnPhase_FitGraph.Size = new System.Drawing.Size(94, 23);
+            this.btnPhase_FitGraph.TabIndex = 25;
+            this.btnPhase_FitGraph.Text = "Autofit";
+            this.btnPhase_FitGraph.UseVisualStyleBackColor = true;
+            this.btnPhase_FitGraph.Click += new System.EventHandler(this.btnPhase_FitGraph_Click);
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.chkGraphShowGain);
             this.groupBox2.Controls.Add(this.chkGraphShowPhase);
-            this.groupBox2.Location = new System.Drawing.Point(5, 491);
+            this.groupBox2.Location = new System.Drawing.Point(5, 517);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(112, 75);
             this.groupBox2.TabIndex = 56;
@@ -711,7 +826,7 @@
             this.gbFrequencyRange.Controls.Add(this.label9);
             this.gbFrequencyRange.Controls.Add(this.cmbGraph_FreqStart);
             this.gbFrequencyRange.Controls.Add(this.btnFitGraphX);
-            this.gbFrequencyRange.Location = new System.Drawing.Point(5, 327);
+            this.gbFrequencyRange.Location = new System.Drawing.Point(5, 353);
             this.gbFrequencyRange.Name = "gbFrequencyRange";
             this.gbFrequencyRange.Size = new System.Drawing.Size(112, 161);
             this.gbFrequencyRange.TabIndex = 51;
@@ -779,7 +894,7 @@
             this.gbDb_Range.Controls.Add(this.label7);
             this.gbDb_Range.Controls.Add(this.label6);
             this.gbDb_Range.Controls.Add(this.btnD_FitGraphY);
-            this.gbDb_Range.Location = new System.Drawing.Point(5, 8);
+            this.gbDb_Range.Location = new System.Drawing.Point(5, 34);
             this.gbDb_Range.Name = "gbDb_Range";
             this.gbDb_Range.Size = new System.Drawing.Size(113, 143);
             this.gbDb_Range.TabIndex = 50;
@@ -874,7 +989,7 @@
             // chkShowDataPoints
             // 
             this.chkShowDataPoints.AutoSize = true;
-            this.chkShowDataPoints.Location = new System.Drawing.Point(11, 598);
+            this.chkShowDataPoints.Location = new System.Drawing.Point(11, 624);
             this.chkShowDataPoints.Name = "chkShowDataPoints";
             this.chkShowDataPoints.Size = new System.Drawing.Size(108, 17);
             this.chkShowDataPoints.TabIndex = 45;
@@ -887,7 +1002,7 @@
             this.chkThickLines.AutoSize = true;
             this.chkThickLines.Checked = true;
             this.chkThickLines.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkThickLines.Location = new System.Drawing.Point(11, 578);
+            this.chkThickLines.Location = new System.Drawing.Point(11, 604);
             this.chkThickLines.Name = "chkThickLines";
             this.chkThickLines.Size = new System.Drawing.Size(77, 17);
             this.chkThickLines.TabIndex = 44;
@@ -958,121 +1073,6 @@
             this.lblCursor_Frequency.TabIndex = 10;
             this.lblCursor_Frequency.Text = "F: 00.00 Hz";
             // 
-            // grpPhase
-            // 
-            this.grpPhase.Controls.Add(this.btnPhase180);
-            this.grpPhase.Controls.Add(this.udPhase_Bottom);
-            this.grpPhase.Controls.Add(this.udPhase_Top);
-            this.grpPhase.Controls.Add(this.label12);
-            this.grpPhase.Controls.Add(this.label13);
-            this.grpPhase.Controls.Add(this.btnPhase_FitGraph);
-            this.grpPhase.Location = new System.Drawing.Point(4, 153);
-            this.grpPhase.Name = "grpPhase";
-            this.grpPhase.Size = new System.Drawing.Size(113, 168);
-            this.grpPhase.TabIndex = 57;
-            this.grpPhase.TabStop = false;
-            this.grpPhase.Text = "Phase";
-            // 
-            // udPhase_Bottom
-            // 
-            this.udPhase_Bottom.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.udPhase_Bottom.Increment = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.udPhase_Bottom.Location = new System.Drawing.Point(8, 76);
-            this.udPhase_Bottom.Maximum = new decimal(new int[] {
-            180,
-            0,
-            0,
-            0});
-            this.udPhase_Bottom.Minimum = new decimal(new int[] {
-            200,
-            0,
-            0,
-            -2147483648});
-            this.udPhase_Bottom.Name = "udPhase_Bottom";
-            this.udPhase_Bottom.Size = new System.Drawing.Size(94, 20);
-            this.udPhase_Bottom.TabIndex = 33;
-            this.udPhase_Bottom.Value = new decimal(new int[] {
-            180,
-            0,
-            0,
-            -2147483648});
-            this.udPhase_Bottom.ValueChanged += new System.EventHandler(this.ud_Graph_Phase_Bottom_ValueChanged);
-            // 
-            // udPhase_Top
-            // 
-            this.udPhase_Top.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.udPhase_Top.Increment = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
-            this.udPhase_Top.Location = new System.Drawing.Point(8, 35);
-            this.udPhase_Top.Maximum = new decimal(new int[] {
-            200,
-            0,
-            0,
-            0});
-            this.udPhase_Top.Minimum = new decimal(new int[] {
-            180,
-            0,
-            0,
-            -2147483648});
-            this.udPhase_Top.Name = "udPhase_Top";
-            this.udPhase_Top.Size = new System.Drawing.Size(94, 20);
-            this.udPhase_Top.TabIndex = 32;
-            this.udPhase_Top.Value = new decimal(new int[] {
-            180,
-            0,
-            0,
-            0});
-            this.udPhase_Top.ValueChanged += new System.EventHandler(this.ud_Graph_Phase_Top_ValueChanged);
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label12.Location = new System.Drawing.Point(8, 58);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(40, 13);
-            this.label12.TabIndex = 29;
-            this.label12.Text = "Bottom";
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label13.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label13.Location = new System.Drawing.Point(8, 17);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(26, 13);
-            this.label13.TabIndex = 27;
-            this.label13.Text = "Top";
-            // 
-            // btnPhase_FitGraph
-            // 
-            this.btnPhase_FitGraph.Location = new System.Drawing.Point(6, 109);
-            this.btnPhase_FitGraph.Name = "btnPhase_FitGraph";
-            this.btnPhase_FitGraph.Size = new System.Drawing.Size(94, 23);
-            this.btnPhase_FitGraph.TabIndex = 25;
-            this.btnPhase_FitGraph.Text = "Autofit";
-            this.btnPhase_FitGraph.UseVisualStyleBackColor = true;
-            this.btnPhase_FitGraph.Click += new System.EventHandler(this.btnPhase_FitGraph_Click);
-            // 
-            // btnPhase180
-            // 
-            this.btnPhase180.Location = new System.Drawing.Point(6, 138);
-            this.btnPhase180.Name = "btnPhase180";
-            this.btnPhase180.Size = new System.Drawing.Size(94, 23);
-            this.btnPhase180.TabIndex = 34;
-            this.btnPhase180.Text = "+180 / -180";
-            this.btnPhase180.UseVisualStyleBackColor = true;
-            this.btnPhase180.Click += new System.EventHandler(this.btnPhase180_Click);
-            // 
             // frmBodePlot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1103,6 +1103,10 @@
             this.scGraphSettings.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGraphSettings)).EndInit();
             this.scGraphSettings.ResumeLayout(false);
+            this.grpPhase.ResumeLayout(false);
+            this.grpPhase.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.udPhase_Bottom)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udPhase_Top)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.gbFrequencyRange.ResumeLayout(false);
@@ -1112,10 +1116,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.ud_Graph_Bottom)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ud_Graph_Top)).EndInit();
             this.pnlCursorsLeft.ResumeLayout(false);
-            this.grpPhase.ResumeLayout(false);
-            this.grpPhase.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.udPhase_Bottom)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.udPhase_Top)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1158,8 +1158,8 @@
         private System.Windows.Forms.GroupBox grpMeasurements_L;
         private System.Windows.Forms.Label lblMeas_Highest_Freq_L;
         private System.Windows.Forms.Label lblMeas_HighestGainFreq;
-        private System.Windows.Forms.Label lblMeas_Amplitude_dBV_L;
-        private System.Windows.Forms.Label lblMeas_Amplitude_V_L;
+        private System.Windows.Forms.Label lblMeas_Gain_dB_L;
+        private System.Windows.Forms.Label lblMeas_Gain_L;
         private System.Windows.Forms.Label lblMeas_MaxAmplitude_L;
         private System.Windows.Forms.Label lblMeas_BW1_high_L;
         private System.Windows.Forms.Label lblMeas_BW1_low_L;

@@ -730,11 +730,20 @@ namespace QA40x_AUDIO_ANALYSER
         void WriteCursorTexts_Dpercent_L(double Vin, double Vout, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double power, double noiseFloor, double load)
         {
             if (GraphSettings.XAxisType == E_X_AxisType.OUTPUT_VOLTAGE)
-                lblCursor_X_Axis.Text = $"V(out): {Vout:##0.000 V}";
+            {
+                lblCursor_X_Axis.Text = "V(out)";
+                lblCursor_Vout_L.Text = $"{Vout:##0.000 V}";
+            }
             else if (GraphSettings.XAxisType == E_X_AxisType.OUTPUT_POWER)
-                lblCursor_X_Axis.Text = $"P(out): {power:##0.000 W}";
+            {
+                lblCursor_X_Axis.Text = "P(out)";
+                lblCursor_Vout_L.Text = $"{power:##0.000 W}";
+            }
             else if (GraphSettings.XAxisType == E_X_AxisType.INPUT_VOLTAGE)
-                lblCursor_X_Axis.Text = $"V(in): {Vin:##0.000 V}";
+            {
+                lblCursor_X_Axis.Text = "V(in)";
+                lblCursor_Vout_L.Text = $"V(in): {Vin:##0.000 V}";
+            }
 
             lblCursor_Magnitude_L.Text = $"{magnitude:0.## dB}";
 
@@ -758,12 +767,20 @@ namespace QA40x_AUDIO_ANALYSER
         void WriteCursorTexts_Dpercent_R(double Vin, double Vout, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double power, double noiseFloor, double load)
         {
             if (GraphSettings.XAxisType == E_X_AxisType.OUTPUT_VOLTAGE)
-                lblCursor_X_Axis.Text = $"V(out): {Vout:##0.000 V}";
+            {
+                lblCursor_X_Axis.Text = "V(out)";
+                lblCursor_Vout_R.Text = $"{Vout:##0.000 V}";
+            }
             else if (GraphSettings.XAxisType == E_X_AxisType.OUTPUT_POWER)
-                lblCursor_X_Axis.Text = $"P(out): {power:##0.000 W}";
+            {
+                lblCursor_X_Axis.Text = "P(out)";
+                lblCursor_Vout_R.Text = $"{power:##0.000 W}";
+            }
             else if (GraphSettings.XAxisType == E_X_AxisType.INPUT_VOLTAGE)
-                lblCursor_X_Axis.Text = $"V(in): {Vin:##0.000 V}";
-
+            {
+                lblCursor_X_Axis.Text = "V(in)";
+                lblCursor_Vout_R.Text = $"V(in): {Vin:##0.000 V}";
+            }
             lblCursor_Magnitude_R.Text = $"{magnitude:0.## dB}";
 
             lblCursor_THD_R.Text = $"{thd:0.0000 \\%}";
@@ -801,11 +818,20 @@ namespace QA40x_AUDIO_ANALYSER
         void WriteCursorTexts_dB_L(double Vin, double Vout, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double power, double noiseFloor, double load)
         {
             if (GraphSettings.XAxisType == E_X_AxisType.OUTPUT_VOLTAGE)
-                lblCursor_X_Axis.Text = $"V(out): {Vout:##0.000 V}";
+            {
+                lblCursor_X_Axis.Text = "V(out)";
+                lblCursor_Vout_L.Text = $"{Vout:##0.000 V}";
+            }
             else if (GraphSettings.XAxisType == E_X_AxisType.OUTPUT_POWER)
-                lblCursor_X_Axis.Text = $"P(out): {power:##0.000 W}";
+            {
+                lblCursor_X_Axis.Text = "P(out)";
+                lblCursor_Vout_L.Text = $"{power:##0.000 W}";
+            }
             else if (GraphSettings.XAxisType == E_X_AxisType.INPUT_VOLTAGE)
-                lblCursor_X_Axis.Text = $"V(in): {Vin:##0.000 V}";
+            {
+                lblCursor_X_Axis.Text = "V(in)";
+                lblCursor_Vout_L.Text = $"V(in): {Vin:##0.000 V}";
+            }
 
             lblCursor_Magnitude_L.Text = $"{magnitude:0.## dB}";
             lblCursor_THD_L.Text = $"{thd:0.0# dB}";
@@ -829,11 +855,20 @@ namespace QA40x_AUDIO_ANALYSER
         void WriteCursorTexts_dB_R(double Vin, double Vout, double magnitude, double thd, double D2, double D3, double D4, double D5, double D6, double power, double noiseFloor, double load)
         {
             if (GraphSettings.XAxisType == E_X_AxisType.OUTPUT_VOLTAGE)
-                lblCursor_X_Axis.Text = $"V(out): {Vout:##0.000 V}";
+            {
+                lblCursor_X_Axis.Text = "V(out)";
+                lblCursor_Vout_R.Text = $"{Vout:##0.000 V}";
+            }
             else if (GraphSettings.XAxisType == E_X_AxisType.OUTPUT_POWER)
-                lblCursor_X_Axis.Text = $"P(out): {power:##0.000 W}";
+            {
+                lblCursor_X_Axis.Text = "P(out)";
+                lblCursor_Vout_R.Text = $"{power:##0.000 W}";
+            }
             else if (GraphSettings.XAxisType == E_X_AxisType.INPUT_VOLTAGE)
-                lblCursor_X_Axis.Text = $"V(in): {Vin:##0.000 V}";
+            {
+                lblCursor_X_Axis.Text = "V(in)";
+                lblCursor_Vout_R.Text = $"V(in): {Vin:##0.000 V}";
+            }
 
             lblCursor_Magnitude_R.Text = $"{magnitude:0.## dB}";
             lblCursor_THD_R.Text = $"{thd:0.0# dB}";
@@ -1453,46 +1488,69 @@ namespace QA40x_AUDIO_ANALYSER
                 // Check if index in StepData array
                 if (MeasurementResult.AmplitudeSteps.Count > nearest1.Index)
                 {
+                    var xAxisValue = Math.Pow(10, nearest1.X);
                     //var step_l = MeasurementResult.AmplitudeSteps[nearest1.Index];
 
-                    var voltage = Math.Pow(10, nearest1.X);
-                    var minDistance_l = MeasurementResult.AmplitudeSteps.Min(n => Math.Abs(voltage - n.Left.Fundamental_V));
-                    var step_l = MeasurementResult.AmplitudeSteps.First(n => Math.Abs(voltage - n.Left.Fundamental_V) == minDistance_l);
+                    //var step_l = MeasurementResult.AmplitudeSteps.Where(n => n.Left.Fundamental_V >= xAxisValue * 0.9 && n.Left.Fundamental_V <= xAxisValue * 1.1).FirstOrDefault();
+                    //var step_r = MeasurementResult.AmplitudeSteps.Where(n => n.Right.Fundamental_V >= xAxisValue * 0.9 && n.Right.Fundamental_V <= xAxisValue * 1.1).FirstOrDefault();
 
-                    var minDistance_r = MeasurementResult.AmplitudeSteps.Min(n => Math.Abs(voltage - n.Right.Fundamental_V));
-                    var step_r = MeasurementResult.AmplitudeSteps.First(n => Math.Abs(voltage - n.Right.Fundamental_V) == minDistance_r);
+                    ThdAmplitudeStep step_l = null;
+                    ThdAmplitudeStep step_r = null;
 
+                    var minSelection_l = MeasurementResult.AmplitudeSteps.Where(n => n.Left.Fundamental_V >= xAxisValue * 0.9 && n.Left.Fundamental_V <= xAxisValue * 1.1);
+                    if (minSelection_l.Any())
+                    {
+                        var minDistance_l = minSelection_l.Min(n => Math.Abs(xAxisValue - n.Left.Fundamental_V));
+                        step_l = MeasurementResult.AmplitudeSteps.First(n => Math.Abs(xAxisValue - n.Left.Fundamental_V) == minDistance_l);
+                    }
+
+                    var minSelection_r = MeasurementResult.AmplitudeSteps.Where(n => n.Right.Fundamental_V >= xAxisValue * 0.9 && n.Right.Fundamental_V <= xAxisValue * 1.1);
+                    if (minSelection_r.Any())
+                    {
+                        var minDistance_r = minSelection_r.Min(n => Math.Abs(xAxisValue - n.Right.Fundamental_V));
+                        step_r = MeasurementResult.AmplitudeSteps.First(n => Math.Abs(xAxisValue - n.Right.Fundamental_V) == minDistance_r);
+                    }
 
                     // Write cursor texts based in plot type
                     if (GraphSettings.GraphType == E_ThdAmplitude_GraphType.DB)
                     {
-                        WriteCursorTexts_dB_L(step_l.GeneratorVoltage
-                        , step_l.Left.Fundamental_V
-                        , step_l.Left.Gain_dB
-                        , step_l.Left.Thd_dB - step_l.Left.Fundamental_dBV
-                        , (step_l.Left.Harmonics.Count > 0 ? step_l.Left.Harmonics[0].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)   // 2nd harmonic
-                        , (step_l.Left.Harmonics.Count > 1 ? step_l.Left.Harmonics[1].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)
-                        , (step_l.Left.Harmonics.Count > 2 ? step_l.Left.Harmonics[2].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)
-                        , (step_l.Left.Harmonics.Count > 3 ? step_l.Left.Harmonics[3].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)
-                        , (step_l.Left.Harmonics.Count > 4 ? step_l.Left.D6Plus_dBV - step_l.Left.Fundamental_dBV : 0)                   // 6+ harmonics
-                        , step_l.Left.Power_Watt
-                        , step_l.Left.Average_NoiseFloor_dBV - step_l.Left.Fundamental_dBV
-                        , MeasurementResult.MeasurementSettings.Load
-                        );
+                        if (step_l != null)
+                        {
+                            WriteCursorTexts_dB_L(step_l.GeneratorVoltage
+                            , step_l.Left.Fundamental_V
+                            , step_l.Left.Gain_dB
+                            , step_l.Left.Thd_dB - step_l.Left.Fundamental_dBV
+                            , (step_l.Left.Harmonics.Count > 0 ? step_l.Left.Harmonics[0].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)   // 2nd harmonic
+                            , (step_l.Left.Harmonics.Count > 1 ? step_l.Left.Harmonics[1].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)
+                            , (step_l.Left.Harmonics.Count > 2 ? step_l.Left.Harmonics[2].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)
+                            , (step_l.Left.Harmonics.Count > 3 ? step_l.Left.Harmonics[3].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)
+                            , (step_l.Left.Harmonics.Count > 4 ? step_l.Left.D6Plus_dBV - step_l.Left.Fundamental_dBV : 0)                   // 6+ harmonics
+                            , step_l.Left.Power_Watt
+                            , step_l.Left.Average_NoiseFloor_dBV - step_l.Left.Fundamental_dBV
+                            , MeasurementResult.MeasurementSettings.Load
+                            );
+                        }
+                        else
+                            WriteCursorTexts_dB_L(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-                        WriteCursorTexts_dB_R(step_l.GeneratorVoltage
-                        , step_l.Right.Fundamental_V
-                        , step_l.Right.Gain_dB
-                        , step_l.Right.Thd_dB - step_l.Right.Fundamental_dBV
-                        , (step_l.Right.Harmonics.Count > 0 ? step_l.Right.Harmonics[0].Amplitude_dBV - step_l.Right.Fundamental_dBV : 0)   // 2nd harmonic
-                        , (step_l.Right.Harmonics.Count > 1 ? step_l.Right.Harmonics[1].Amplitude_dBV - step_l.Right.Fundamental_dBV : 0)
-                        , (step_l.Right.Harmonics.Count > 2 ? step_l.Right.Harmonics[2].Amplitude_dBV - step_l.Right.Fundamental_dBV : 0)
-                        , (step_l.Right.Harmonics.Count > 3 ? step_l.Right.Harmonics[3].Amplitude_dBV - step_l.Right.Fundamental_dBV : 0)
-                        , (step_l.Right.Harmonics.Count > 4 ? step_l.Right.D6Plus_dBV - step_l.Right.Fundamental_dBV : 0)                   // 6+ harmonics
-                        , step_l.Right.Power_Watt
-                        , step_l.Right.Average_NoiseFloor_dBV - step_l.Right.Fundamental_dBV
-                        , MeasurementResult.MeasurementSettings.Load
-                        );
+                        if (step_r != null)
+                        {
+                            WriteCursorTexts_dB_R(step_r.GeneratorVoltage
+                            , step_r.Right.Fundamental_V
+                            , step_r.Right.Gain_dB
+                            , step_r.Right.Thd_dB - step_r.Right.Fundamental_dBV
+                            , (step_r.Right.Harmonics.Count > 0 ? step_r.Right.Harmonics[0].Amplitude_dBV - step_r.Right.Fundamental_dBV : 0)   // 2nd harmonic
+                            , (step_r.Right.Harmonics.Count > 1 ? step_r.Right.Harmonics[1].Amplitude_dBV - step_r.Right.Fundamental_dBV : 0)
+                            , (step_r.Right.Harmonics.Count > 2 ? step_r.Right.Harmonics[2].Amplitude_dBV - step_r.Right.Fundamental_dBV : 0)
+                            , (step_r.Right.Harmonics.Count > 3 ? step_r.Right.Harmonics[3].Amplitude_dBV - step_r.Right.Fundamental_dBV : 0)
+                            , (step_r.Right.Harmonics.Count > 4 ? step_r.Right.D6Plus_dBV - step_r.Right.Fundamental_dBV : 0)                   // 6+ harmonics
+                            , step_r.Right.Power_Watt
+                            , step_r.Right.Average_NoiseFloor_dBV - step_r.Right.Fundamental_dBV
+                            , MeasurementResult.MeasurementSettings.Load
+                            );
+                        }
+                        else
+                            WriteCursorTexts_dB_R(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                     }
                     else
                     {
@@ -2128,6 +2186,11 @@ namespace QA40x_AUDIO_ANALYSER
         private void chkEnableRightChannel_CheckedChanged(object sender, EventArgs e)
         {
             MeasurementSettings.EnableRightChannel = chkEnableRightChannel.Checked;
+        }
+
+        private void scGraphCursors_Panel2_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

@@ -123,6 +123,8 @@
             this.lblCursor_D6_L = new System.Windows.Forms.Label();
             this.lblCursor_Power_L = new System.Windows.Forms.Label();
             this.lblCursor_NoiseFloor_L = new System.Windows.Forms.Label();
+            this.lblCursor_Vout_L = new System.Windows.Forms.Label();
+            this.lblCursor_Vout_R = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.scThdVsFreq)).BeginInit();
             this.scThdVsFreq.Panel1.SuspendLayout();
             this.scThdVsFreq.Panel2.SuspendLayout();
@@ -526,6 +528,7 @@
             this.scGraphCursors.Panel2.Controls.Add(this.lblCursor_X_Axis);
             this.scGraphCursors.Panel2.Controls.Add(this.pnlCursorsRight);
             this.scGraphCursors.Panel2.Controls.Add(this.pnlCursorsLeft);
+            this.scGraphCursors.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.scGraphCursors_Panel2_Paint);
             this.scGraphCursors.Size = new System.Drawing.Size(836, 765);
             this.scGraphCursors.SplitterDistance = 710;
             this.scGraphCursors.TabIndex = 0;
@@ -1166,16 +1169,17 @@
             // lblCursor_X_Axis
             // 
             this.lblCursor_X_Axis.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_X_Axis.Location = new System.Drawing.Point(43, 0);
+            this.lblCursor_X_Axis.Location = new System.Drawing.Point(80, 0);
             this.lblCursor_X_Axis.Margin = new System.Windows.Forms.Padding(0);
-            this.lblCursor_X_Axis.MinimumSize = new System.Drawing.Size(100, 13);
+            this.lblCursor_X_Axis.MinimumSize = new System.Drawing.Size(50, 13);
             this.lblCursor_X_Axis.Name = "lblCursor_X_Axis";
-            this.lblCursor_X_Axis.Size = new System.Drawing.Size(116, 15);
+            this.lblCursor_X_Axis.Size = new System.Drawing.Size(56, 17);
             this.lblCursor_X_Axis.TabIndex = 44;
-            this.lblCursor_X_Axis.Text = "V(out): 0.000 V";
+            this.lblCursor_X_Axis.Text = "V(out)";
             // 
             // pnlCursorsRight
             // 
+            this.pnlCursorsRight.Controls.Add(this.lblCursor_Vout_R);
             this.pnlCursorsRight.Controls.Add(this.label28);
             this.pnlCursorsRight.Controls.Add(this.lblCursor_Magnitude_R);
             this.pnlCursorsRight.Controls.Add(this.lblCursor_NoiseFloor_R);
@@ -1186,25 +1190,25 @@
             this.pnlCursorsRight.Controls.Add(this.lblCursor_D3_R);
             this.pnlCursorsRight.Controls.Add(this.lblCursor_D5_R);
             this.pnlCursorsRight.Controls.Add(this.lblCursor_D4_R);
-            this.pnlCursorsRight.Location = new System.Drawing.Point(45, 36);
+            this.pnlCursorsRight.Location = new System.Drawing.Point(4, 36);
             this.pnlCursorsRight.Name = "pnlCursorsRight";
-            this.pnlCursorsRight.Size = new System.Drawing.Size(790, 16);
+            this.pnlCursorsRight.Size = new System.Drawing.Size(831, 16);
             this.pnlCursorsRight.TabIndex = 42;
             // 
             // label28
             // 
             this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label28.Location = new System.Drawing.Point(-1, 0);
+            this.label28.Location = new System.Drawing.Point(22, 0);
             this.label28.MinimumSize = new System.Drawing.Size(50, 13);
             this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(86, 13);
+            this.label28.Size = new System.Drawing.Size(53, 13);
             this.label28.TabIndex = 40;
-            this.label28.Text = "Right channel";
+            this.label28.Text = "Right";
             // 
             // lblCursor_Magnitude_R
             // 
             this.lblCursor_Magnitude_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_Magnitude_R.Location = new System.Drawing.Point(174, 0);
+            this.lblCursor_Magnitude_R.Location = new System.Drawing.Point(212, 0);
             this.lblCursor_Magnitude_R.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_Magnitude_R.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_Magnitude_R.Name = "lblCursor_Magnitude_R";
@@ -1215,7 +1219,7 @@
             // lblCursor_NoiseFloor_R
             // 
             this.lblCursor_NoiseFloor_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_NoiseFloor_R.Location = new System.Drawing.Point(716, 0);
+            this.lblCursor_NoiseFloor_R.Location = new System.Drawing.Point(754, 0);
             this.lblCursor_NoiseFloor_R.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_NoiseFloor_R.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_NoiseFloor_R.Name = "lblCursor_NoiseFloor_R";
@@ -1226,7 +1230,7 @@
             // lblCursor_THD_R
             // 
             this.lblCursor_THD_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_THD_R.Location = new System.Drawing.Point(108, 0);
+            this.lblCursor_THD_R.Location = new System.Drawing.Point(146, 0);
             this.lblCursor_THD_R.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_THD_R.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_THD_R.Name = "lblCursor_THD_R";
@@ -1237,7 +1241,7 @@
             // lblCursor_Power_R
             // 
             this.lblCursor_Power_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_Power_R.Location = new System.Drawing.Point(630, 0);
+            this.lblCursor_Power_R.Location = new System.Drawing.Point(668, 0);
             this.lblCursor_Power_R.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_Power_R.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_Power_R.Name = "lblCursor_Power_R";
@@ -1248,7 +1252,7 @@
             // lblCursor_D2_R
             // 
             this.lblCursor_D2_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D2_R.Location = new System.Drawing.Point(250, 0);
+            this.lblCursor_D2_R.Location = new System.Drawing.Point(288, 0);
             this.lblCursor_D2_R.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_D2_R.MinimumSize = new System.Drawing.Size(50, 13);
             this.lblCursor_D2_R.Name = "lblCursor_D2_R";
@@ -1259,7 +1263,7 @@
             // lblCursor_D6_R
             // 
             this.lblCursor_D6_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D6_R.Location = new System.Drawing.Point(554, 0);
+            this.lblCursor_D6_R.Location = new System.Drawing.Point(592, 0);
             this.lblCursor_D6_R.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_D6_R.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_D6_R.Name = "lblCursor_D6_R";
@@ -1270,7 +1274,7 @@
             // lblCursor_D3_R
             // 
             this.lblCursor_D3_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D3_R.Location = new System.Drawing.Point(326, 0);
+            this.lblCursor_D3_R.Location = new System.Drawing.Point(364, 0);
             this.lblCursor_D3_R.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_D3_R.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_D3_R.Name = "lblCursor_D3_R";
@@ -1281,7 +1285,7 @@
             // lblCursor_D5_R
             // 
             this.lblCursor_D5_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D5_R.Location = new System.Drawing.Point(478, 0);
+            this.lblCursor_D5_R.Location = new System.Drawing.Point(516, 0);
             this.lblCursor_D5_R.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_D5_R.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_D5_R.Name = "lblCursor_D5_R";
@@ -1292,7 +1296,7 @@
             // lblCursor_D4_R
             // 
             this.lblCursor_D4_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D4_R.Location = new System.Drawing.Point(402, 0);
+            this.lblCursor_D4_R.Location = new System.Drawing.Point(440, 0);
             this.lblCursor_D4_R.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_D4_R.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_D4_R.Name = "lblCursor_D4_R";
@@ -1302,6 +1306,7 @@
             // 
             // pnlCursorsLeft
             // 
+            this.pnlCursorsLeft.Controls.Add(this.lblCursor_Vout_L);
             this.pnlCursorsLeft.Controls.Add(this.lblCursor_D5_L);
             this.pnlCursorsLeft.Controls.Add(this.lblCursor_Magnitude_L);
             this.pnlCursorsLeft.Controls.Add(this.label27);
@@ -1312,15 +1317,15 @@
             this.pnlCursorsLeft.Controls.Add(this.lblCursor_D6_L);
             this.pnlCursorsLeft.Controls.Add(this.lblCursor_Power_L);
             this.pnlCursorsLeft.Controls.Add(this.lblCursor_NoiseFloor_L);
-            this.pnlCursorsLeft.Location = new System.Drawing.Point(43, 15);
+            this.pnlCursorsLeft.Location = new System.Drawing.Point(3, 15);
             this.pnlCursorsLeft.Name = "pnlCursorsLeft";
-            this.pnlCursorsLeft.Size = new System.Drawing.Size(790, 20);
+            this.pnlCursorsLeft.Size = new System.Drawing.Size(830, 20);
             this.pnlCursorsLeft.TabIndex = 43;
             // 
             // lblCursor_D5_L
             // 
             this.lblCursor_D5_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D5_L.Location = new System.Drawing.Point(480, 2);
+            this.lblCursor_D5_L.Location = new System.Drawing.Point(518, 2);
             this.lblCursor_D5_L.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_D5_L.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_D5_L.Name = "lblCursor_D5_L";
@@ -1331,7 +1336,7 @@
             // lblCursor_Magnitude_L
             // 
             this.lblCursor_Magnitude_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_Magnitude_L.Location = new System.Drawing.Point(176, 2);
+            this.lblCursor_Magnitude_L.Location = new System.Drawing.Point(214, 2);
             this.lblCursor_Magnitude_L.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_Magnitude_L.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_Magnitude_L.Name = "lblCursor_Magnitude_L";
@@ -1342,17 +1347,17 @@
             // label27
             // 
             this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label27.Location = new System.Drawing.Point(0, 2);
+            this.label27.Location = new System.Drawing.Point(23, 2);
             this.label27.MinimumSize = new System.Drawing.Size(50, 13);
             this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(86, 13);
+            this.label27.Size = new System.Drawing.Size(53, 13);
             this.label27.TabIndex = 39;
-            this.label27.Text = "Left channel";
+            this.label27.Text = "Left";
             // 
             // lblCursor_THD_L
             // 
             this.lblCursor_THD_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_THD_L.Location = new System.Drawing.Point(110, 2);
+            this.lblCursor_THD_L.Location = new System.Drawing.Point(148, 2);
             this.lblCursor_THD_L.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_THD_L.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_THD_L.Name = "lblCursor_THD_L";
@@ -1363,7 +1368,7 @@
             // lblCursor_D2_L
             // 
             this.lblCursor_D2_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D2_L.Location = new System.Drawing.Point(252, 2);
+            this.lblCursor_D2_L.Location = new System.Drawing.Point(290, 2);
             this.lblCursor_D2_L.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_D2_L.MinimumSize = new System.Drawing.Size(50, 13);
             this.lblCursor_D2_L.Name = "lblCursor_D2_L";
@@ -1374,7 +1379,7 @@
             // lblCursor_D3_L
             // 
             this.lblCursor_D3_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D3_L.Location = new System.Drawing.Point(328, 2);
+            this.lblCursor_D3_L.Location = new System.Drawing.Point(366, 2);
             this.lblCursor_D3_L.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_D3_L.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_D3_L.Name = "lblCursor_D3_L";
@@ -1385,7 +1390,7 @@
             // lblCursor_D4_L
             // 
             this.lblCursor_D4_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D4_L.Location = new System.Drawing.Point(404, 2);
+            this.lblCursor_D4_L.Location = new System.Drawing.Point(442, 2);
             this.lblCursor_D4_L.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_D4_L.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_D4_L.Name = "lblCursor_D4_L";
@@ -1396,7 +1401,7 @@
             // lblCursor_D6_L
             // 
             this.lblCursor_D6_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_D6_L.Location = new System.Drawing.Point(556, 2);
+            this.lblCursor_D6_L.Location = new System.Drawing.Point(594, 2);
             this.lblCursor_D6_L.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_D6_L.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_D6_L.Name = "lblCursor_D6_L";
@@ -1407,7 +1412,7 @@
             // lblCursor_Power_L
             // 
             this.lblCursor_Power_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_Power_L.Location = new System.Drawing.Point(632, 2);
+            this.lblCursor_Power_L.Location = new System.Drawing.Point(670, 2);
             this.lblCursor_Power_L.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_Power_L.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_Power_L.Name = "lblCursor_Power_L";
@@ -1418,13 +1423,35 @@
             // lblCursor_NoiseFloor_L
             // 
             this.lblCursor_NoiseFloor_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCursor_NoiseFloor_L.Location = new System.Drawing.Point(718, 2);
+            this.lblCursor_NoiseFloor_L.Location = new System.Drawing.Point(756, 2);
             this.lblCursor_NoiseFloor_L.Margin = new System.Windows.Forms.Padding(0);
             this.lblCursor_NoiseFloor_L.MinimumSize = new System.Drawing.Size(60, 13);
             this.lblCursor_NoiseFloor_L.Name = "lblCursor_NoiseFloor_L";
             this.lblCursor_NoiseFloor_L.Size = new System.Drawing.Size(71, 13);
             this.lblCursor_NoiseFloor_L.TabIndex = 20;
             this.lblCursor_NoiseFloor_L.Text = "00.00 dB";
+            // 
+            // lblCursor_Vout_L
+            // 
+            this.lblCursor_Vout_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_Vout_L.Location = new System.Drawing.Point(80, 2);
+            this.lblCursor_Vout_L.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_Vout_L.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_Vout_L.Name = "lblCursor_Vout_L";
+            this.lblCursor_Vout_L.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_Vout_L.TabIndex = 40;
+            this.lblCursor_Vout_L.Text = "0.000 V";
+            // 
+            // lblCursor_Vout_R
+            // 
+            this.lblCursor_Vout_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCursor_Vout_R.Location = new System.Drawing.Point(79, 0);
+            this.lblCursor_Vout_R.Margin = new System.Windows.Forms.Padding(0);
+            this.lblCursor_Vout_R.MinimumSize = new System.Drawing.Size(60, 13);
+            this.lblCursor_Vout_R.Name = "lblCursor_Vout_R";
+            this.lblCursor_Vout_R.Size = new System.Drawing.Size(60, 15);
+            this.lblCursor_Vout_R.TabIndex = 41;
+            this.lblCursor_Vout_R.Text = "0.000 V";
             // 
             // frmThdAmplitude
             // 
@@ -1569,5 +1596,7 @@
         private System.Windows.Forms.Label lblCursorMagnitude;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Label lblCursor_X_Axis;
+        private System.Windows.Forms.Label lblCursor_Vout_R;
+        private System.Windows.Forms.Label lblCursor_Vout_L;
     }
 }

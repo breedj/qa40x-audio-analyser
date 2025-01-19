@@ -12,6 +12,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 
 
@@ -1073,8 +1074,8 @@ namespace QA40x_AUDIO_ANALYSER
                     lblMeas_BW3_L.Text = AutoUnitText(gainBW3dB.Bandwidth, "Hz", 1);
                     lblMeas_BW3_low_L.Text = AutoUnitText(gainBW3dB.LowerFreq, "Hz", 1);
                     lblMeas_BW3_high_L.Text = AutoUnitText(gainBW3dB.UpperFreq, "Hz", 1);
-                    lblMeas_Amplitude_V_L.Text = gainBW3dB.HighestGain.ToString("0.00") + " x";
-                    lblMeas_Amplitude_dBV_L.Text = AutoUnitText(QaLibrary.ConvertVoltage(gainBW3dB.HighestGain, E_VoltageUnit.Volt, E_VoltageUnit.dBV), "dB", 2);
+                    lblMeas_Gain_L.Text = gainBW3dB.HighestGain.ToString("0.00") + " x";
+                    lblMeas_Gain_dB_L.Text = gainBW3dB.HighestGain.ToString("0." + new string('0', 2)) + " dB";
                     lblMeas_Highest_Freq_L.Text = AutoUnitText(gainBW3dB.HighestGainFreq, "Hz", 1);
 
                     var gainBW1dB = CalculateGainBandwidth(-1, MeasurementResult.FrequencySteps);
@@ -1204,7 +1205,7 @@ namespace QA40x_AUDIO_ANALYSER
             AddVerticalLine(upperFreq_dB_left, bwData.UpperFreqGain, colors.GetColor(colorRange, 2), lineWidth);
 
             // Bandwidht arrow
-            AddArrow(lowerFreq_dB_left, bwData.UpperFreqGain / 2, upperFreq_dB_left, bwData.UpperFreqGain / 2, colors.GetColor(colorRange, 4), lineWidth);
+            AddArrow(lowerFreq_dB_left, bwData.UpperFreqGain, upperFreq_dB_left, bwData.UpperFreqGain, colors.GetColor(colorRange, 4), lineWidth);
 
             // Bandwitdh text
             var lowerFreq = Math.Log10(bwData.LowerFreq);
@@ -1215,7 +1216,7 @@ namespace QA40x_AUDIO_ANALYSER
                 bwText = $"B{gain:0}: {(bwData.Bandwidth / 1000):0.00# kHz}";
             if (bwData.UpperFreq > 96000)
                 bwText = $"B{gain:0}: > 96 kHz";
-            AddText(bwText, (lowerFreq + ((upperFreq - lowerFreq) / 2)), bwData.UpperFreqGain / 2, colors.GetColor(colorRange, 8), -35, -10);
+            AddText(bwText, (lowerFreq + ((upperFreq - lowerFreq) / 2)), bwData.UpperFreqGain, colors.GetColor(colorRange, 8), -35, -10);
 
             // Low frequency text
             var bwLowF = $"{bwData.LowerFreq:0 Hz}";

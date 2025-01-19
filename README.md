@@ -22,13 +22,14 @@ An audio amplifier analyser program for the QuantAsylum QA40x series.
 - [x] Added Frequency Response measurement with bandwidth analysis 
       
 **TODO:**
-- [ ] FFT with automatic peak search
+- [ ] FFT with automatic peak search of harmonics
 - [ ] Amplifier impedance vs frequency measurement
+- [ ] Bode plot with phase measurement
 - [ ] Saving of data to json file
 - [ ] Importing data from json file
 - [ ] Saving measurement results to image
 - [ ] Generating pdf report of measurements
-- [ ] Measurment project management
+- [ ] Measurement project management
 - [ ] Multiple measurements and results per project
 - [ ] Overlay of multiple of the same measurements for comparison
 

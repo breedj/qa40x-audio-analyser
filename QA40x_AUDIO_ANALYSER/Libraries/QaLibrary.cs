@@ -28,7 +28,7 @@ namespace QaControl
         public static double MINIMUM_GENERATOR_VOLTAGE_DBV = -165;
         public static double MAXIMUM_GENERATOR_VOLTAGE_DBV = 18;
 
-        public static double MINIMUM_GENERATOR_FREQUENCY_HZ = 5;
+        public static double MINIMUM_GENERATOR_FREQUENCY_HZ = 1;
         public static double MAXIMUM_GENERATOR_FREQUENCY_HZ = 96000;
 
         public static double MINIMUM_LOAD = 0;
@@ -173,10 +173,10 @@ namespace QaControl
         public static double[] GetLineairSpacedLogarithmicValuesPerOctave(double start, double stop, uint stepsPerOctave)
         {
             // Calculate the number of octaves between start and stop frequencies
-            double octaves = Math.Log(stop / start, 2);
+            double octaves = Math.Max(1, Math.Log(stop / start, 2));
 
             // Calculate the total number of steps based on steps per octave
-            int totalSteps = (int)(stepsPerOctave * octaves);
+            int totalSteps = Math.Max(2, (int)(stepsPerOctave * octaves));
 
             // Calculate the increment in logarithmic space (base 2)
             double logStep = octaves / totalSteps;
@@ -187,6 +187,8 @@ namespace QaControl
             {
                 // Calculate the frequency by raising 2 to the power of the current log position
                 values[i] =  start * Math.Pow(2, i * logStep);
+                if (values[i] > stop)
+                    values[i] = stop;
             }
 
             return values;
@@ -205,6 +207,9 @@ namespace QaControl
             for (int i = 0; i < frequencies.Length; i++) {
                 binnedFrequencies[i] = GetNearestBinFrequency(frequencies[i], sampleRate, fftSize);
             }
+
+            // Remove duplicates (occurs when many steps at low frequencies). Remove frequencies lower than 1 and higher than 95500
+            binnedFrequencies = binnedFrequencies.Where(x => x >= 1 && x <= 95500).GroupBy(x => x).Select(y => y.First()).ToArray();
 
             return binnedFrequencies;
         }
@@ -463,18 +468,27 @@ namespace QaControl
         public static async Task<(double, LeftRightSeries)> DetermineGenAmplitudeByOutputAmplitudeWithChirp(double startGeneratorAmplitude, double desiredOutputAmplitude, bool leftChannelEnabled, bool rightChannelEnabled, CancellationToken ct)
         {
             await Qa40x.SetExpoChirpGen(startGeneratorAmplitude, 0, 48, false);
-            await Qa40x.SetOutputSource(OutputSources.ExpoChirp);                    // Set sine wave
-            LeftRightSeries acqData = await DoAcquisitions(1, ct);            // Do a single aqcuisition
+            await Qa40x.SetOutputSource(OutputSources.ExpoChirp);                   // Set sine wave
+            LeftRightSeries acqData = await DoAcquisitions(1, ct);                  // Do a single aqcuisition
             if (acqData == null || acqData.FreqInput == null)
                 return (150, null);
+
+            int binsToSkip = (int)(10 / acqData.FreqInput.Df);                      // Skip first 10 Hz
+            int binsToTake = (int)(80000 / acqData.FreqInput.Df);                   // Take up to 80 kHz
+
+            if (binsToTake >= acqData.FreqInput.Left.Length)                        // Invalid amount of samples, use all 
+            {
+                binsToSkip = 0;
+                binsToTake = acqData.FreqInput.Left.Length;        
+            }
 
             // Determine highest channel value
             double peak_left = -150;
             double peak_right = -150;
             if (leftChannelEnabled)
-                peak_left = acqData.FreqInput.Left.Max();
+                peak_left = acqData.FreqInput.Left.Skip(binsToSkip).Take(binsToTake).Max();
             if (rightChannelEnabled)
-                peak_right = acqData.FreqInput.Right.Max();
+                peak_right = acqData.FreqInput.Right.Skip(binsToSkip).Take(binsToTake).Max();
 
             double peak_dBV = 20 * Math.Log10(Math.Max(peak_left, peak_right));
 
@@ -889,7 +903,7 @@ namespace QaControl
                 displayTime = period * 2;
             else if (period < 0.0002)
                 displayTime = period * 1.5;
-
+           
             // Get first zero-crossing
             int startStep = 0;
             if (!plotChirp)
@@ -931,7 +945,7 @@ namespace QaControl
 
 
             double maxVolt = 0;
-            for (int f = startStep; f < startStep + displaySteps; f++)
+            for (int f = startStep; f < startStep + displaySteps && f < timeData.Left.Length; f++)
             {
                 timeX.Add(time);
                 voltY_left.Add(timeData.Left[f]);
@@ -963,7 +977,7 @@ namespace QaControl
                 plot_left = plot.Plot.Add.Scatter(timeX, voltY_left);
                 plot_left.LineWidth = 1;
                 plot_left.Color = new ScottPlot.Color(1, 97, 170, 255);  // Blue
-                plot_left.MarkerSize = 1;
+                plot_left.MarkerSize = 2;
             }
 
             Scatter plot_right = null;
@@ -975,7 +989,7 @@ namespace QaControl
                     plot_right.Color = new ScottPlot.Color(220, 5, 46, 120); // Red transparant if left channel behind it
                 else
                     plot_right.Color = new ScottPlot.Color(220, 5, 46, 255); // Red
-                plot_right.MarkerSize = 1;
+                plot_right.MarkerSize = 2;
             }
 
             plot.Plot.Axes.SetLimits(0, time, -maxVolt, maxVolt);
@@ -1000,6 +1014,129 @@ namespace QaControl
             Clipboard.SetImage(bm);
         }
 
+        public static double GetPhaseBetweenSignals(uint sampleRate, double frequency, double[] referenceSignal, double[] analyzedSignal)
+        {
+            //if (frequency < 50000)
+                return GetPhaseByFft(sampleRate, frequency, referenceSignal, analyzedSignal);               // Get phase by fft. Is faster than correlation but maybe less accurate at high frequencies. We need to test this.
+            
+            //return GetPhaseByCorrelation(sampleRate, frequency, referenceSignal, analyzedSignal);         // Get phase by correlation
+        }
+
+        public static double GetPhaseByFft(uint sampleRate, double frequency, double[] referenceSignal, double[] analyzedSignal)
+        {
+            var window = new FftSharp.Windows.Hanning();
+            double[] windowed_l = window.Apply(analyzedSignal);
+            System.Numerics.Complex[] spectrum_l = FftSharp.FFT.Forward(windowed_l);
+
+            double[] windowed_r = window.Apply(referenceSignal);
+            System.Numerics.Complex[] spectrum_r = FftSharp.FFT.Forward(windowed_r);
+
+            var fundamentalBin = GetBinOfFrequency(frequency, sampleRate, (uint)referenceSignal.Length);
+            var phase = (180 / Math.PI) * (spectrum_l[fundamentalBin].Phase - spectrum_r[fundamentalBin].Phase);
+
+            if (phase < -180)
+                phase = phase + 360;
+            else if (phase > 180)
+                phase = phase - 360;
+
+            return phase;
+        }
+
+        /// <summary>
+        /// Get the phase of the output signal to the reference signal
+        /// </summary>
+        /// <param name="sampleRate">The sample rate used for the referenceSignal and analyzedSignal</param>
+        /// <param name="frequency">The frequency of the signals</param>
+        /// <param name="referenceSignal">The reference signal for the phase measurement</param>
+        /// <param name="analyzedSignal">The signal to calculate the phase of</param>
+        /// <returns>The phase between the analyzed and refernce signal in degrees</returns>
+        public static double GetPhaseByCorrelation(uint sampleRate, double frequency, double[] referenceSignal, double[] analyzedSignal)
+        {
+            // Constants
+            const double resolution = 0.5;                  // 0.5 degree resolution seems to work the best. Finer resolution comes with more calculation time
+            const int minimum_samples_to_compare = 200;     // Minimum amount of samples to use for good result up to 95 kHz
+            const int minimum_cycles_calculate = 3;         // Use at least 3 cycles
+
+
+            double sampleTime = 1 / (double)sampleRate;
+            double samplesPerCycle = sampleRate / frequency;
+            int cyclesToCalculate = (int)Math.Max(minimum_cycles_calculate, (minimum_samples_to_compare / samplesPerCycle));     // Calculate amount of cycles needed for minimum_samples_to_compare
+            int amount_samples = (int)(sampleRate / frequency * cyclesToCalculate);         // Amount of samples to take from source voltages
+
+            // Make the input signal the same amplitude as the output 
+            var inputMaxV = referenceSignal.Max();
+            var outputMaxV = analyzedSignal.Max();
+            var gain = outputMaxV / inputMaxV;
+            var normalizedReferenceSignal = referenceSignal.Select(x => x * gain).ToArray();
+
+
+            // Resample with higher sample rate
+            int sampleMultiplier = Math.Max(1, (int)(360.0 / resolution / samplesPerCycle));                    // Calculate multiplier for new sample rate     
+            int newSampleRate = (int)sampleRate * sampleMultiplier;                                             // Calculate new sample rate
+            double newSampleTime = 1 / (double)newSampleRate;                                                   // Time between samples
+            double samplesToSkip = sampleMultiplier;                                                            // Samples to skip between two samples of the original signals
+
+            int samplesToCalculate = (int)(samplesPerCycle * cyclesToCalculate * sampleMultiplier);
+
+            // Create a references sinewave signal with the new sample rate but the same frequency
+            double[] synthesizedSignal = Generator.GenerateSine(samplesToCalculate, newSampleRate, frequency, outputMaxV, 0);   
+
+            // Resample the reference and analyzed signal to the new sample rate. Add one extra 'empty' cycle 
+            int newSamplesPerCycle = samplesToCalculate / cyclesToCalculate;
+            double[] resampledAnalyzedSignal = new double[samplesToCalculate];
+            double[] resampledReferenceSignal = new double[samplesToCalculate];
+
+            int sampleNr = 0;
+            for (int i = 0; i < samplesToCalculate - newSamplesPerCycle; i += (int)samplesToSkip)
+            {
+                resampledReferenceSignal[i] = normalizedReferenceSignal[sampleNr];
+                resampledAnalyzedSignal[i] = analyzedSignal[sampleNr];
+                sampleNr++;
+            }
+
+            // Correlate (convolute) the resampled reference and analyzed with the reference signal.
+            // The synthesized signal will be shifted one samle each iteration. The sample which falls off is added to the other size.
+            // That is possible because it contains complete cycles.
+            double[] aCorrelationAnalyzedSignal = new double[newSamplesPerCycle];
+            double[] aCorrelationReferenceSignal = new double[newSamplesPerCycle];
+            for (int i = 0; i < newSamplesPerCycle; i++)
+            {
+                // Three lines below do the same as: var shiftedSynth = synthesizedSignal.Skip(i).Concat(synthesizedSignal.Take(i)).ToArray();
+                double[] shiftedSynth = new double[samplesToCalculate];
+                Array.Copy(synthesizedSignal, i, shiftedSynth, 0, samplesToCalculate - i);                       
+                Array.Copy(synthesizedSignal, 0, shiftedSynth, samplesToCalculate - i, i);
+
+                aCorrelationReferenceSignal[i] = Statistics.Pearson(resampledReferenceSignal, shiftedSynth);     // Get correlation between reference and synth signal
+                aCorrelationAnalyzedSignal[i] = Statistics.Pearson(resampledAnalyzedSignal, shiftedSynth);       // Get correlation between analyzed and synth signal
+            }
+
+            // Get the item with the highest correlation and get the sample index of the reference signal
+            var corrItemReferenceSignal = aCorrelationReferenceSignal.Select((Value, Index) => new { Value, Index }).OrderByDescending(i => i.Value).First();
+            var maxCorrReferenceSignal = corrItemReferenceSignal.Value;
+            var maxCorrIndexReferenceSignal = corrItemReferenceSignal.Index;
+            var shiftTimeReferenceSignal = newSampleTime * maxCorrIndexReferenceSignal;                         // Calculate the time shift of the input signal to the reference signal
+            //var phaseReferenceSignal = 360 * frequency * shiftTimeReferenceSignal;                            // Calculate the phase of the input signal to the reference signal
+
+            // Get the item with the highest correlation and get the sample index of the analyzed signal
+            var corrItemAnalyzedSignal = aCorrelationAnalyzedSignal.Select((Value, Index) => new { Value, Index }).OrderByDescending(i => i.Value).First();
+            var maxCorrAnalyzedSignal = corrItemAnalyzedSignal.Value;
+            var maxCorrIndexAnalyzedSignal = corrItemAnalyzedSignal.Index;
+            var shiftTimeAnalyzedSignal = newSampleTime * maxCorrIndexAnalyzedSignal;                           // Calculate the time shift of the output signal to the reference signal
+            //var phaseAnalyzedSignal = 360 * frequency * shiftTimeAnalyzedSignal;                              // Calculate the phase of the output signal to the reference signal
+
+
+            // Calculate the phase    
+            var phaseDiff = (360 * frequency * (shiftTimeAnalyzedSignal - shiftTimeReferenceSignal));
+            var phase = Math.Round(phaseDiff % 360, 1);                                                         // Round to 0.1 degree between -360 and 360
+
+            // Convert to between -180 and 180 degrees
+            if (phase < -180)
+                phase = phase + 360;
+            else if (phase > 180)
+                phase = phase - 360;
+           
+            return phase;
+        }
     }
 }           
     

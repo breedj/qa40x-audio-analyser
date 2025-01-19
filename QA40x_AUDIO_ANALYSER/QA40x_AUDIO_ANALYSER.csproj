@@ -73,6 +73,9 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FftSharp, Version=2.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FftSharp.2.2.0\lib\netstandard2.0\FftSharp.dll</HintPath>
+    </Reference>
     <Reference Include="HarfBuzzSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\HarfBuzzSharp.7.3.0.3\lib\net462\HarfBuzzSharp.dll</HintPath>
     </Reference>
@@ -107,22 +110,22 @@
       <HintPath>..\packages\SkiaSharp.Views.WindowsForms.2.88.9\lib\net462\SkiaSharp.Views.WindowsForms.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    <Reference Include="System.Buffers, Version=4.0.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.6.0\lib\net462\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing.Common, Version=4.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Drawing.Common.4.7.3\lib\net461\System.Drawing.Common.dll</HintPath>
     </Reference>
-    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    <Reference Include="System.Memory, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.6.0\lib\net462\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    <Reference Include="System.Numerics.Vectors, Version=4.1.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.6.0\lib\net462\System.Numerics.Vectors.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.0\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Security.AccessControl, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.AccessControl.4.7.0\lib\net461\System.Security.AccessControl.dll</HintPath>
@@ -154,12 +157,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\FrequencyResponse\E_FrequencyResponse_GraphType.cs" />
-    <Compile Include="Data\FrequencyResponse\E_FrequencyResponse_Reference.cs" />
+    <Compile Include="Data\FrequencyResponse\E_FrequencyResponseReference.cs" />
     <Compile Include="Data\FrequencyResponse\FrequencyResponseData.cs" />
     <Compile Include="Data\FrequencyResponse\FrequencyResponseGraphSettings.cs" />
     <Compile Include="Data\FrequencyResponse\FrequencyResponseMeasurementResult.cs" />
     <Compile Include="Data\FrequencyResponse\FrequencyResponseMeasurementSettings.cs" />
+    <Compile Include="Data\FrequencyResponse\E_FrequencyResponseGraphType.cs" />
+    <Compile Include="Data\FrequencyResponseSteps\BodePlotData.cs" />
+    <Compile Include="Data\FrequencyResponseSteps\BodePlotMeasurementResult.cs" />
+    <Compile Include="Data\FrequencyResponseSteps\BodePlotGraphSettings.cs" />
+    <Compile Include="Data\FrequencyResponseSteps\BodePlotMeasurementSettings.cs" />
+    <Compile Include="Data\FrequencyResponseSteps\BodePlotStep.cs" />
     <Compile Include="Data\ThdAmplitude\E_ThdAmplitude_GraphType.cs" />
     <Compile Include="Data\ThdAmplitude\E_X_AxisType.cs" />
     <Compile Include="Data\ThdAmplitude\ThdAmplitudeGraphSettings.cs" />
@@ -194,6 +202,12 @@
     <Compile Include="frmThdAmplitude.Designer.cs">
       <DependentUpon>frmThdAmplitude.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmBodePlot.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmBodePlot.Designer.cs">
+      <DependentUpon>frmBodePlot.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmThdFrequency.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -203,6 +217,9 @@
     <Compile Include="Data\HarmonicData.cs" />
     <Compile Include="Libraries\ComboHelper.cs" />
     <Compile Include="Libraries\GraphColors.cs" />
+    <Compile Include="Libraries\Generator.cs" />
+    <Compile Include="Libraries\Interpolation.cs" />
+    <Compile Include="Libraries\Statistics.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Libraries\Qa40x.cs" />
@@ -217,6 +234,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmThdAmplitude.resx">
       <DependentUpon>frmThdAmplitude.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmBodePlot.resx">
+      <DependentUpon>frmBodePlot.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmThdFrequency.resx">
       <DependentUpon>frmThdFrequency.cs</DependentUpon>

@@ -297,6 +297,15 @@ namespace QA402_AUDIO_ANALYSER
             return lrts;
         }
 
+        static public async Task<LeftRightTimeSeries> GetOutputTimeSeries()
+        {
+            Dictionary<string, string> d = await Get(string.Format("/Data/Time/Output"));
+
+            LeftRightTimeSeries lrts = new LeftRightTimeSeries() { dt = Convert.ToDouble(d["Dx"]), Left = ConvertBase64ToDoubles(d["Left"]), Right = ConvertBase64ToDoubles(d["Right"]) };
+
+            return lrts;
+        }
+
         static public async Task<LeftRightFrequencySeries> GetInputFrequencySeries()
         {
             DateTime now = DateTime.Now;

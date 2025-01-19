@@ -1,5 +1,4 @@
 ﻿using QA402_AUDIO_ANALYSER;
-using QA40x_AUDIO_ANALYSER;
 using QaControl;
 using ScottPlot;
 using ScottPlot.Plottables;
@@ -59,7 +58,7 @@ namespace QA40x_AUDIO_ANALYSER
         }
 
         void PopulateMeasurementSettingsComboBoxes()
-        {
+        { 
             var items = new List<KeyValuePair<double, string>>
             {
                 new (0, "Input voltage"),
@@ -147,12 +146,12 @@ namespace QA40x_AUDIO_ANALYSER
             settings.FftSize = 65536 * 2;
             settings.WindowingFunction = Windowing.Hann;
             settings.SmoothDenominator = 3;
-            settings.RightChannelIsReference = false;
+            settings.RightChannelIsReference = true;
             settings.GeneratorType = E_GeneratorType.OUTPUT_VOLTAGE;
             settings.GeneratorAmplitude = 0;
             settings.GeneratorAmplitudeUnit = E_VoltageUnit.dBV;
             settings.EnableLeftChannel = true;
-            settings.EnableRightChannel = true;
+            settings.EnableRightChannel = false;
             settings.SmoothDenominator = 24;
             settings.FftResolution = 1;
         }
@@ -170,7 +169,7 @@ namespace QA40x_AUDIO_ANALYSER
                 FrequencyRange_Start = 1,
                 FrequencyRange_End = 100000,
 
-                GraphType = E_FrequencyResponse_GraphType.DBV,
+                GraphType = E_FrequencyResponseGraphType.DBV,
 
                 Show1dBBandwidth_L = false,
                 Show3dBBandwidth_L = true,
@@ -575,7 +574,7 @@ namespace QA40x_AUDIO_ANALYSER
             if (cmbGraph_FreqStart.SelectedIndex > -1 && cmbGraph_FreqEnd.SelectedIndex > -1)
                 freqPlot.Plot.Axes.SetLimits(Math.Log10(GraphSettings.FrequencyRange_Start), Math.Log10(Convert.ToDouble(GraphSettings.FrequencyRange_End)), GraphSettings.YRangeBottom, GraphSettings.YRangeTop);
 
-            if (GraphSettings.GraphType == E_FrequencyResponse_GraphType.DBV)
+            if (GraphSettings.GraphType == E_FrequencyResponseGraphType.DBV)
                 freqPlot.Plot.Title("Frequency Response (dBV)");
             else
                 freqPlot.Plot.Title("Gain (dB)");
@@ -592,6 +591,16 @@ namespace QA40x_AUDIO_ANALYSER
             freqPlot.Plot.Legend.Orientation = ScottPlot.Orientation.Horizontal;
             freqPlot.Plot.Legend.Alignment = ScottPlot.Alignment.UpperRight;
 
+
+            ScottPlot.AxisRules.MaximumBoundary rule = new(
+                xAxis: freqPlot.Plot.Axes.Bottom,
+                yAxis: freqPlot.Plot.Axes.Left,
+                limits: new AxisLimits(Math.Log10(1), Math.Log10(100000), -200, 100)
+                );
+
+            freqPlot.Plot.Axes.Rules.Clear();
+            freqPlot.Plot.Axes.Rules.Add(rule);
+
             freqPlot.Refresh();
         }
 
@@ -600,7 +609,7 @@ namespace QA40x_AUDIO_ANALYSER
         /// Plot the magnitude graph
         /// </summary>
         /// <param name="measurementResult">Data to plot</param>
-        void PlotGraph(FrequencyResponseMeasurementResult measurementResult, int measurementNr, bool showLeftChannel, bool showRightChannel, E_FrequencyResponse_GraphType graphType)
+        void PlotGraph(FrequencyResponseMeasurementResult measurementResult, int measurementNr, bool showLeftChannel, bool showRightChannel, E_FrequencyResponseGraphType graphType)
         {
             if (measurementResult == null || measurementResult.FrequencyResponseData == null || measurementResult.FrequencyResponseData.FreqInput == null)
                 return;
@@ -614,7 +623,7 @@ namespace QA40x_AUDIO_ANALYSER
             double startFrequency = frequencyStep;
 
 
-            if (graphType == E_FrequencyResponse_GraphType.GAIN)
+            if (graphType == E_FrequencyResponseGraphType.GAIN)
             {
                 if (measurementResult.GainData == null)
                     return;
@@ -708,7 +717,7 @@ namespace QA40x_AUDIO_ANALYSER
                 chkEnableRightChannel.Visible = true;
                 
                 btnGraph_Gain.Visible = false;
-                GraphSettings.GraphType = E_FrequencyResponse_GraphType.DBV;
+                GraphSettings.GraphType = E_FrequencyResponseGraphType.DBV;
                 
                 
                 if (MeasurementSettings.EnableLeftChannel && !MeasurementSettings.EnableRightChannel)
@@ -733,8 +742,8 @@ namespace QA40x_AUDIO_ANALYSER
             pnlCursorsRight.Visible = GraphSettings.ShowRightChannel;
 
             grpMeasurements_L.Visible = MeasurementSettings.EnableLeftChannel;
-            grpMeasurements_R.Visible = MeasurementSettings.EnableRightChannel && GraphSettings.GraphType == E_FrequencyResponse_GraphType.DBV;
-            if (GraphSettings.GraphType == E_FrequencyResponse_GraphType.DBV)
+            grpMeasurements_R.Visible = MeasurementSettings.EnableRightChannel && GraphSettings.GraphType == E_FrequencyResponseGraphType.DBV;
+            if (GraphSettings.GraphType == E_FrequencyResponseGraphType.DBV)
             {
                 grpMeasurements_L.Text = "Measurements left channel";
                 pnlCursorsRight.Visible = true;
@@ -874,7 +883,7 @@ namespace QA40x_AUDIO_ANALYSER
                 if (MeasurementResult.FrequencyResponseData.FreqInput.Left.Count() > nearest1.Index)
                 {
                     // Write cursor texts based in plot type
-                    if (GraphSettings.GraphType == E_FrequencyResponse_GraphType.DBV)
+                    if (GraphSettings.GraphType == E_FrequencyResponseGraphType.DBV)
                     {
                         WriteCursorTexts_dBV((uint)nearest1.Index);
                     }
@@ -1048,7 +1057,7 @@ namespace QA40x_AUDIO_ANALYSER
 
         private void btnGraph_dBV_Click(object sender, EventArgs e)
         {
-            GraphSettings.GraphType = E_FrequencyResponse_GraphType.DBV;
+            GraphSettings.GraphType = E_FrequencyResponseGraphType.DBV;
             ClearCursorTexts();
             UpdateGraphChannelSelectors();
             btnFitGraphY_Click(sender, e);
@@ -1056,7 +1065,7 @@ namespace QA40x_AUDIO_ANALYSER
 
         private void btnGraph_Gain_Click(object sender, EventArgs e)
         {
-            GraphSettings.GraphType = E_FrequencyResponse_GraphType.GAIN;
+            GraphSettings.GraphType = E_FrequencyResponseGraphType.GAIN;
             ClearCursorTexts();
             UpdateGraphChannelSelectors();
             btnFitGraphY_Click(sender, e);
@@ -1090,7 +1099,7 @@ namespace QA40x_AUDIO_ANALYSER
         private void PlotBandwidthLines()
         {
             // Plot
-            if (GraphSettings.GraphType == E_FrequencyResponse_GraphType.DBV)   
+            if (GraphSettings.GraphType == E_FrequencyResponseGraphType.DBV)   
                 PlotDbVBandwidthLines();
             else 
                 PlotGainBandwidthLines();
@@ -1109,7 +1118,7 @@ namespace QA40x_AUDIO_ANALYSER
                 BandwidthData bandwidthData1dB = new BandwidthData();
                 if (MeasurementResult.MeasurementSettings.EnableLeftChannel)
                 {
-                    bandwidthData3dB.Left = CalculateBandwidth(-3, MeasurementResult.FrequencyResponseData.FreqInput.Left);
+                    bandwidthData3dB.Left = CalculateBandwidth(-3, MeasurementResult.FrequencyResponseData.FreqInput.Left, MeasurementResult.FrequencyResponseData.FreqInput.Df);
                     lblMeas_BW3_L.Text = AutoUnitText(bandwidthData3dB.Left.Bandwidth, "Hz", 2);
                     lblMeas_BW3_low_L.Text = AutoUnitText(bandwidthData3dB.Left.LowerFreq, "Hz", 2);
                     lblMeas_BW3_high_L.Text = AutoUnitText(bandwidthData3dB.Left.UpperFreq, "Hz", 2);
@@ -1117,7 +1126,7 @@ namespace QA40x_AUDIO_ANALYSER
                     lblMeas_Amplitude_dBV_L.Text = AutoUnitText(QaLibrary.ConvertVoltage(bandwidthData3dB.Left.HighestAmplitudeVolt, E_VoltageUnit.Volt, E_VoltageUnit.dBV), "dBV", 2);
                     lblMeas_Highest_Freq_L.Text = AutoUnitText(bandwidthData3dB.Left.HighestAmplitudeFreq, "Hz", 2);
 
-                    bandwidthData1dB.Left = CalculateBandwidth(-1, MeasurementResult.FrequencyResponseData.FreqInput.Left);
+                    bandwidthData1dB.Left = CalculateBandwidth(-1, MeasurementResult.FrequencyResponseData.FreqInput.Left, MeasurementResult.FrequencyResponseData.FreqInput.Df);
                     lblMeas_BW1_L.Text = AutoUnitText(bandwidthData1dB.Left.Bandwidth, "Hz", 2);
                     lblMeas_BW1_low_L.Text = AutoUnitText(bandwidthData1dB.Left.LowerFreq, "Hz", 2);
                     lblMeas_BW1_high_L.Text = AutoUnitText(bandwidthData1dB.Left.UpperFreq, "Hz", 2);
@@ -1125,7 +1134,7 @@ namespace QA40x_AUDIO_ANALYSER
 
                 if (MeasurementResult.MeasurementSettings.EnableRightChannel)
                 {
-                    bandwidthData3dB.Right = CalculateBandwidth(-3, MeasurementResult.FrequencyResponseData.FreqInput.Right);
+                    bandwidthData3dB.Right = CalculateBandwidth(-3, MeasurementResult.FrequencyResponseData.FreqInput.Right, MeasurementResult.FrequencyResponseData.FreqInput.Df);
                     lblMeas_BW3_R.Text = AutoUnitText(bandwidthData3dB.Right.Bandwidth, "Hz", 1);
                     lblMeas_BW3_low_R.Text = AutoUnitText(bandwidthData3dB.Right.LowerFreq, "Hz", 1);
                     lblMeas_BW3_high_R.Text = AutoUnitText(bandwidthData3dB.Right.UpperFreq, "Hz", 1);
@@ -1133,7 +1142,7 @@ namespace QA40x_AUDIO_ANALYSER
                     lblMeas_Amplitude_dBV_R.Text = AutoUnitText(QaLibrary.ConvertVoltage(bandwidthData3dB.Right.HighestAmplitudeVolt, E_VoltageUnit.Volt, E_VoltageUnit.dBV), "dBV", 2);
                     lblMeas_Highest_Freq_R.Text = AutoUnitText(bandwidthData3dB.Right.HighestAmplitudeFreq, "Hz", 1);
 
-                    bandwidthData1dB.Right = CalculateBandwidth(-1, MeasurementResult.FrequencyResponseData.FreqInput.Right);
+                    bandwidthData1dB.Right = CalculateBandwidth(-1, MeasurementResult.FrequencyResponseData.FreqInput.Right, MeasurementResult.FrequencyResponseData.FreqInput.Df);
                     lblMeas_BW1_R.Text = AutoUnitText(bandwidthData1dB.Right.Bandwidth, "Hz", 1);
                     lblMeas_BW1_low_R.Text = AutoUnitText(bandwidthData1dB.Right.LowerFreq, "Hz", 1);
                     lblMeas_BW1_high_R.Text = AutoUnitText(bandwidthData1dB.Right.UpperFreq, "Hz", 1);
@@ -1186,7 +1195,7 @@ namespace QA40x_AUDIO_ANALYSER
                 // Gain BW
                 if (MeasurementResult.MeasurementSettings.EnableLeftChannel)
                 {
-                    var gainBW3dB = CalculateBandwidth(-3, MeasurementResult.GainData);        // Volts is gain
+                    var gainBW3dB = CalculateBandwidth(-3, MeasurementResult.GainData, MeasurementResult.FrequencyResponseData.FreqInput.Df);        // Volts is gain
                     lblMeas_BW3_L.Text = AutoUnitText(gainBW3dB.Bandwidth, "Hz", 1);
                     lblMeas_BW3_low_L.Text = AutoUnitText(gainBW3dB.LowerFreq, "Hz", 1);
                     lblMeas_BW3_high_L.Text = AutoUnitText(gainBW3dB.UpperFreq, "Hz", 1);
@@ -1194,7 +1203,7 @@ namespace QA40x_AUDIO_ANALYSER
                     lblMeas_Amplitude_dBV_L.Text = AutoUnitText(QaLibrary.ConvertVoltage(gainBW3dB.HighestAmplitudeVolt, E_VoltageUnit.Volt, E_VoltageUnit.dBV), "dB", 2);
                     lblMeas_Highest_Freq_L.Text = AutoUnitText(gainBW3dB.HighestAmplitudeFreq, "Hz", 1);
 
-                    var gainBW1dB = CalculateBandwidth(-1, MeasurementResult.GainData);
+                    var gainBW1dB = CalculateBandwidth(-1, MeasurementResult.GainData, MeasurementResult.FrequencyResponseData.FreqInput.Df);
                     lblMeas_BW1_L.Text = AutoUnitText(gainBW1dB.Bandwidth, "Hz", 1);
                     lblMeas_BW1_low_L.Text = AutoUnitText(gainBW1dB.LowerFreq, "Hz", 1);
                     lblMeas_BW1_high_L.Text = AutoUnitText(gainBW1dB.UpperFreq, "Hz", 1);
@@ -1217,6 +1226,97 @@ namespace QA40x_AUDIO_ANALYSER
                     }
                 }
             }
+        }
+
+
+        class BandwidthChannelData
+        {
+            public double LowestAmplitudeVolt;
+            public double LowestAmplitudeFreq;
+
+            public double HighestAmplitudeVolt;
+            public double HighestAmplitudeFreq;
+
+            public double LowerFreq;
+            public double LowerFreqAmplitudeVolt;
+
+            public double UpperFreq;
+            public double UpperFreqAmplitudeVolt;
+
+            public double Bandwidth;
+        }
+
+        class BandwidthData
+        {
+            public BandwidthChannelData Left;
+            public BandwidthChannelData Right;
+        }
+
+        /// <summary>
+        /// Calculate bandwidth from equally spaced data.
+        /// </summary>
+        /// <param name="dB"></param>
+        /// <param name="data"></param>
+        /// <param name="frequencyResolution"></param>
+        /// <returns></returns>
+        BandwidthChannelData CalculateBandwidth(double dB, double[] data, double frequencyResolution)
+        {
+            BandwidthChannelData bandwidthData = new BandwidthChannelData();
+
+            if (data == null)
+                return bandwidthData;
+
+            var gainValue = Math.Pow(10, dB / 20);
+
+            bandwidthData.LowestAmplitudeVolt = data.Skip(1).Min(); // Skip dc
+            var lowestAmplitude_left_index = data.ToList().IndexOf(bandwidthData.LowestAmplitudeVolt);
+            bandwidthData.LowestAmplitudeFreq = frequencyResolution * (lowestAmplitude_left_index + 1);
+
+            // Get highest amplitude
+            //bandwidthData.HighestAmplitudeVolt = data.Skip((int)(5 / frequencyResolution)).Max();      // Skip first 5 Hz for now.
+            bandwidthData.HighestAmplitudeVolt = data.Skip(1).Max();      // Skip dc.
+            var highestAmplitude_left_index = data.ToList().IndexOf(bandwidthData.HighestAmplitudeVolt);
+            bandwidthData.HighestAmplitudeFreq = frequencyResolution * highestAmplitude_left_index;
+
+            // Get lower frequency
+            //var lowerFreq_left = data.Select((Value, Index) => new { Value, Index }).Where(f => f.Value <= (bandwidthData.HighestAmplitudeVolt * gainValue) && f.Index < highestAmplitude_left_index).LastOrDefault();
+            var lowerFreq_left = data.Select((Value, Index) => new { Value, Index })
+                .Where(f => f.Index < highestAmplitude_left_index)
+                .Select(n => new { n.Value, n.Index, delta = Math.Abs(n.Value - (bandwidthData.HighestAmplitudeVolt * gainValue)) })
+                .OrderBy(p => p.delta)
+                .FirstOrDefault();
+
+            if (lowerFreq_left != default)
+            {
+                double lowerFreq_left_index = lowerFreq_left.Index;
+                bandwidthData.LowerFreqAmplitudeVolt = lowerFreq_left.Value;
+                double lowerFreq_left_amplitude_dBV = 20 * Math.Log10(lowerFreq_left.Value);
+                bandwidthData.LowerFreq = (lowerFreq_left_index + 1) * frequencyResolution;
+            }
+            else
+                bandwidthData.LowerFreq = 1;
+
+            // Get upper frequency
+            //var upperFreq_left = data.Select((Value, Index) => new { Value, Index }).Where(f => f.Value <= bandwidthData.HighestAmplitudeVolt * gainValue && f.Index > highestAmplitude_left_index).FirstOrDefault();
+            var upperFreq_left = data.Select((Value, Index) => new { Value, Index })
+                .Where(f => f.Index > highestAmplitude_left_index)
+                .Select(n => new { n.Value, n.Index, delta = Math.Abs(n.Value - (bandwidthData.HighestAmplitudeVolt * gainValue)) })
+                .OrderBy(p => p.delta)
+                .FirstOrDefault();
+
+            if (upperFreq_left != default)
+            {
+                double upperFreq_left_index = upperFreq_left.Index;
+                bandwidthData.UpperFreqAmplitudeVolt = upperFreq_left.Value;
+                double upperFreq_left_amplitude_dBV = 20 * Math.Log10(upperFreq_left.Value);
+                bandwidthData.UpperFreq = upperFreq_left_index * frequencyResolution;
+            }
+            else
+                bandwidthData.UpperFreq = 100000;
+
+            bandwidthData.Bandwidth = bandwidthData.UpperFreq - bandwidthData.LowerFreq;
+
+            return bandwidthData;
         }
 
         private string AutoUnitText(double value, string unit, int decimals, int milliDecimals = 0)
@@ -1311,89 +1411,7 @@ namespace QA40x_AUDIO_ANALYSER
             txt.OffsetY = offsetY;
         }
 
-        private class BandwidthChannelData
-        {
-            public double LowestAmplitudeVolt;
-            public double LowestAmplitudeFreq;
-
-            public double HighestAmplitudeVolt;
-            public double HighestAmplitudeFreq;
-
-            public double LowerFreq;
-            public double LowerFreqAmplitudeVolt;
-
-            public double UpperFreq;
-            public double UpperFreqAmplitudeVolt;
-
-            public double Bandwidth;
-        }
-
-        private class BandwidthData
-        {
-            public BandwidthChannelData Left;
-            public BandwidthChannelData Right;
-        }
-
-        private BandwidthChannelData CalculateBandwidth(double dB, double[] data)
-        {
-            BandwidthChannelData bandwidthData = new BandwidthChannelData();
-
-            if (data == null)
-                return bandwidthData;
-
-            var gainValue = Math.Pow(10, dB / 20);
-
-            bandwidthData.LowestAmplitudeVolt = data.Skip(1).Min();
-            var lowestAmplitude_left_index = data.ToList().IndexOf(bandwidthData.HighestAmplitudeVolt);
-            bandwidthData.LowestAmplitudeFreq = MeasurementResult.FrequencyResponseData.FreqInput.Df * lowestAmplitude_left_index;
-
-            // Get highest amplitude
-            bandwidthData.HighestAmplitudeVolt = data.Skip((int)(5 / MeasurementResult.FrequencyResponseData.FreqInput.Df)).Max();      // Skip first 5 Hz for now.
-            var highestAmplitude_left_index = data.ToList().IndexOf(bandwidthData.HighestAmplitudeVolt);
-            bandwidthData.HighestAmplitudeFreq = MeasurementResult.FrequencyResponseData.FreqInput.Df * highestAmplitude_left_index;
-
-            // Get lower frequency
-            //var lowerFreq_left = data.Select((Value, Index) => new { Value, Index }).Where(f => f.Value <= (bandwidthData.HighestAmplitudeVolt * gainValue) && f.Index < highestAmplitude_left_index).LastOrDefault();
-            var lowerFreq_left = data.Select((Value, Index) => new { Value, Index })
-                .Where(f => f.Index < highestAmplitude_left_index)
-                .Select(n => new { n.Value, n.Index, delta = Math.Abs(n.Value - (bandwidthData.HighestAmplitudeVolt * gainValue)) })
-                .OrderBy(p => p.delta)
-                .FirstOrDefault();
-
-            if (lowerFreq_left != default)
-            {
-                double lowerFreq_left_index = lowerFreq_left.Index;
-                bandwidthData.LowerFreqAmplitudeVolt = lowerFreq_left.Value;
-                double lowerFreq_left_amplitude_dBV = 20 * Math.Log10(lowerFreq_left.Value);
-                bandwidthData.LowerFreq = lowerFreq_left_index * MeasurementResult.FrequencyResponseData.FreqInput.Df;
-            }
-            else
-                bandwidthData.LowerFreq = 1;
-
-            // Get upper frequency
-            //var upperFreq_left = data.Select((Value, Index) => new { Value, Index }).Where(f => f.Value <= bandwidthData.HighestAmplitudeVolt * gainValue && f.Index > highestAmplitude_left_index).FirstOrDefault();
-            var upperFreq_left = data.Select((Value, Index) => new { Value, Index })
-                .Where(f => f.Index > highestAmplitude_left_index)
-                .Select(n => new { n.Value, n.Index, delta = Math.Abs(n.Value - (bandwidthData.HighestAmplitudeVolt * gainValue)) })
-                .OrderBy(p => p.delta)
-                .FirstOrDefault();
-
-            if (upperFreq_left != default)
-            {
-                double upperFreq_left_index = upperFreq_left.Index;
-                bandwidthData.UpperFreqAmplitudeVolt = upperFreq_left.Value;
-                double upperFreq_left_amplitude_dBV = 20 * Math.Log10(upperFreq_left.Value);
-                bandwidthData.UpperFreq = upperFreq_left_index * MeasurementResult.FrequencyResponseData.FreqInput.Df;
-            }
-            else
-                bandwidthData.UpperFreq = 100000;
-
-            bandwidthData.Bandwidth = bandwidthData.UpperFreq - bandwidthData.LowerFreq;
-
-            return bandwidthData;
-        }
-
-        
+    
 
 
         /// <summary>
@@ -1586,12 +1604,12 @@ namespace QA40x_AUDIO_ANALYSER
         private void btnFitGraphY_Click(object sender, EventArgs e)
         {
             BandwidthData bw = new BandwidthData();
-            if (GraphSettings.GraphType == E_FrequencyResponse_GraphType.GAIN)
+            if (GraphSettings.GraphType == E_FrequencyResponseGraphType.GAIN)
             {
                 if (MeasurementResult == null || MeasurementResult.GainData == null)
                     return;
 
-                bw.Left = CalculateBandwidth(-3, MeasurementResult.GainData);
+                bw.Left = CalculateBandwidth(-3, MeasurementResult.GainData, MeasurementResult.FrequencyResponseData.FreqInput.Df);
                 var maxGain = 20 * Math.Log10(bw.Left.HighestAmplitudeVolt);
                 var maxValue = (int)Math.Round((maxGain + 2) / 2, MidpointRounding.AwayFromZero) * 2;
                 ud_Graph_Top.Value = maxValue;
@@ -1607,19 +1625,20 @@ namespace QA40x_AUDIO_ANALYSER
                 if (MeasurementResult == null || MeasurementResult.FrequencyResponseData == null || MeasurementResult.FrequencyResponseData.FreqInput == null || MeasurementResult.FrequencyResponseData.FreqInput.Left == null)
                     return;
 
-                bw.Left = CalculateBandwidth(-3, MeasurementResult.FrequencyResponseData.FreqInput.Left);
-                bw.Right = CalculateBandwidth(-3, MeasurementResult.FrequencyResponseData.FreqInput.Right);
+                bw.Left = CalculateBandwidth(-3, MeasurementResult.FrequencyResponseData.FreqInput.Left, MeasurementResult.FrequencyResponseData.FreqInput.Df);
+                bw.Right = CalculateBandwidth(-3, MeasurementResult.FrequencyResponseData.FreqInput.Right, MeasurementResult.FrequencyResponseData.FreqInput.Df);
 
-                var maxGain = 20 * Math.Log10(Math.Max(bw.Left.HighestAmplitudeVolt, (GraphSettings.ShowRightChannel ? bw.Right.HighestAmplitudeVolt : -160)));
+                var maxGain = 20 * Math.Log10(Math.Max(bw.Left.HighestAmplitudeVolt, (GraphSettings.ShowRightChannel ? bw.Right.HighestAmplitudeVolt : 0)));
                 var maxValue = (int)Math.Round((maxGain + 2) / 2, MidpointRounding.AwayFromZero) * 2;
                 ud_Graph_Top.Value = maxValue;
 
-                var minGain = 20 * Math.Log10(Math.Min(bw.Left.LowestAmplitudeVolt, (GraphSettings.ShowRightChannel ? bw.Right.LowestAmplitudeVolt : 160)));
-                if ((maxValue - minGain) < 10)
-                    ud_Graph_Bottom.Value = maxValue - 10;      // Mimimum range is 10
-                else 
-                    ud_Graph_Bottom.Value = (int)minGain;
-               
+                var minGain = 20 * Math.Log10(Math.Min(bw.Left.LowestAmplitudeVolt, (GraphSettings.ShowRightChannel ? bw.Right.LowestAmplitudeVolt : 100)));
+                ud_Graph_Bottom.Value = maxValue - 10;      // 1 dB per tick
+                //if ((maxValue - minGain) < 10)
+                //    ud_Graph_Bottom.Value = maxValue - 10;      // Mimimum range is 10
+                //else 
+                //    ud_Graph_Bottom.Value = (int)minGain;
+
             }
         }
 

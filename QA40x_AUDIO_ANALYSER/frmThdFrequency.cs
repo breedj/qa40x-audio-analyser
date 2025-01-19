@@ -5,6 +5,7 @@ using ScottPlot.Plottables;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -127,7 +128,7 @@ namespace QA40x_AUDIO_ANALYSER
                 new (10000, "10000"),
                 new (20000, "20000"),
                 new (50000, "50000"),
-                new (50000, "100000")
+                new (100000, "100000")
             };
             ComboBoxHelper.PopulateComboBox(cmbGraph_FreqEnd, items);
         }
@@ -139,7 +140,7 @@ namespace QA40x_AUDIO_ANALYSER
         {
             // Initialize with default measurement settings
             settings.StartFrequency = 20;
-            settings.EndFrequency = 20000;
+            settings.EndFrequency = 20000;  
             settings.SampleRate = 192000;
             settings.FftSize = 65536 * 2;
             settings.WindowingFunction = Windowing.Hann;
@@ -359,9 +360,9 @@ namespace QA40x_AUDIO_ANALYSER
             if (await QaLibrary.CheckDeviceConnected() == false)
                 return false;
            
-            // ********************************************************************
-            // Check connection
-            // Load a settings file with the particulars we want
+            // ********************************************************************  
+            // Load a settings we want
+            // ********************************************************************  
             await Qa40x.SetDefaults();
             await Qa40x.SetOutputSource(OutputSources.Off);            // We need to call this to make it turn on or off
             await Qa40x.SetSampleRate(_measurementSettings.SampleRate);
@@ -455,8 +456,12 @@ namespace QA40x_AUDIO_ANALYSER
                 var binSize = QaLibrary.CalcBinSize(_measurementSettings.SampleRate, _measurementSettings.FftSize);
                 // Generate a list of frequencies
                 var stepFrequencies = QaLibrary.GetLineairSpacedLogarithmicValuesPerOctave(_measurementSettings.StartFrequency, _measurementSettings.EndFrequency, _measurementSettings.StepsPerOctave);
-                // Translate the generated list to bin center frequncies
-                var stepBins = QaLibrary.TranslateToBinFrequencies(stepFrequencies, _measurementSettings.SampleRate, _measurementSettings.FftSize);
+                // Translate the generated list to bin center frequencies
+                var stepBinFrequencies = QaLibrary.TranslateToBinFrequencies(stepFrequencies, _measurementSettings.SampleRate, _measurementSettings.FftSize);
+                stepBinFrequencies = stepBinFrequencies.Where(x => x >= 1 && x <= 95500)                // Filter out values that are out of range 
+                    .GroupBy(x => x)                                                                    // Filter out duplicates
+                    .Select(y => y.First())
+                    .ToArray();
 
                 // ********************************************************************
                 // Do noise floor measurement
@@ -468,19 +473,19 @@ namespace QA40x_AUDIO_ANALYSER
                 if (ct.IsCancellationRequested)
                     return false;
 
-                Program.MainForm.SetupProgressBar(0, stepBins.Length);
+                Program.MainForm.SetupProgressBar(0, stepBinFrequencies.Length);
 
                 // ********************************************************************
                 // Step through the list of frequencies
                 // ********************************************************************
-                for (int f = 0; f < stepBins.Length; f++)
+                for (int f = 0; f < stepBinFrequencies.Length; f++)
                 {
-                    await Program.MainForm.ShowMessage($"Measuring step {f + 1} of {stepBins.Length}.");
+                    await Program.MainForm.ShowMessage($"Measuring step {f + 1} of {stepBinFrequencies.Length}.");
                     Program.MainForm.UpdateProgressBar(f + 1);
 
                     // Set the generator
                     double amplitudeSetpointdBV = QaLibrary.ConvertVoltage(_measurementSettings.GeneratorAmplitude, _measurementSettings.GeneratorAmplitudeUnit, E_VoltageUnit.dBV);
-                    await Qa40x.SetGen1(stepBins[f], amplitudeSetpointdBV, true);
+                    await Qa40x.SetGen1(stepBinFrequencies[f], amplitudeSetpointdBV, true);
                     if (f == 0)
                         await Qa40x.SetOutputSource(OutputSources.Sine);            // We need to call this to make the averages reset
 
@@ -488,20 +493,21 @@ namespace QA40x_AUDIO_ANALYSER
                     if (ct.IsCancellationRequested)
                         return false;
 
+                    uint fundamentalBin = QaLibrary.GetBinOfFrequency(stepBinFrequencies[f], binSize);
+                    if (fundamentalBin >= lrfs.FreqInput.Left.Length)               // Check in bin within range
+                        break;
+
+
                     ThdFrequencyStep step = new()
                     {
-                        FundamentalFrequency = stepBins[f],
+                        FundamentalFrequency = stepBinFrequencies[f],
                         GeneratorVoltage = QaLibrary.ConvertVoltage(amplitudeSetpointdBV, E_VoltageUnit.dBV, E_VoltageUnit.Volt),
                         fftData = lrfs.FreqInput,
                         timeData = lrfs.TimeInput
                     };
-
-                    uint fundamentalBin = QaLibrary.GetBinOfFrequency(step.FundamentalFrequency, binSize);
-                    if (fundamentalBin >= lrfs.FreqInput.Left.Length)               // Check in bin within range
-                        break;
-
+                  
                     // Plot the mini graphs
-                    QaLibrary.PlotMiniFftGraph(graphFft, lrfs.FreqInput, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
+                    QaLibrary.PlotMiniFftGraph(graphFft, lrfs.FreqInput, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);           
                     QaLibrary.PlotMiniTimeGraph(graphTime, lrfs.TimeInput, step.FundamentalFrequency, _measurementSettings.EnableLeftChannel && GraphSettings.ShowLeftChannel, _measurementSettings.EnableRightChannel && GraphSettings.ShowRightChannel);
 
                     step.Left = ChannelCalculations(binSize, step.FundamentalFrequency, amplitudeSetpointdBV, lrfs.FreqInput.Left, MeasurementResult.NoiseFloor.FreqInput.Left, _measurementSettings.Load);
@@ -547,7 +553,6 @@ namespace QA40x_AUDIO_ANALYSER
         private ThdFrequencyStepChannel ChannelCalculations(double binSize, double fundamentalFrequency, double generatorAmplitudeDbv, double[] fftData, double[] noiseFloorFftData, double load)
         {
             uint fundamentalBin = QaLibrary.GetBinOfFrequency(fundamentalFrequency, binSize);
-
 
             ThdFrequencyStepChannel channelData = new()
             {
@@ -914,7 +919,7 @@ namespace QA40x_AUDIO_ANALYSER
 
             //thdPlot.Plot.Axes.AutoScale();
             if (cmbGraph_FreqStart.SelectedIndex > -1 && cmbGraph_FreqEnd.SelectedIndex > -1 && cmbD_Graph_Bottom.SelectedIndex > -1 && cmbD_Graph_Top.SelectedIndex > -1)
-                thdPlot.Plot.Axes.SetLimits(Math.Log10(Convert.ToDouble(cmbGraph_FreqStart.Text)), Math.Log10(Convert.ToDouble(cmbGraph_FreqEnd.Text)), Math.Log10(Convert.ToDouble(cmbD_Graph_Bottom.Text)) - 0.000001, Math.Log10(Convert.ToDouble(cmbD_Graph_Top.Text)));  // - 0.000001 to force showing label
+                thdPlot.Plot.Axes.SetLimits(Math.Log10(GraphSettings.FrequencyRange_Start), Math.Log10(GraphSettings.FrequencyRange_End), Math.Log10(GraphSettings.D_PercentBottom) - 0.00000001, Math.Log10(GraphSettings.D_PercentTop));  // - 0.000001 to force showing label
             thdPlot.Plot.Title("Distortion (%)");
             thdPlot.Plot.Axes.Title.Label.FontSize = 17;
 
@@ -928,6 +933,19 @@ namespace QA40x_AUDIO_ANALYSER
             thdPlot.Plot.Legend.Orientation = ScottPlot.Orientation.Horizontal;
             thdPlot.Plot.Legend.Alignment = ScottPlot.Alignment.UpperRight;
             thdPlot.Plot.ShowLegend();
+
+            PixelPadding padding = new(65, 20, 30, 50);         
+            thdPlot.Plot.Layout.Fixed(padding);
+
+            ScottPlot.AxisRules.MaximumBoundary rule = new(
+                xAxis: thdPlot.Plot.Axes.Bottom,
+                yAxis: thdPlot.Plot.Axes.Left,
+                limits: new AxisLimits(Math.Log10(1), Math.Log10(100000), -200, 100)
+                );
+
+            thdPlot.Plot.Axes.Rules.Clear();
+            thdPlot.Plot.Axes.Rules.Add(rule);
+
             thdPlot.Refresh();
         }
 
@@ -1049,6 +1067,7 @@ namespace QA40x_AUDIO_ANALYSER
         void InitializeMagnitudePlot()
         {
             thdPlot.Plot.Clear();
+            thdPlot.Plot.Axes.Remove(Edge.Right);
 
             // create a minor tick generator that places log-distributed minor ticks
             //ScottPlot.TickGenerators. minorTickGen = new();
@@ -1103,7 +1122,8 @@ namespace QA40x_AUDIO_ANALYSER
 
             //thdPlot.Plot.Axes.AutoScale();
             if (cmbGraph_FreqStart.SelectedIndex > -1 && cmbGraph_FreqEnd.SelectedIndex > -1)
-                thdPlot.Plot.Axes.SetLimits(Math.Log10(Convert.ToDouble(cmbGraph_FreqStart.Text)), Math.Log10(Convert.ToDouble(cmbGraph_FreqEnd.Text)), Convert.ToDouble(ud_dB_Graph_Bottom.Value), Convert.ToDouble(ud_dB_Graph_Top.Value));
+                thdPlot.Plot.Axes.SetLimits(Math.Log10(GraphSettings.FrequencyRange_Start), Math.Log10(GraphSettings.FrequencyRange_End), GraphSettings.DbRangeBottom, GraphSettings.DbRangeTop);
+
             thdPlot.Plot.Title("Magnitude (dB)");
             thdPlot.Plot.Axes.Title.Label.FontSize = 17;
 
@@ -1112,10 +1132,23 @@ namespace QA40x_AUDIO_ANALYSER
             thdPlot.Plot.Axes.Bottom.Label.FontSize = 15;
             thdPlot.Plot.Axes.Bottom.Label.Bold = false;
 
-
             thdPlot.Plot.Legend.IsVisible = true;
             thdPlot.Plot.Legend.Orientation = ScottPlot.Orientation.Horizontal;
             thdPlot.Plot.Legend.Alignment = ScottPlot.Alignment.UpperRight;
+
+            PixelPadding padding = new(65, 20, 30, 50);
+            thdPlot.Plot.Layout.Fixed(padding);
+
+
+            ScottPlot.AxisRules.MaximumBoundary rule = new(
+                xAxis: thdPlot.Plot.Axes.Bottom,
+                yAxis: thdPlot.Plot.Axes.Left,
+                limits: new AxisLimits(Math.Log10(1), Math.Log10(100000), -200, 100)
+                );
+
+            thdPlot.Plot.Axes.Rules.Clear();
+            thdPlot.Plot.Axes.Rules.Add(rule);
+
 
             thdPlot.Refresh();
         }
@@ -1128,6 +1161,7 @@ namespace QA40x_AUDIO_ANALYSER
         void PlotMagnitude(ThdFrequencyMeasurementResult measurementResult, int measurementNr, bool showLeftChannel, bool showRightChannel)
         {
             var freqX = new List<double>();
+         
             var magnY_left = new List<double>();
             var hTotY_left = new List<double>();
             var h2Y_left = new List<double>();
@@ -1149,6 +1183,7 @@ namespace QA40x_AUDIO_ANALYSER
             foreach (var step in measurementResult.FrequencySteps)
             {
                 freqX.Add(step.FundamentalFrequency);
+               
                 if (showLeftChannel && measurementResult.MeasurementSettings.EnableLeftChannel)
                 {
                     if (GraphSettings.ShowMagnitude)

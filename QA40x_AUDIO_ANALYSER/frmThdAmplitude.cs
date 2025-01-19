@@ -207,7 +207,7 @@ namespace QA40x_AUDIO_ANALYSER
             txtStartVoltage.Text = settings.StartAmplitude.ToString("#0.0##");
             cmbStartVoltageUnit.SelectedIndex = (int)settings.StartAmplitudeUnit;
             txtEndVoltage.Text = settings.EndAmplitude.ToString("#0.0##");
-            cmbStartVoltageUnit.SelectedIndex = (int)settings.EndAmplitudeUnit;
+            cmbEndVoltageUnit.SelectedIndex = (int)settings.EndAmplitudeUnit;
        
             txtOutputLoad.Text = settings.Load.ToString();
             txtFrequency.Text = settings.Frequency.ToString();
@@ -233,8 +233,8 @@ namespace QA40x_AUDIO_ANALYSER
             ComboBoxHelper.SelectNearestValue(cmbD_Graph_Bottom, graphSettings.D_PercentBottom);
             ud_dB_Graph_Top.Value = (decimal)graphSettings.DbRangeTop;
             ud_dB_Graph_Bottom.Value = (decimal)graphSettings.DbRangeBottom;
-            SetStartVoltatgeSelectedIndexByFrequency(graphSettings.VoltageRange_Start);
-            SetEndVoltageSelectedIndexByFrequency(graphSettings.VoltageRange_End);
+            SetStartVoltageSelectedIndex(graphSettings.VoltageRange_Start);
+            SetEndVoltageSelectedIndex(graphSettings.VoltageRange_End);
 
             chkShowMagnitude.Checked = graphSettings.ShowMagnitude;
             chkShowThd.Checked = graphSettings.ShowTHD;
@@ -257,7 +257,7 @@ namespace QA40x_AUDIO_ANALYSER
         }
 
 
-        private void SetStartVoltatgeSelectedIndexByFrequency(double startVoltage)
+        private void SetStartVoltageSelectedIndex(double startVoltage)
         {
             if (startVoltage < 0.0001)
                 cmbGraph_VoltageStart.SelectedIndex = 0;
@@ -284,10 +284,10 @@ namespace QA40x_AUDIO_ANALYSER
             else 
                 cmbGraph_VoltageStart.SelectedIndex = 11;
            
-            GraphSettings.VoltageRange_Start = (uint)((KeyValuePair<double, string>)cmbGraph_VoltageStart.SelectedItem).Key;
+            GraphSettings.VoltageRange_Start = (double)((KeyValuePair<double, string>)cmbGraph_VoltageStart.SelectedItem).Key;
         }
 
-        private void SetEndVoltageSelectedIndexByFrequency(double endVoltage)
+        private void SetEndVoltageSelectedIndex(double endVoltage)
         {
             if (endVoltage <= 1)
                 cmbGraph_VoltageEnd.SelectedIndex = 0;
@@ -306,7 +306,7 @@ namespace QA40x_AUDIO_ANALYSER
             else
                 cmbGraph_VoltageEnd.SelectedIndex = 7;
 
-            GraphSettings.VoltageRange_End = (uint)((KeyValuePair<double, string>)cmbGraph_VoltageEnd.SelectedItem).Key;
+            GraphSettings.VoltageRange_End = (double)((KeyValuePair<double, string>)cmbGraph_VoltageEnd.SelectedItem).Key;
         }
 
 
@@ -935,7 +935,7 @@ namespace QA40x_AUDIO_ANALYSER
 
             //thdPlot.Plot.Axes.AutoScale();
             if (cmbGraph_VoltageStart.SelectedIndex > -1 && cmbGraph_VoltageEnd.SelectedIndex > -1 && cmbD_Graph_Bottom.SelectedIndex > -1 && cmbD_Graph_Top.SelectedIndex > -1)
-                thdPlot.Plot.Axes.SetLimits(Math.Log10(Convert.ToDouble(cmbGraph_VoltageStart.Text)), Math.Log10(Convert.ToDouble(cmbGraph_VoltageEnd.Text)), Math.Log10(Convert.ToDouble(cmbD_Graph_Bottom.Text)), Math.Log10(Convert.ToDouble(cmbD_Graph_Top.Text)));
+                thdPlot.Plot.Axes.SetLimits(Math.Log10(GraphSettings.VoltageRange_Start), Math.Log10(GraphSettings.VoltageRange_End), Math.Log10(GraphSettings.D_PercentBottom), Math.Log10(GraphSettings.D_PercentTop));
             thdPlot.Plot.Title("Distortion (%)");
             thdPlot.Plot.Axes.Title.Label.FontSize = 17;
 
@@ -955,6 +955,16 @@ namespace QA40x_AUDIO_ANALYSER
             thdPlot.Plot.Legend.Orientation = ScottPlot.Orientation.Horizontal;
             thdPlot.Plot.Legend.Alignment = ScottPlot.Alignment.UpperRight;
             thdPlot.Plot.ShowLegend();
+
+            ScottPlot.AxisRules.MaximumBoundary rule = new(
+                xAxis: thdPlot.Plot.Axes.Bottom,
+                yAxis: thdPlot.Plot.Axes.Left,
+                limits: new AxisLimits(Math.Log10(0), Math.Log10(100), -200, 100)
+                );
+
+            thdPlot.Plot.Axes.Rules.Clear();
+            thdPlot.Plot.Axes.Rules.Add(rule);
+
             thdPlot.Refresh();
 
 
@@ -1118,7 +1128,7 @@ namespace QA40x_AUDIO_ANALYSER
             thdPlot.Plot.Grid.MinorLineWidth = 1;
 
             if (cmbGraph_VoltageStart.SelectedIndex > -1 && cmbGraph_VoltageEnd.SelectedIndex > -1)
-                thdPlot.Plot.Axes.SetLimits(Math.Log10(Convert.ToDouble(cmbGraph_VoltageStart.Text)), Math.Log10(Convert.ToDouble(cmbGraph_VoltageEnd.Text)), Convert.ToDouble(ud_dB_Graph_Bottom.Value), Convert.ToDouble(ud_dB_Graph_Top.Value));
+                thdPlot.Plot.Axes.SetLimits(Math.Log10(GraphSettings.VoltageRange_Start), Math.Log10(GraphSettings.VoltageRange_End), Convert.ToDouble(ud_dB_Graph_Bottom.Value), Convert.ToDouble(ud_dB_Graph_Top.Value));
             
             thdPlot.Plot.Title("Magnitude (dB)");
             thdPlot.Plot.Axes.Title.Label.FontSize = 17;
@@ -1138,6 +1148,16 @@ namespace QA40x_AUDIO_ANALYSER
             thdPlot.Plot.Legend.Orientation = ScottPlot.Orientation.Horizontal;
             thdPlot.Plot.Legend.Alignment = ScottPlot.Alignment.UpperRight;
             thdPlot.Plot.ShowLegend();
+
+            ScottPlot.AxisRules.MaximumBoundary rule = new(
+                xAxis: thdPlot.Plot.Axes.Bottom,
+                yAxis: thdPlot.Plot.Axes.Left,
+                limits: new AxisLimits(Math.Log10(0.0001), Math.Log10(100), -200, 100)
+                );
+
+            thdPlot.Plot.Axes.Rules.Clear();
+            thdPlot.Plot.Axes.Rules.Add(rule);
+
             thdPlot.Refresh();
         }
 
@@ -1149,7 +1169,8 @@ namespace QA40x_AUDIO_ANALYSER
         void PlotMagnitude(ThdAmplitudeMeasurementResult measurementResult, int measurementNr, bool showLeftChannel, bool showRightChannel)
         {
             // Create lists for line data
-            var freqX = new List<double>();
+            var amplitudeX_L = new List<double>();
+            var amplitudeX_R = new List<double>();
             var magnY_left = new List<double>();
             var hTotY_left = new List<double>();
             var h2Y_left = new List<double>();
@@ -1171,13 +1192,21 @@ namespace QA40x_AUDIO_ANALYSER
             // Add data to the line lists
             foreach (var step in measurementResult.AmplitudeSteps)
             {
-                double xValue = GraphSettings.XAxisType switch
+                double xValue_L = GraphSettings.XAxisType switch
                 {
                     E_X_AxisType.OUTPUT_VOLTAGE => step.Left.Fundamental_V,
                     E_X_AxisType.OUTPUT_POWER => step.Left.Power_Watt,
                     _ => step.GeneratorVoltage
                 };
-                freqX.Add(xValue);
+                amplitudeX_L.Add(xValue_L);
+
+                double xValue_R = GraphSettings.XAxisType switch
+                {
+                    E_X_AxisType.OUTPUT_VOLTAGE => step.Right.Fundamental_V,
+                    E_X_AxisType.OUTPUT_POWER => step.Right.Power_Watt,
+                    _ => step.GeneratorVoltage
+                };
+                amplitudeX_R.Add(xValue_R);
 
                 if (showLeftChannel && measurementResult.MeasurementSettings.EnableLeftChannel)
                 {
@@ -1225,18 +1254,19 @@ namespace QA40x_AUDIO_ANALYSER
             }
 
             // add a scatter plot to the plot
-            double[] logFreqX = freqX.Select(Math.Log10).ToArray();
+            double[] logAmplitudeX_L = amplitudeX_L.Select(Math.Log10).ToArray();
+            double[] logAmplitudeX_R = amplitudeX_R.Select(Math.Log10).ToArray();
             float lineWidth = GraphSettings.ThickLines ? 1.6f : 1;
             float markerSize = GraphSettings.ShowDataPoints ? lineWidth + 3 : 1;
 
             var colors = new GraphColors();
             int color = measurementNr * 2;
 
-            void AddPlot(List<double> yValues, int colorIndex, string legendText, LinePattern linePattern)
+            void AddPlot(double[] xValues, List<double> yValues, int colorIndex, string legendText, LinePattern linePattern)
             {
                 if (yValues.Count == 0) return;
-                double[] logYValues = yValues.ToArray();
-                var plot = thdPlot.Plot.Add.Scatter(logFreqX, logYValues);
+                
+                var plot = thdPlot.Plot.Add.Scatter(xValues, yValues.ToArray());
                 plot.LineWidth = lineWidth;
                 plot.Color = colors.GetColor(colorIndex, color);
                 plot.MarkerSize = markerSize;
@@ -1246,26 +1276,26 @@ namespace QA40x_AUDIO_ANALYSER
 
             if (showLeftChannel)
             {
-                if (GraphSettings.ShowMagnitude) AddPlot(magnY_left, 9, showRightChannel ? "Magn-L" : "Magn", LinePattern.DenselyDashed);
-                if (GraphSettings.ShowTHD) AddPlot(hTotY_left, 8, showRightChannel ? "THD-L" : "THD", LinePattern.Solid);
-                if (GraphSettings.ShowD2) AddPlot(h2Y_left, 0, showRightChannel ? "H2-L" : "H2", LinePattern.Solid);
-                if (GraphSettings.ShowD3) AddPlot(h3Y_left, 1, showRightChannel ? "H3-L" : "H3", LinePattern.Solid);
-                if (GraphSettings.ShowD4) AddPlot(h4Y_left, 2, showRightChannel ? "H4-L" : "H4", LinePattern.Solid);
-                if (GraphSettings.ShowD5) AddPlot(h5Y_left, 3, showRightChannel ? "H5-L" : "H5", LinePattern.Solid);
-                if (GraphSettings.ShowD6) AddPlot(h6Y_left, 4, showRightChannel ? "H6+-L" : "H6+", LinePattern.Solid);
-                if (GraphSettings.ShowNoiseFloor) AddPlot(noiseY_left, 9, showRightChannel ? "Noise-L" : "Noise", showRightChannel ? LinePattern.Solid : LinePattern.Dotted);
+                if (GraphSettings.ShowMagnitude) AddPlot(logAmplitudeX_L, magnY_left, 9, showRightChannel ? "Magn-L" : "Magn", LinePattern.DenselyDashed);
+                if (GraphSettings.ShowTHD) AddPlot(logAmplitudeX_L, hTotY_left, 8, showRightChannel ? "THD-L" : "THD", LinePattern.Solid);
+                if (GraphSettings.ShowD2) AddPlot(logAmplitudeX_L, h2Y_left, 0, showRightChannel ? "H2-L" : "H2", LinePattern.Solid);
+                if (GraphSettings.ShowD3) AddPlot(logAmplitudeX_L, h3Y_left, 1, showRightChannel ? "H3-L" : "H3", LinePattern.Solid);
+                if (GraphSettings.ShowD4) AddPlot(logAmplitudeX_L, h4Y_left, 2, showRightChannel ? "H4-L" : "H4", LinePattern.Solid);
+                if (GraphSettings.ShowD5) AddPlot(logAmplitudeX_L, h5Y_left, 3, showRightChannel ? "H5-L" : "H5", LinePattern.Solid);
+                if (GraphSettings.ShowD6) AddPlot(logAmplitudeX_L, h6Y_left, 4, showRightChannel ? "H6+-L" : "H6+", LinePattern.Solid);
+                if (GraphSettings.ShowNoiseFloor) AddPlot(logAmplitudeX_L, noiseY_left, 9, showRightChannel ? "Noise-L" : "Noise", showRightChannel ? LinePattern.Solid : LinePattern.Dotted);
             }
 
             if (showRightChannel)
             {
-                if (GraphSettings.ShowMagnitude) AddPlot(magnY_right, 9, showLeftChannel ? "Magn-R" : "Magn", showLeftChannel ? LinePattern.Dotted : LinePattern.DenselyDashed);
-                if (GraphSettings.ShowTHD) AddPlot(hTotY_right, 8, showLeftChannel ? "THD-R" : "THD", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
-                if (GraphSettings.ShowD2) AddPlot(h2Y_right, 0, showLeftChannel ? "H2-R" : "H2", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
-                if (GraphSettings.ShowD3) AddPlot(h3Y_right, 1, showLeftChannel ? "H3-R" : "H3", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
-                if (GraphSettings.ShowD4) AddPlot(h4Y_right, 2, showLeftChannel ? "H4-R" : "H4", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
-                if (GraphSettings.ShowD5) AddPlot(h5Y_right, 3, showLeftChannel ? "H5-R" : "H5", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
-                if (GraphSettings.ShowD6) AddPlot(h6Y_right, 4, showLeftChannel ? "H6+-R" : "H6+", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
-                if (GraphSettings.ShowNoiseFloor) AddPlot(noiseY_right, 9, showLeftChannel ? "Noise-R" : "Noise", LinePattern.Dotted);
+                if (GraphSettings.ShowMagnitude) AddPlot(logAmplitudeX_R, magnY_right, 9, showLeftChannel ? "Magn-R" : "Magn", showLeftChannel ? LinePattern.Dotted : LinePattern.DenselyDashed);
+                if (GraphSettings.ShowTHD) AddPlot(logAmplitudeX_R, hTotY_right, 8, showLeftChannel ? "THD-R" : "THD", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD2) AddPlot(logAmplitudeX_R, h2Y_right, 0, showLeftChannel ? "H2-R" : "H2", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD3) AddPlot(logAmplitudeX_R, h3Y_right, 1, showLeftChannel ? "H3-R" : "H3", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD4) AddPlot(logAmplitudeX_R, h4Y_right, 2, showLeftChannel ? "H4-R" : "H4", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD5) AddPlot(logAmplitudeX_R, h5Y_right, 3, showLeftChannel ? "H5-R" : "H5", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowD6) AddPlot(logAmplitudeX_R, h6Y_right, 4, showLeftChannel ? "H6+-R" : "H6+", showLeftChannel ? LinePattern.DenselyDashed : LinePattern.Solid);
+                if (GraphSettings.ShowNoiseFloor) AddPlot(logAmplitudeX_R, noiseY_right, 9, showLeftChannel ? "Noise-R" : "Noise", LinePattern.Dotted);
             }
 
             // If marker selected draw marker line
@@ -1377,8 +1407,15 @@ namespace QA40x_AUDIO_ANALYSER
             if (thdPlot.Plot.GetPlottables<Scatter>().Count() == 0) 
                 return;                     // Nothing plotted
 
-            // Get nearest x-location in plotr
-            DataPoint nearest1 = thdPlot.Plot.GetPlottables<Scatter>().First().Data.GetNearestX(mouseLocation, thdPlot.Plot.LastRender);
+            // Get nearest x-location in plot
+            DataPoint nearest1 = new();
+
+            for (int i = 0; i < thdPlot.Plot.GetPlottables<Scatter>().Count(); i++)
+            {
+                nearest1 = thdPlot.Plot.GetPlottables<Scatter>().ToList()[i].Data.GetNearestX(mouseLocation, thdPlot.Plot.LastRender);
+                if (nearest1.IsReal)
+                    break;
+            }
 
             // place the crosshair over the highlighted point
             if (nearest1.IsReal)
@@ -1416,66 +1453,74 @@ namespace QA40x_AUDIO_ANALYSER
                 // Check if index in StepData array
                 if (MeasurementResult.AmplitudeSteps.Count > nearest1.Index)
                 {
-                    var step = MeasurementResult.AmplitudeSteps[nearest1.Index];
+                    //var step_l = MeasurementResult.AmplitudeSteps[nearest1.Index];
+
+                    var voltage = Math.Pow(10, nearest1.X);
+                    var minDistance_l = MeasurementResult.AmplitudeSteps.Min(n => Math.Abs(voltage - n.Left.Fundamental_V));
+                    var step_l = MeasurementResult.AmplitudeSteps.First(n => Math.Abs(voltage - n.Left.Fundamental_V) == minDistance_l);
+
+                    var minDistance_r = MeasurementResult.AmplitudeSteps.Min(n => Math.Abs(voltage - n.Right.Fundamental_V));
+                    var step_r = MeasurementResult.AmplitudeSteps.First(n => Math.Abs(voltage - n.Right.Fundamental_V) == minDistance_r);
+
 
                     // Write cursor texts based in plot type
                     if (GraphSettings.GraphType == E_ThdAmplitude_GraphType.DB)
                     {
-                        WriteCursorTexts_dB_L(step.GeneratorVoltage
-                        , step.Left.Fundamental_V
-                        , step.Left.Gain_dB
-                        , step.Left.Thd_dB - step.Left.Fundamental_dBV
-                        , (step.Left.Harmonics.Count > 0 ? step.Left.Harmonics[0].Amplitude_dBV - step.Left.Fundamental_dBV : 0)   // 2nd harmonic
-                        , (step.Left.Harmonics.Count > 1 ? step.Left.Harmonics[1].Amplitude_dBV - step.Left.Fundamental_dBV : 0)
-                        , (step.Left.Harmonics.Count > 2 ? step.Left.Harmonics[2].Amplitude_dBV - step.Left.Fundamental_dBV : 0)
-                        , (step.Left.Harmonics.Count > 3 ? step.Left.Harmonics[3].Amplitude_dBV - step.Left.Fundamental_dBV : 0)
-                        , (step.Left.Harmonics.Count > 4 ? step.Left.D6Plus_dBV - step.Left.Fundamental_dBV : 0)                   // 6+ harmonics
-                        , step.Left.Power_Watt
-                        , step.Left.Average_NoiseFloor_dBV - step.Left.Fundamental_dBV
+                        WriteCursorTexts_dB_L(step_l.GeneratorVoltage
+                        , step_l.Left.Fundamental_V
+                        , step_l.Left.Gain_dB
+                        , step_l.Left.Thd_dB - step_l.Left.Fundamental_dBV
+                        , (step_l.Left.Harmonics.Count > 0 ? step_l.Left.Harmonics[0].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)   // 2nd harmonic
+                        , (step_l.Left.Harmonics.Count > 1 ? step_l.Left.Harmonics[1].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)
+                        , (step_l.Left.Harmonics.Count > 2 ? step_l.Left.Harmonics[2].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)
+                        , (step_l.Left.Harmonics.Count > 3 ? step_l.Left.Harmonics[3].Amplitude_dBV - step_l.Left.Fundamental_dBV : 0)
+                        , (step_l.Left.Harmonics.Count > 4 ? step_l.Left.D6Plus_dBV - step_l.Left.Fundamental_dBV : 0)                   // 6+ harmonics
+                        , step_l.Left.Power_Watt
+                        , step_l.Left.Average_NoiseFloor_dBV - step_l.Left.Fundamental_dBV
                         , MeasurementResult.MeasurementSettings.Load
                         );
 
-                        WriteCursorTexts_dB_R(step.GeneratorVoltage
-                        , step.Right.Fundamental_V
-                        , step.Right.Gain_dB
-                        , step.Right.Thd_dB - step.Right.Fundamental_dBV
-                        , (step.Right.Harmonics.Count > 0 ? step.Right.Harmonics[0].Amplitude_dBV - step.Right.Fundamental_dBV : 0)   // 2nd harmonic
-                        , (step.Right.Harmonics.Count > 1 ? step.Right.Harmonics[1].Amplitude_dBV - step.Right.Fundamental_dBV : 0)
-                        , (step.Right.Harmonics.Count > 2 ? step.Right.Harmonics[2].Amplitude_dBV - step.Right.Fundamental_dBV : 0)
-                        , (step.Right.Harmonics.Count > 3 ? step.Right.Harmonics[3].Amplitude_dBV - step.Right.Fundamental_dBV : 0)
-                        , (step.Right.Harmonics.Count > 4 ? step.Right.D6Plus_dBV - step.Right.Fundamental_dBV : 0)                   // 6+ harmonics
-                        , step.Right.Power_Watt
-                        , step.Right.Average_NoiseFloor_dBV - step.Right.Fundamental_dBV
+                        WriteCursorTexts_dB_R(step_l.GeneratorVoltage
+                        , step_l.Right.Fundamental_V
+                        , step_l.Right.Gain_dB
+                        , step_l.Right.Thd_dB - step_l.Right.Fundamental_dBV
+                        , (step_l.Right.Harmonics.Count > 0 ? step_l.Right.Harmonics[0].Amplitude_dBV - step_l.Right.Fundamental_dBV : 0)   // 2nd harmonic
+                        , (step_l.Right.Harmonics.Count > 1 ? step_l.Right.Harmonics[1].Amplitude_dBV - step_l.Right.Fundamental_dBV : 0)
+                        , (step_l.Right.Harmonics.Count > 2 ? step_l.Right.Harmonics[2].Amplitude_dBV - step_l.Right.Fundamental_dBV : 0)
+                        , (step_l.Right.Harmonics.Count > 3 ? step_l.Right.Harmonics[3].Amplitude_dBV - step_l.Right.Fundamental_dBV : 0)
+                        , (step_l.Right.Harmonics.Count > 4 ? step_l.Right.D6Plus_dBV - step_l.Right.Fundamental_dBV : 0)                   // 6+ harmonics
+                        , step_l.Right.Power_Watt
+                        , step_l.Right.Average_NoiseFloor_dBV - step_l.Right.Fundamental_dBV
                         , MeasurementResult.MeasurementSettings.Load
                         );
                     }
                     else
                     {
-                        WriteCursorTexts_Dpercent_L(step.GeneratorVoltage
-                        , step.Left.Fundamental_V
-                        , step.Left.Gain_dB
-                        , step.Left.Thd_Percent
-                        , (step.Left.Harmonics.Count > 0 ? step.Left.Harmonics[0].Thd_Percent : 0)     // 2nd harmonic
-                        , (step.Left.Harmonics.Count > 1 ? step.Left.Harmonics[1].Thd_Percent : 0)
-                        , (step.Left.Harmonics.Count > 2 ? step.Left.Harmonics[2].Thd_Percent : 0)
-                        , (step.Left.Harmonics.Count > 3 ? step.Left.Harmonics[3].Thd_Percent : 0)
-                        , (step.Left.Harmonics.Count > 4 ? step.Left.ThdPercent_D6plus : 0)                   // 6+ harmonics
-                        , step.Left.Power_Watt
-                        , (step.Left.Average_NoiseFloor_V / step.Left.Fundamental_V) * 100
+                        WriteCursorTexts_Dpercent_L(step_l.GeneratorVoltage
+                        , step_l.Left.Fundamental_V
+                        , step_l.Left.Gain_dB
+                        , step_l.Left.Thd_Percent
+                        , (step_l.Left.Harmonics.Count > 0 ? step_l.Left.Harmonics[0].Thd_Percent : 0)     // 2nd harmonic
+                        , (step_l.Left.Harmonics.Count > 1 ? step_l.Left.Harmonics[1].Thd_Percent : 0)
+                        , (step_l.Left.Harmonics.Count > 2 ? step_l.Left.Harmonics[2].Thd_Percent : 0)
+                        , (step_l.Left.Harmonics.Count > 3 ? step_l.Left.Harmonics[3].Thd_Percent : 0)
+                        , (step_l.Left.Harmonics.Count > 4 ? step_l.Left.ThdPercent_D6plus : 0)                   // 6+ harmonics
+                        , step_l.Left.Power_Watt
+                        , (step_l.Left.Average_NoiseFloor_V / step_l.Left.Fundamental_V) * 100
                         , MeasurementResult.MeasurementSettings.Load
                         );
 
-                        WriteCursorTexts_Dpercent_R(step.GeneratorVoltage
-                        , step.Right.Fundamental_V
-                        , step.Right.Gain_dB
-                        , step.Right.Thd_Percent
-                        , (step.Right.Harmonics.Count > 0 ? step.Right.Harmonics[0].Thd_Percent : 0)     // 2nd harmonic
-                        , (step.Right.Harmonics.Count > 1 ? step.Right.Harmonics[1].Thd_Percent : 0)
-                        , (step.Right.Harmonics.Count > 2 ? step.Right.Harmonics[2].Thd_Percent : 0)
-                        , (step.Right.Harmonics.Count > 3 ? step.Right.Harmonics[3].Thd_Percent : 0)
-                        , (step.Right.Harmonics.Count > 4 ? step.Right.ThdPercent_D6plus : 0)                   // 6+ harmonics
-                        , step.Right.Power_Watt
-                        , (step.Right.Average_NoiseFloor_V / step.Right.Fundamental_V) * 100
+                        WriteCursorTexts_Dpercent_R(step_l.GeneratorVoltage
+                        , step_l.Right.Fundamental_V
+                        , step_l.Right.Gain_dB
+                        , step_l.Right.Thd_Percent
+                        , (step_l.Right.Harmonics.Count > 0 ? step_l.Right.Harmonics[0].Thd_Percent : 0)     // 2nd harmonic
+                        , (step_l.Right.Harmonics.Count > 1 ? step_l.Right.Harmonics[1].Thd_Percent : 0)
+                        , (step_l.Right.Harmonics.Count > 2 ? step_l.Right.Harmonics[2].Thd_Percent : 0)
+                        , (step_l.Right.Harmonics.Count > 3 ? step_l.Right.Harmonics[3].Thd_Percent : 0)
+                        , (step_l.Right.Harmonics.Count > 4 ? step_l.Right.ThdPercent_D6plus : 0)                   // 6+ harmonics
+                        , step_l.Right.Power_Watt
+                        , (step_l.Right.Average_NoiseFloor_V / step_l.Right.Fundamental_V) * 100
                         , MeasurementResult.MeasurementSettings.Load
                         );
                     }
@@ -1827,6 +1872,10 @@ namespace QA40x_AUDIO_ANALYSER
             double min = 0, max = 0;
             double min_left = 0, max_left = 0;
             double min_right = 0, max_right = 0;
+
+            if (MeasurementResult.AmplitudeSteps.Count == 0)
+                return;
+
             switch ((int)GraphSettings.XAxisType)
             {
                 case 0:
@@ -1986,14 +2035,14 @@ namespace QA40x_AUDIO_ANALYSER
         private void cmbGraph_VoltageStart_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cmbGraph_VoltageStart.SelectedIndex != -1)
-                GraphSettings.VoltageRange_Start = (uint)((KeyValuePair<double, string>)cmbGraph_VoltageStart.SelectedItem).Key;
+                GraphSettings.VoltageRange_Start = (double)((KeyValuePair<double, string>)cmbGraph_VoltageStart.SelectedItem).Key;
             UpdateGraph(true);
         }
 
         private void cmbGraph_VoltageEnd_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cmbGraph_VoltageEnd.SelectedIndex != -1)
-                GraphSettings.VoltageRange_End = (uint)((KeyValuePair<double, string>)cmbGraph_VoltageEnd.SelectedItem).Key;
+                GraphSettings.VoltageRange_End = (double)((KeyValuePair<double, string>)cmbGraph_VoltageEnd.SelectedItem).Key;
             UpdateGraph(true);
         }
 

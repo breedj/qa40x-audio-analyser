@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.scTopBottom = new System.Windows.Forms.SplitContainer();
+            this.btnMeasurement_BodePlot = new System.Windows.Forms.Button();
             this.btnMeasurement_FrequencyResponse = new System.Windows.Forms.Button();
             this.btnMeasurement_ThdAmplitude = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
@@ -54,6 +55,7 @@
             // 
             // scTopBottom.Panel1
             // 
+            this.scTopBottom.Panel1.Controls.Add(this.btnMeasurement_BodePlot);
             this.scTopBottom.Panel1.Controls.Add(this.btnMeasurement_FrequencyResponse);
             this.scTopBottom.Panel1.Controls.Add(this.btnMeasurement_ThdAmplitude);
             this.scTopBottom.Panel1.Controls.Add(this.progressBar1);
@@ -68,6 +70,20 @@
             this.scTopBottom.SplitterDistance = 60;
             this.scTopBottom.TabIndex = 1;
             // 
+            // btnMeasurement_BodePlot
+            // 
+            this.btnMeasurement_BodePlot.BackColor = System.Drawing.Color.AliceBlue;
+            this.btnMeasurement_BodePlot.FlatAppearance.BorderColor = System.Drawing.Color.Peru;
+            this.btnMeasurement_BodePlot.FlatAppearance.BorderSize = 2;
+            this.btnMeasurement_BodePlot.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnMeasurement_BodePlot.Location = new System.Drawing.Point(439, 3);
+            this.btnMeasurement_BodePlot.Name = "btnMeasurement_BodePlot";
+            this.btnMeasurement_BodePlot.Size = new System.Drawing.Size(128, 54);
+            this.btnMeasurement_BodePlot.TabIndex = 12;
+            this.btnMeasurement_BodePlot.Text = "Bode Plot";
+            this.btnMeasurement_BodePlot.UseVisualStyleBackColor = false;
+            this.btnMeasurement_BodePlot.Click += new System.EventHandler(this.btnMeasurement_BodePlot_Click);
+            // 
             // btnMeasurement_FrequencyResponse
             // 
             this.btnMeasurement_FrequencyResponse.BackColor = System.Drawing.Color.AliceBlue;
@@ -78,7 +94,7 @@
             this.btnMeasurement_FrequencyResponse.Name = "btnMeasurement_FrequencyResponse";
             this.btnMeasurement_FrequencyResponse.Size = new System.Drawing.Size(128, 54);
             this.btnMeasurement_FrequencyResponse.TabIndex = 11;
-            this.btnMeasurement_FrequencyResponse.Text = "Frequency Response";
+            this.btnMeasurement_FrequencyResponse.Text = "Frequency Response\r\nChirp";
             this.btnMeasurement_FrequencyResponse.UseVisualStyleBackColor = false;
             this.btnMeasurement_FrequencyResponse.Click += new System.EventHandler(this.btnMeasurement_FrequencyResponse_Click);
             // 
@@ -171,5 +187,6 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.Button btnMeasurement_ThdAmplitude;
         private System.Windows.Forms.Button btnMeasurement_FrequencyResponse;
+        private System.Windows.Forms.Button btnMeasurement_BodePlot;
     }
 }

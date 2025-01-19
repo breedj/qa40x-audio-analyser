@@ -6,7 +6,7 @@ namespace QaControl
 {
     public class FrequencyResponseGraphSettings
     {
-        public E_FrequencyResponse_GraphType GraphType { get; set; }         
+        public E_FrequencyResponseGraphType GraphType { get; set; }         
         public bool ShowLeftChannel { get; set; }
         public bool ShowRightChannel { get; set; }
         public bool ThickLines { get; set; }

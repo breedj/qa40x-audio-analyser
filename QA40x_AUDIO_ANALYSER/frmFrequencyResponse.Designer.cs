@@ -72,7 +72,10 @@
             this.btnSingle = new System.Windows.Forms.Button();
             this.btnStopThdMeasurement = new System.Windows.Forms.Button();
             this.btnRun = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.grpMeasurmentSettings_Chirp = new System.Windows.Forms.GroupBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cmbLowFrequencyAccuracy = new System.Windows.Forms.ComboBox();
+            this.lblLowFrequencyAccuracy = new System.Windows.Forms.Label();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.label1 = new System.Windows.Forms.Label();
             this.chkRightIsReference = new System.Windows.Forms.CheckBox();
@@ -124,16 +127,13 @@
             this.lblCursor_Amplitude_V_L = new System.Windows.Forms.Label();
             this.lblCursor_Amplitude_dBV_L = new System.Windows.Forms.Label();
             this.lblCursor_LeftChannel = new System.Windows.Forms.Label();
-            this.cmbLowFrequencyAccuracy = new System.Windows.Forms.ComboBox();
-            this.lblLowFrequencyAccuracy = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.scThdVsFreq)).BeginInit();
             this.scThdVsFreq.Panel1.SuspendLayout();
             this.scThdVsFreq.Panel2.SuspendLayout();
             this.scThdVsFreq.SuspendLayout();
             this.grpMeasurements_R.SuspendLayout();
             this.grpMeasurements_L.SuspendLayout();
-            this.groupBox1.SuspendLayout();
+            this.grpMeasurmentSettings_Chirp.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udAverages)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.scGraphCursors)).BeginInit();
             this.scGraphCursors.Panel1.SuspendLayout();
@@ -167,7 +167,7 @@
             this.scThdVsFreq.Panel1.Controls.Add(this.btnSingle);
             this.scThdVsFreq.Panel1.Controls.Add(this.btnStopThdMeasurement);
             this.scThdVsFreq.Panel1.Controls.Add(this.btnRun);
-            this.scThdVsFreq.Panel1.Controls.Add(this.groupBox1);
+            this.scThdVsFreq.Panel1.Controls.Add(this.grpMeasurmentSettings_Chirp);
             this.scThdVsFreq.Panel1MinSize = 260;
             // 
             // scThdVsFreq.Panel2
@@ -200,7 +200,7 @@
             this.grpMeasurements_R.Controls.Add(this.label39);
             this.grpMeasurements_R.Controls.Add(this.chk1dBBandWidth_R);
             this.grpMeasurements_R.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.grpMeasurements_R.Location = new System.Drawing.Point(4, 457);
+            this.grpMeasurements_R.Location = new System.Drawing.Point(4, 455);
             this.grpMeasurements_R.Name = "grpMeasurements_R";
             this.grpMeasurements_R.Size = new System.Drawing.Size(254, 153);
             this.grpMeasurements_R.TabIndex = 54;
@@ -374,7 +374,7 @@
             this.label37.Location = new System.Drawing.Point(101, 31);
             this.label37.MinimumSize = new System.Drawing.Size(30, 13);
             this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(42, 13);
+            this.label37.Size = new System.Drawing.Size(45, 13);
             this.label37.TabIndex = 48;
             this.label37.Text = "f(high)";
             // 
@@ -432,7 +432,7 @@
             this.grpMeasurements_L.Controls.Add(this.label19);
             this.grpMeasurements_L.Controls.Add(this.chk1dBBandWidth_L);
             this.grpMeasurements_L.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.grpMeasurements_L.Location = new System.Drawing.Point(4, 301);
+            this.grpMeasurements_L.Location = new System.Drawing.Point(4, 299);
             this.grpMeasurements_L.Name = "grpMeasurements_L";
             this.grpMeasurements_L.Size = new System.Drawing.Size(254, 151);
             this.grpMeasurements_L.TabIndex = 53;
@@ -606,7 +606,7 @@
             this.label10.Location = new System.Drawing.Point(101, 31);
             this.label10.MinimumSize = new System.Drawing.Size(30, 13);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(42, 13);
+            this.label10.Size = new System.Drawing.Size(45, 13);
             this.label10.TabIndex = 48;
             this.label10.Text = "f(high)";
             // 
@@ -688,35 +688,69 @@
             this.btnRun.UseVisualStyleBackColor = false;
             this.btnRun.Click += new System.EventHandler(this.btnRun_Click);
             // 
-            // groupBox1
+            // grpMeasurmentSettings_Chirp
             // 
-            this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.cmbLowFrequencyAccuracy);
-            this.groupBox1.Controls.Add(this.lblLowFrequencyAccuracy);
-            this.groupBox1.Controls.Add(this.linkLabel1);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.chkRightIsReference);
-            this.groupBox1.Controls.Add(this.cmbFrequencySpan);
-            this.groupBox1.Controls.Add(this.lblSmoothing);
-            this.groupBox1.Controls.Add(this.cmbSmoothing);
-            this.groupBox1.Controls.Add(this.lblGeneratorType);
-            this.groupBox1.Controls.Add(this.cmbGeneratorType);
-            this.groupBox1.Controls.Add(this.chkEnableRightChannel);
-            this.groupBox1.Controls.Add(this.chkEnableLeftChannel);
-            this.groupBox1.Controls.Add(this.udAverages);
-            this.groupBox1.Controls.Add(this.label4);
-            this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.cmbGeneratorVoltageUnit);
-            this.groupBox1.Controls.Add(this.lblThdFreq_GenVoltage);
-            this.groupBox1.Controls.Add(this.txtGeneratorVoltage);
-            this.groupBox1.Controls.Add(this.lblStartFrequency);
-            this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(3, 46);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(254, 249);
-            this.groupBox1.TabIndex = 0;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Measurement Settings";
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.label3);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.cmbLowFrequencyAccuracy);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.lblLowFrequencyAccuracy);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.linkLabel1);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.label1);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.chkRightIsReference);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.cmbFrequencySpan);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.lblSmoothing);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.cmbSmoothing);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.lblGeneratorType);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.cmbGeneratorType);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.chkEnableRightChannel);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.chkEnableLeftChannel);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.udAverages);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.label4);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.label2);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.cmbGeneratorVoltageUnit);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.lblThdFreq_GenVoltage);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.txtGeneratorVoltage);
+            this.grpMeasurmentSettings_Chirp.Controls.Add(this.lblStartFrequency);
+            this.grpMeasurmentSettings_Chirp.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.grpMeasurmentSettings_Chirp.Location = new System.Drawing.Point(3, 46);
+            this.grpMeasurmentSettings_Chirp.Name = "grpMeasurmentSettings_Chirp";
+            this.grpMeasurmentSettings_Chirp.Size = new System.Drawing.Size(254, 250);
+            this.grpMeasurmentSettings_Chirp.TabIndex = 0;
+            this.grpMeasurmentSettings_Chirp.TabStop = false;
+            this.grpMeasurmentSettings_Chirp.Text = "Measurement Settings";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label3.Location = new System.Drawing.Point(191, 111);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(20, 13);
+            this.label3.TabIndex = 63;
+            this.label3.Text = "Hz";
+            // 
+            // cmbLowFrequencyAccuracy
+            // 
+            this.cmbLowFrequencyAccuracy.DisplayMember = "1";
+            this.cmbLowFrequencyAccuracy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbLowFrequencyAccuracy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cmbLowFrequencyAccuracy.FormattingEnabled = true;
+            this.cmbLowFrequencyAccuracy.Location = new System.Drawing.Point(126, 106);
+            this.cmbLowFrequencyAccuracy.Name = "cmbLowFrequencyAccuracy";
+            this.cmbLowFrequencyAccuracy.Size = new System.Drawing.Size(58, 21);
+            this.cmbLowFrequencyAccuracy.TabIndex = 62;
+            this.cmbLowFrequencyAccuracy.SelectedIndexChanged += new System.EventHandler(this.cmbLowFrequencyAccuracy_SelectedIndexChanged);
+            // 
+            // lblLowFrequencyAccuracy
+            // 
+            this.lblLowFrequencyAccuracy.AutoSize = true;
+            this.lblLowFrequencyAccuracy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblLowFrequencyAccuracy.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.lblLowFrequencyAccuracy.Location = new System.Drawing.Point(16, 109);
+            this.lblLowFrequencyAccuracy.Name = "lblLowFrequencyAccuracy";
+            this.lblLowFrequencyAccuracy.Size = new System.Drawing.Size(105, 13);
+            this.lblLowFrequencyAccuracy.TabIndex = 61;
+            this.lblLowFrequencyAccuracy.Text = "Frequency resolution";
             // 
             // linkLabel1
             // 
@@ -883,7 +917,7 @@
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label2.Location = new System.Drawing.Point(191, 78);
+            this.label2.Location = new System.Drawing.Point(191, 80);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(20, 13);
             this.label2.TabIndex = 21;
@@ -1384,40 +1418,6 @@
             this.lblCursor_LeftChannel.TabIndex = 39;
             this.lblCursor_LeftChannel.Text = "Left channel";
             // 
-            // cmbLowFrequencyAccuracy
-            // 
-            this.cmbLowFrequencyAccuracy.DisplayMember = "1";
-            this.cmbLowFrequencyAccuracy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbLowFrequencyAccuracy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cmbLowFrequencyAccuracy.FormattingEnabled = true;
-            this.cmbLowFrequencyAccuracy.Location = new System.Drawing.Point(126, 106);
-            this.cmbLowFrequencyAccuracy.Name = "cmbLowFrequencyAccuracy";
-            this.cmbLowFrequencyAccuracy.Size = new System.Drawing.Size(58, 21);
-            this.cmbLowFrequencyAccuracy.TabIndex = 62;
-            this.cmbLowFrequencyAccuracy.SelectedIndexChanged += new System.EventHandler(this.cmbLowFrequencyAccuracy_SelectedIndexChanged);
-            // 
-            // lblLowFrequencyAccuracy
-            // 
-            this.lblLowFrequencyAccuracy.AutoSize = true;
-            this.lblLowFrequencyAccuracy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLowFrequencyAccuracy.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.lblLowFrequencyAccuracy.Location = new System.Drawing.Point(16, 109);
-            this.lblLowFrequencyAccuracy.Name = "lblLowFrequencyAccuracy";
-            this.lblLowFrequencyAccuracy.Size = new System.Drawing.Size(105, 13);
-            this.lblLowFrequencyAccuracy.TabIndex = 61;
-            this.lblLowFrequencyAccuracy.Text = "Frequency resolution";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label3.Location = new System.Drawing.Point(191, 109);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(20, 13);
-            this.label3.TabIndex = 63;
-            this.label3.Text = "Hz";
-            // 
             // frmFrequencyResponse
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1439,8 +1439,8 @@
             this.grpMeasurements_R.PerformLayout();
             this.grpMeasurements_L.ResumeLayout(false);
             this.grpMeasurements_L.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.grpMeasurmentSettings_Chirp.ResumeLayout(false);
+            this.grpMeasurmentSettings_Chirp.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udAverages)).EndInit();
             this.scGraphCursors.Panel1.ResumeLayout(false);
             this.scGraphCursors.Panel2.ResumeLayout(false);
@@ -1468,7 +1468,7 @@
         private System.Windows.Forms.SplitContainer scThdVsFreq;
         private System.Windows.Forms.Button btnStopThdMeasurement;
         private System.Windows.Forms.Button btnRun;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox grpMeasurmentSettings_Chirp;
         private System.Windows.Forms.NumericUpDown udAverages;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label2;

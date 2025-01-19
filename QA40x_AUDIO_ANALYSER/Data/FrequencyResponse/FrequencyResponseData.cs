@@ -9,7 +9,7 @@ namespace QaControl
 
     public class FrequencyResponseData
     {
-        public string MeasurementType { get; } = "FREQUENCY_RESPONSE";            // To identify the data type in json 
+        public string MeasurementType { get; } = "FREQUENCY_RESPONSE_CHIRP";            // To identify the data type in json 
 
         public string Title { get; set; }
         public DateTime CreateDate { get; set; }

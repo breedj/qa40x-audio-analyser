@@ -1,7 +1,7 @@
 ﻿
 namespace QA40x_AUDIO_ANALYSER
 {
-    public enum E_FrequencyResponse_GraphType
+    public enum E_FrequencyResponseGraphType
     {
         DBV = 0,
         GAIN = 1

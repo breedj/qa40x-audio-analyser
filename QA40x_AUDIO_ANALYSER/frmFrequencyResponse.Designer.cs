@@ -1203,11 +1203,6 @@
             0,
             0});
             this.ud_Graph_Bottom.Location = new System.Drawing.Point(8, 76);
-            this.ud_Graph_Bottom.Maximum = new decimal(new int[] {
-            50,
-            0,
-            0,
-            0});
             this.ud_Graph_Bottom.Minimum = new decimal(new int[] {
             180,
             0,

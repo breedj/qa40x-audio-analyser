@@ -161,7 +161,6 @@ namespace QA40x_AUDIO_ANALYSER
         void SetMeasurementControls(BodePlotMeasurementSettings settings)
         {
             cmbGeneratorType.SelectedIndex = (int)settings.GeneratorType;                     
-            txtGeneratorVoltage.ReadOnly = settings.GeneratorType  != 0;
             txtGeneratorVoltage.Text = settings.GeneratorAmplitude.ToString("#0.0##");
             cmbGeneratorVoltageUnit.SelectedIndex = (int)settings.GeneratorAmplitudeUnit;
            
@@ -414,7 +413,7 @@ namespace QA40x_AUDIO_ANALYSER
                     Program.MainForm.UpdateProgressBar(f + 1);
 
                     // Set the generator
-                    double amplitudeSetpointdBV = QaLibrary.ConvertVoltage(genVoltagedBV, _measurementSettings.GeneratorAmplitudeUnit, E_VoltageUnit.dBV);
+                    double amplitudeSetpointdBV = genVoltagedBV;
                     await Qa40x.SetGen1(stepBinFrequencies[f], amplitudeSetpointdBV, true);
                     if (f == 0)
                         await Qa40x.SetOutputSource(OutputSources.Sine);            // We need to call this to make the averages reset

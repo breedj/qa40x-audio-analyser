@@ -167,7 +167,7 @@
             this.MinimumSize = new System.Drawing.Size(1320, 900);
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "QA40x Audio Analyser - V0.5";
+            this.Text = "QA40x Audio Analyser - V0.6";
             this.scTopBottom.Panel1.ResumeLayout(false);
             this.scTopBottom.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.scTopBottom)).EndInit();

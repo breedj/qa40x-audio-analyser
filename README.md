@@ -9,6 +9,9 @@ An audio amplifier analyser program for the QuantAsylum QA40x series.
 
 ![image](https://github.com/user-attachments/assets/b3003300-b136-4545-9260-cc9436383a9a)
 
+![image](https://github.com/user-attachments/assets/6b32d47d-7a12-44ae-8316-dbc39d3f3a07)
+
+
 **DONE:**
 - [x] THD vs frequency measurement
 - [x] Automatic determination of input attenuation
@@ -19,12 +22,16 @@ An audio amplifier analyser program for the QuantAsylum QA40x series.
 - [x] Plotting of noise floor in graphs
 - [x] THD vs Output amplitude measurement
 - [x] Added right channel support to measurements
-- [x] Added Frequency Response measurement with bandwidth analysis 
-      
-**TODO:**
+- [x] Added Frequency Response measurement with bandwidth analysis
+- [x] Bode plot with phase measurement
+
+**IN PROGRESS:**
 - [ ] FFT with automatic peak search of harmonics
 - [ ] Amplifier impedance vs frequency measurement
-- [ ] Bode plot with phase measurement
+- [ ] New interface
+- [ ] Cross platform (Windows, Linux, Mac)
+      
+**TODO:**
 - [ ] Saving of data to json file
 - [ ] Importing data from json file
 - [ ] Saving measurement results to image
@@ -32,6 +39,7 @@ An audio amplifier analyser program for the QuantAsylum QA40x series.
 - [ ] Measurement project management
 - [ ] Multiple measurements and results per project
 - [ ] Overlay of multiple of the same measurements for comparison
+- [ ] Replace REST calls by USB calls.
 
 ## INSTALLATION NOTES
 

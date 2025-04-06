@@ -139,16 +139,16 @@ namespace QA40x_AUDIO_ANALYSER
         void SetDefaultMeasurementSettings(ref ThdFrequencyMeasurementSettings settings)
         {
             // Initialize with default measurement settings
-            settings.StartFrequency = 20;
-            settings.EndFrequency = 20000;  
+            settings.StartFrequency = 5;
+            settings.EndFrequency = 96000;  
             settings.SampleRate = 192000;
             settings.FftSize = 65536 * 2;
             settings.WindowingFunction = Windowing.Hann;
             settings.InputRange = 18;
-            settings.GeneratorType = E_GeneratorType.INPUT_VOLTAGE;         
+            settings.GeneratorType = E_GeneratorType.OUTPUT_POWER;         
             settings.GeneratorAmplitude = -25;
             settings.GeneratorAmplitudeUnit = E_VoltageUnit.dBV;
-            settings.StepsPerOctave = 2;
+            settings.StepsPerOctave = 5;
             settings.Averages = 1;
             settings.Load = 8;                      // Amplifier load (Ohm)
             settings.AmpOutputPower = 1;            // Output power (Watt)
@@ -168,12 +168,12 @@ namespace QA40x_AUDIO_ANALYSER
                 DbRangeTop = 10,
                 DbRangeBottom = -150,
                 D_PercentTop = 10,
-                D_PercentBottom = 0.0001,
+                D_PercentBottom = 0.00001,
 
-                FrequencyRange_Start = 20,
-                FrequencyRange_End = 20000,
+                FrequencyRange_Start = 5,
+                FrequencyRange_End = 100000,
 
-                GraphType = E_ThdFreq_GraphType.DB,
+                GraphType = E_ThdFreq_GraphType.D_PERCENT,
                 ShowMagnitude = true,
                 ShowTHD = true,
                 ShowD2 = true,
@@ -331,6 +331,7 @@ namespace QA40x_AUDIO_ANALYSER
         {
             ClearPlot();
             ClearCursorTexts();
+            UpdateGraph(true);
                         
             var _measurementSettings = MeasurementSettings.Copy();             // Create snapshot so it is not changed during measuring
 
@@ -920,7 +921,13 @@ namespace QA40x_AUDIO_ANALYSER
             //thdPlot.Plot.Axes.AutoScale();
             if (cmbGraph_FreqStart.SelectedIndex > -1 && cmbGraph_FreqEnd.SelectedIndex > -1 && cmbD_Graph_Bottom.SelectedIndex > -1 && cmbD_Graph_Top.SelectedIndex > -1)
                 thdPlot.Plot.Axes.SetLimits(Math.Log10(GraphSettings.FrequencyRange_Start), Math.Log10(GraphSettings.FrequencyRange_End), Math.Log10(GraphSettings.D_PercentBottom) - 0.00000001, Math.Log10(GraphSettings.D_PercentTop));  // - 0.000001 to force showing label
-            thdPlot.Plot.Title("Distortion (%)");
+            
+            if (MeasurementSettings.GeneratorType == E_GeneratorType.OUTPUT_POWER)
+                thdPlot.Plot.Title($"Distortion (%) - Output power: {MeasurementSettings.AmpOutputPower} W - Load: {MeasurementSettings.Load} Ω");
+            else if (MeasurementSettings.GeneratorType == E_GeneratorType.INPUT_VOLTAGE)
+                thdPlot.Plot.Title($"Distortion (%) - Input voltage: {MeasurementSettings.GeneratorAmplitude:0.00} {MeasurementSettings.GeneratorAmplitudeUnit.ToString()} - Load: {MeasurementSettings.Load} Ω");
+            else if (MeasurementSettings.GeneratorType == E_GeneratorType.OUTPUT_VOLTAGE)
+                thdPlot.Plot.Title($"Distortion (%) - Output voltage: {MeasurementSettings.AmpOutputAmplitude:0.00} {MeasurementSettings.AmpOutputAmplitudeUnit.ToString()} - Load: {MeasurementSettings.Load} Ω");
             thdPlot.Plot.Axes.Title.Label.FontSize = 17;
 
             thdPlot.Plot.XLabel("Frequency (Hz)");

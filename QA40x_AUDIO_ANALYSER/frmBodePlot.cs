@@ -1073,7 +1073,7 @@ namespace QA40x_AUDIO_ANALYSER
                     lblMeas_BW3_L.Text = AutoUnitText(gainBW3dB.Bandwidth, "Hz", 1);
                     lblMeas_BW3_low_L.Text = AutoUnitText(gainBW3dB.LowerFreq, "Hz", 1);
                     lblMeas_BW3_high_L.Text = AutoUnitText(gainBW3dB.UpperFreq, "Hz", 1);
-                    lblMeas_Gain_L.Text = gainBW3dB.HighestGain.ToString("0.00") + " x";
+                    lblMeas_Gain_L.Text = Math.Pow(10, gainBW3dB.HighestGain / 20).ToString("0.00") + " x";
                     lblMeas_Gain_dB_L.Text = gainBW3dB.HighestGain.ToString("0." + new string('0', 2)) + " dB";
                     lblMeas_Highest_Freq_L.Text = AutoUnitText(gainBW3dB.HighestGainFreq, "Hz", 1);
 

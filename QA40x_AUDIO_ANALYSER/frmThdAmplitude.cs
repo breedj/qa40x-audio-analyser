@@ -151,7 +151,7 @@ namespace QA40x_AUDIO_ANALYSER
             settings.SampleRate = 192000;
             settings.FftSize = 65536 * 2;
             settings.WindowingFunction = Windowing.Hann;
-            settings.StepsPerOctave = 2;
+            settings.StepsPerOctave = 5;
             settings.Averages = 1;
             settings.Load = 8;                      // Amplifier load (Ohm)
             settings.StartAmplitude = 0.001;           
@@ -178,7 +178,7 @@ namespace QA40x_AUDIO_ANALYSER
                 VoltageRange_Start = 0.001,
                 VoltageRange_End = 10,
 
-                GraphType = E_ThdAmplitude_GraphType.DB,
+                GraphType = E_ThdAmplitude_GraphType.D_PERCENT,
                 ShowMagnitude = true,
                 ShowTHD = true,
                 ShowD2 = true,
@@ -356,6 +356,7 @@ namespace QA40x_AUDIO_ANALYSER
 
             ClearPlot();
             ClearCursorTexts();
+            UpdateGraph(true);
 
             var _measurementSettings = MeasurementSettings.Copy();             // Create snapshot so it is not changed during measuring
 
@@ -971,7 +972,9 @@ namespace QA40x_AUDIO_ANALYSER
             //thdPlot.Plot.Axes.AutoScale();
             if (cmbGraph_VoltageStart.SelectedIndex > -1 && cmbGraph_VoltageEnd.SelectedIndex > -1 && cmbD_Graph_Bottom.SelectedIndex > -1 && cmbD_Graph_Top.SelectedIndex > -1)
                 thdPlot.Plot.Axes.SetLimits(Math.Log10(GraphSettings.VoltageRange_Start), Math.Log10(GraphSettings.VoltageRange_End), Math.Log10(GraphSettings.D_PercentBottom), Math.Log10(GraphSettings.D_PercentTop));
-            thdPlot.Plot.Title("Distortion (%)");
+           
+            thdPlot.Plot.Title($"Distortion (%) - Frequency: {MeasurementSettings.Frequency} Hz - Load: {MeasurementSettings.Load} Ω");
+
             thdPlot.Plot.Axes.Title.Label.FontSize = 17;
 
             if (cmbXAxis.SelectedIndex == (int)E_X_AxisType.OUTPUT_VOLTAGE)
@@ -1554,33 +1557,43 @@ namespace QA40x_AUDIO_ANALYSER
                     }
                     else
                     {
-                        WriteCursorTexts_Dpercent_L(step_l.GeneratorVoltage
-                        , step_l.Left.Fundamental_V
-                        , step_l.Left.Gain_dB
-                        , step_l.Left.Thd_Percent
-                        , (step_l.Left.Harmonics.Count > 0 ? step_l.Left.Harmonics[0].Thd_Percent : 0)     // 2nd harmonic
-                        , (step_l.Left.Harmonics.Count > 1 ? step_l.Left.Harmonics[1].Thd_Percent : 0)
-                        , (step_l.Left.Harmonics.Count > 2 ? step_l.Left.Harmonics[2].Thd_Percent : 0)
-                        , (step_l.Left.Harmonics.Count > 3 ? step_l.Left.Harmonics[3].Thd_Percent : 0)
-                        , (step_l.Left.Harmonics.Count > 4 ? step_l.Left.ThdPercent_D6plus : 0)                   // 6+ harmonics
-                        , step_l.Left.Power_Watt
-                        , (step_l.Left.Average_NoiseFloor_V / step_l.Left.Fundamental_V) * 100
-                        , MeasurementResult.MeasurementSettings.Load
-                        );
+                        if (step_l != null)
+                        {
+                            WriteCursorTexts_Dpercent_L(step_l.GeneratorVoltage
+                            , step_l.Left.Fundamental_V
+                            , step_l.Left.Gain_dB
+                            , step_l.Left.Thd_Percent
+                            , (step_l.Left.Harmonics.Count > 0 ? step_l.Left.Harmonics[0].Thd_Percent : 0)     // 2nd harmonic
+                            , (step_l.Left.Harmonics.Count > 1 ? step_l.Left.Harmonics[1].Thd_Percent : 0)
+                            , (step_l.Left.Harmonics.Count > 2 ? step_l.Left.Harmonics[2].Thd_Percent : 0)
+                            , (step_l.Left.Harmonics.Count > 3 ? step_l.Left.Harmonics[3].Thd_Percent : 0)
+                            , (step_l.Left.Harmonics.Count > 4 ? step_l.Left.ThdPercent_D6plus : 0)                   // 6+ harmonics
+                            , step_l.Left.Power_Watt
+                            , (step_l.Left.Average_NoiseFloor_V / step_l.Left.Fundamental_V) * 100
+                            , MeasurementResult.MeasurementSettings.Load
+                            );
+                        }
+                        else
+                            WriteCursorTexts_dB_L(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-                        WriteCursorTexts_Dpercent_R(step_l.GeneratorVoltage
-                        , step_l.Right.Fundamental_V
-                        , step_l.Right.Gain_dB
-                        , step_l.Right.Thd_Percent
-                        , (step_l.Right.Harmonics.Count > 0 ? step_l.Right.Harmonics[0].Thd_Percent : 0)     // 2nd harmonic
-                        , (step_l.Right.Harmonics.Count > 1 ? step_l.Right.Harmonics[1].Thd_Percent : 0)
-                        , (step_l.Right.Harmonics.Count > 2 ? step_l.Right.Harmonics[2].Thd_Percent : 0)
-                        , (step_l.Right.Harmonics.Count > 3 ? step_l.Right.Harmonics[3].Thd_Percent : 0)
-                        , (step_l.Right.Harmonics.Count > 4 ? step_l.Right.ThdPercent_D6plus : 0)                   // 6+ harmonics
-                        , step_l.Right.Power_Watt
-                        , (step_l.Right.Average_NoiseFloor_V / step_l.Right.Fundamental_V) * 100
-                        , MeasurementResult.MeasurementSettings.Load
-                        );
+                        if (step_r != null)
+                        {
+                            WriteCursorTexts_Dpercent_R(step_r.GeneratorVoltage
+                            , step_r.Right.Fundamental_V
+                            , step_r.Right.Gain_dB
+                            , step_r.Right.Thd_Percent
+                            , (step_r.Right.Harmonics.Count > 0 ? step_r.Right.Harmonics[0].Thd_Percent : 0)     // 2nd harmonic
+                            , (step_r.Right.Harmonics.Count > 1 ? step_r.Right.Harmonics[1].Thd_Percent : 0)
+                            , (step_r.Right.Harmonics.Count > 2 ? step_r.Right.Harmonics[2].Thd_Percent : 0)
+                            , (step_r.Right.Harmonics.Count > 3 ? step_r.Right.Harmonics[3].Thd_Percent : 0)
+                            , (step_r.Right.Harmonics.Count > 4 ? step_r.Right.ThdPercent_D6plus : 0)                   // 6+ harmonics
+                            , step_r.Right.Power_Watt
+                            , (step_r.Right.Average_NoiseFloor_V / step_r.Right.Fundamental_V) * 100
+                            , MeasurementResult.MeasurementSettings.Load
+                            );
+                        }
+                        else
+                            WriteCursorTexts_dB_R(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                     }
                 }
 

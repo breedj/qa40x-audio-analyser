@@ -1,3 +1,6 @@
+>A newer version of this software has been developed.
+>https://github.com/breedj/tonebench-audio-equipment-analyzer
+
 # qa40x-audio-analyser
 An audio amplifier analyser program for the QuantAsylum QA40x series.
 
